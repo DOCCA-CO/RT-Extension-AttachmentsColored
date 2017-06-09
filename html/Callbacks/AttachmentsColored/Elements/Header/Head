@@ -1,0 +1,4 @@
+<script src="<%$RT::WebPath%>/NoAuth/js/util_AttachmentsColored.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="<%$RT::WebPath%>/NoAuth/css/AttachmentsColored.css" type="text/css" media="all" />
+
