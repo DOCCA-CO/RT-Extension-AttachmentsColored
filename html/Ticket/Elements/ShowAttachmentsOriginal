@@ -52,10 +52,12 @@
         hide_chrome => $HideTitleBox &>
 
 <div class="attachment-list">
-
+<table>
 % foreach my $key (sort { lc($a) cmp lc($b) } keys %documents) {
-
-<%$key%><br />
+<tr><td>
+%# <%$key%><br />
+<%$key%>
+</td><td>
 <ul <% $Selectable ? 'class="selectable"' : '' |n %> >
 % foreach my $rev (@{$documents{$key}}) {
 % if ($rev->ContentLength) {
@@ -84,9 +86,9 @@
 % }
 % }
 </ul>
-
+</td></tr>
 % }
-
+</table>
 % if ($show_more) {
 <span class="show-more-link">
 % my %params = %ARGS;

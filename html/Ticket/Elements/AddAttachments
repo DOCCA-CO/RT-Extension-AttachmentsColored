@@ -58,9 +58,9 @@
 </tr>
 % } # end of if
 
-<tr><td class="label"><&|/l&>Attach</&>:</td>
-% if(($ENV{'HTTP_USER_AGENT'} || '') !~ /(?:hiptop|Blazer|Novarra|Vagabond|SonyEricsson|Symbian|NetFront|UP.Browser|UP.Link|Windows CE|MIDP|J2ME|DoCoMo|J-PHONE|PalmOS|PalmSource|iPhone|iPod|AvantGo|Nokia|Android|WebOS|S60|Mobile)/io){
-    <td>
+<tr>
+%# <td class="label"><&|/l&>Attach</&>:</td>
+    <td colspan="2">
         <div class="dropzone" id="attach-dropzone">
         </div>
 <script type="text/javascript">
@@ -163,14 +163,11 @@ jQuery( function() {
             <input type="hidden" class="hidden" name="UpdateAttach" value="1" />
         </div>
     </td>
-% }else{
-<td><input name="Attach" id="Attach" type="file" multiple="multiple" style="width:350px;" /><input type="hidden" class="hidden" name="UpdateAttach" value="1" /></td>
-% }
 </tr>
 % if ($HasExisting) {
 <tr>
-  <td class="label" valign="top"><&|/l&>Include attachments</&>:</td>
-  <td id="reuse-attachments">
+%#  <td class="label" valign="top"><&|/l&>Include attachments</&>:</td>
+  <td id="reuse-attachments" colspan="2">
     <& /Ticket/Elements/ShowAttachmentsOriginal,
       Ticket       => $TicketObj,
       Selectable   => 1,
