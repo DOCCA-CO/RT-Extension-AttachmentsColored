@@ -67,7 +67,7 @@
 Dropzone.autoDiscover = false;
 jQuery( function() {
     var attachDropzone = new Dropzone('#attach-dropzone', {
-        url: RT.Config.WebHomePath + '/Helpers/Upload/Add?Token=' + jQuery('#attach-dropzone').closest('form').find('input[name=Token]').val(),
+        url: RT.Config.WebHomePath + '/Helpers/Upload/Add?Token=' + jQuery('#attach-dropzone').closest('form').find('input[name=Token]').val()+'&TicketId=<%$ticketid%>',
         paramName: "Attach",
         dictDefaultMessage: <% loc("Drop files here or click to attach") |n,j %>,
         maxFilesize: 10000,
@@ -192,10 +192,11 @@ if ( exists $session{'Attachments'}{ $Token } && keys %{ $session{'Attachments'}
 }
 
 my $HasExisting = 0;
-
+my $ticketid = 0;
 if ($TicketObj && $TicketObj->id) {
     my $Existing = $TicketObj->Attachments;
     $Existing->LimitHasFilename;
     $HasExisting = 1 if $Existing->Count;
+    $ticketid = $TicketObj->Id;
 }
 </%INIT>
