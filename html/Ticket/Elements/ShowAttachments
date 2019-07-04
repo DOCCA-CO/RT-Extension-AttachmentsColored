@@ -107,7 +107,7 @@ unless($rename =~ /_rr\.(jpg|jpeg|png)/){
     $resize = 1;
 }
 
-my $filename_ = "https://".RT->Config->Get('WebDomain').RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
+my $filename_ = "https://".RT->Config->Get('WebDomain').(RT->Config->Get('WebPort')?":".RT->Config->Get('WebPort'):"").RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
 $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
 </%perl>
  <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
