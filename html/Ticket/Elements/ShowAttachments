@@ -73,7 +73,8 @@ foreach my $ao ('category', 'filename', 'default', 'user', 'size', 'comment')  {
 $m->out("<tr align=center><td> ".join('</td><td>', @aob)."</td></tr>");
 
 foreach my $rev (@{$AttOrd2})  {
-  next if ( ($rev->{'category'} eq 'hidden') && !$showhidden );
+  next if ($rev->{'filename'} =~ /_rr\.(jpg|jpeg|png)/);
+  next if ( ($rev->{'category'} eq 'hidden' ) && !$showhidden );
 
   $m->out('<tr>'); 
 #  $m->out('<td align="center" style="'. $rev->{'style'}. '">'. $rev->{'category'}. '</td>'); 
@@ -99,8 +100,15 @@ $m->out('<span class="AttCat" style="font-weight:normal;">'.$href.'</span>');
 
 $m->out('</td>'); 
 
+my $rename = $rev->{'filename'};
+my $resize = 0;
+unless($rename =~ /_rr\.(jpg|jpeg|png)/){
+    $rename =~ s/\./_rr\./;
+    $resize = 1;
+}
 
-  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+my $filename_ = "https://".RT->Config->Get('WebDomain').RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
+$m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
 </%perl>
  <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
 <% $rev->{'filename'} %>
@@ -159,6 +167,48 @@ $m->out('</td>');
 %}
 
 //document.getElementById("LoadFullHistory").style.display="";
+
+var yOff = 25;
+var xOff = 10;
+var pathToImage; 
+
+function resize(e, fname){
+    pathToImage = fname;
+    jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
+    jQuery("#image-when-hovering-text").css("position", "absolute").css("top", (e.pageY - yOff) + "px")
+            .css("left", (e.pageX + xOff) + "px")
+            .fadeIn("fast");
+//    jQuery(".text-hover-image").css("background-color", "yellow");
+//    document.body.innerHTML = "<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>";
+//    document.getElementById("image-when-hovering-text").style.position = "absolute";
+}
+
+function remuve(){
+    jQuery("#image-when-hovering-text").remove();
+}
+
+jQuery(".text-hover-image").mousemove(function (e) {
+        jQuery("#image-when-hovering-text")
+            .css("top", (e.pageY - yOff) + "px")
+            .css("left", (e.pageX + xOff) + "px");
+});
+    
+
+/*
+jQuery(".text-hover-image").hover(function (e) {
+        jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
+        jQuery("#image-when-hovering-text")
+            .css("position", "absolute")
+            .css("top", (e.pageY - yOff) + "px")
+            .css("left", (e.pageX + xOff) + "px")
+            .fadeIn("fast");
+},
+function () {
+        
+});
+
+
+*/
 </script>
 
 <%INIT>
@@ -225,6 +275,11 @@ $showhidden = $showhidden->Content if $showhidden;
 
 my $commentId = 0;
 
+my (%att, %tr);
+foreach my $rev (@{$AttOrd2}){
+    $tr{$rev->{'filename'}} = $rev->{'attachment'}->TransactionId;
+    $att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
+}
 </%INIT>
 
 
