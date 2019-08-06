@@ -102,7 +102,7 @@ $m->out('</td>');
 
 my $rename = $rev->{'filename'};
 my $resize = 0;
-unless($rename =~ /_rr\.(jpg|jpeg|png)/){
+if($rename =~ /\.(jpg|jpeg|png)/){
 #    $rename =~ s/\./_rr\./;
     my ($pre, $post) = $rename =~ /(.+)\.([^\.]+)$/;
     $rename = $pre."_rr.".$post;
