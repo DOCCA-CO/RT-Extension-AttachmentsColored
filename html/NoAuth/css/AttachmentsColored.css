@@ -4,3 +4,8 @@ div.AttachmentsColoredOrder {
   float:center;
   background-color:#aeaeae; 
 }
+
+.bigdrop {
+    width: 600px !important;
+    left:-370px !important;
+}

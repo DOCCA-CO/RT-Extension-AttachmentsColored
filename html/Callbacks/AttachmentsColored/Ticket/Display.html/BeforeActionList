@@ -11,7 +11,7 @@ if($Ticket && $Ticket->id && $Ticket->CurrentUserHasRight('ModifyTicket'))  {
       }
     }
   } elsif($Action eq 'AttachmentOrder')  {
-    if($AttOrd =~ /^(filename|category|user|size|comment)$/)  {
+    if($AttOrd =~ /^(filename|category|user|size|node|comment)$/)  {
       $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-AttachmentOrder', Content => $AttOrd);
     } else  {
       $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder');
