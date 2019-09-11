@@ -113,7 +113,16 @@ my $filename_ = "https://".RT->Config->Get('WebDomain').(RT->Config->Get('WebPor
 $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
 </%perl>
  <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
-<% $rev->{'filename'} %>
+<%perl>
+ my $filename = $rev->{'filename'}?$rev->{'filename'}:"";
+ if(length($filename) > 65){
+    my ($pre,$pos) = $filename =~ /^(.+)\.([^\.]+)$/;
+    $pre = substr $pre, 0, 60;
+    $pre .= "....";
+    $filename = $pre.$pos;
+ }
+</%perl>
+<% $filename %>
 </a></td>
 %  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
 <&|/l, $rev->{'date'}  &>[_1]</&>
