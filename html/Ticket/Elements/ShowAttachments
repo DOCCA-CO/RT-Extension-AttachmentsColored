@@ -125,8 +125,19 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <&|/l, $rev->{'size'} &>[_1]</&>
 </td>
 %  $m->out('<td id="selecttd-'.$commentId.'" align="center" style="'. $rev->{'style'}. ' width:250px;">');
+%my $options = '['. LoadListFromTransaction(585) .']';
+%my @json = @{decode_json($options)};
 <select id='select-<%$commentId%>' class='selectnode'>
 <!-- options -->
+<option></option>
+%foreach my $option (@json) {
+  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'seleced':'' %> > 
+    <span style="padding-left:<%(20 * ($option->{level}-1))%>px;">
+      <img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png">
+      <&|/l, $option->{'text'} &>[_1]</&> 
+    </span>
+  </option>
+%}
 </select>
 
 </td>
@@ -148,9 +159,56 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 </div>
 % }
 
+
+
 <script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js" type="text/javascript"></script>
 
-<script>
+<script type="text/javascript">
+
+jQuery(function ($) {
+  $(document).ready(function() {
+
+    var folderdata = [
+%print LoadListFromTransaction(585), "\n";
+    ];
+
+    function formatResult(node) {
+      var $result = $('<span title="Lorem ipsum dolor sit amet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
+      return $result;
+    };
+
+    $('.selectnode').select2({
+      placeholder: 'Select an option',
+      width: "230px",
+      data: folderdata,
+      formatSelection: function(item) {
+        return item.text
+      },
+      formatResult: function(item) {
+        return item.text
+      },
+      templateResult: formatResult,
+      dropdownCssClass : 'bigdrop',
+      dropdownAutoWidth : true
+    });
+  })
+});
+
+% for (my $i = 0; $i < $commentId; $i++){
+    jQuery("#select-<%$i%>").change(function(){
+        jQuery.ajax({
+            type: 'POST',
+            url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyFolder',
+            data: {
+                'Value' : jQuery("#select-<%$i%>").val(),
+                'attachId' : jQuery("#attachId-<%$i%>").val()
+            },
+            success:function(data){
+              jQuery("#node-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Update/ShowFolderUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
+            }
+        });
+    });
+%}
 
 
 % for (my $i = 0; $i < $commentId; $i++){
@@ -223,41 +281,14 @@ function () {
 
 
 
-// In your Javascript (external .js resource or <script> tag)
-jQuery(function ($) {
-  $(document).ready(function() {
 
-    var data = [
-%print LoadListFromTransaction(585);
-    ];
-
-
-    function formatResult(node) {
-      var $result = $('<span style="padding-left:' + (20 * node.level) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
-      return $result;
-    };
-
-
-
-    $('.selectnode').select2({
-      placeholder: 'Select an option',
-      width: "230px",
-      data: data,
-      formatSelection: function(item) {
-        return item.text
-      },
-      formatResult: function(item) {
-        return item.text
-      },
-      templateResult: formatResult,
-      dropdownCssClass : 'bigdrop',
-      dropdownAutoWidth : true
-    });
-  })
-});
 </script>
 
 <%INIT>
+use utf8;
+use JSON;
+use Data::Dumper;
+
 if (!$Ticket){
  if ($id){
   $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
@@ -336,24 +367,14 @@ sub LoadListFromTransaction {
 ##
 #  Loaded ticket last comment => editor
 ##
-  my $Transactions = $Ticket->Transactions;
-  $Transactions->OrderByCols( { FIELD => 'Created', ORDER => "DESC"},
-                { FIELD => 'id', ORDER => "DESC" },
-                );
-  $Transactions->Limit(FIELD => 'Type', VALUE => 'Create', ENTRYAGGREGATOR => 'OR', OPERATOR=> '=');
-  $Transactions->Limit(FIELD => 'Type', VALUE => 'Comment', ENTRYAGGREGATOR => 'OR', OPERATOR=> '=');
-  $Transactions->Limit(FIELD => 'Type', VALUE => 'Correspond', ENTRYAGGREGATOR => 'OR', OPERATOR=> '=');
-  $Transactions->Limit(FIELD => 'Type', VALUE => 'SystemError', ENTRYAGGREGATOR => 'OR', OPERATOR=> '=');
-  $Transactions->RowsPerPage(1);
-  my $Transaction = $Transactions->First;
 
-  my $message = $Transaction->Content;
+  my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
   my @csv_lines = split /^/m, $message;
   my $json_text = '';
   foreach my $line (@csv_lines) {
     chomp($line);
     my ($level, $id, $node) = split ';', $line;
-    $json_text .= "{ id: $id, text: '$node', level: $level },";
+    $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
   }
   chop($json_text);
   return $json_text;

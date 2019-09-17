@@ -1,0 +1,10 @@
+% $m->out($folder);
+<%init>
+return unless ($ARGS{'attachId'});
+my $Att = RT::Attachment->new($session{'CurrentUser'});
+$Att->Load($ARGS{'attachId'});
+my $folder = "";
+if ($Att && $Att->Id) {
+    $folder = $Att->FirstAttribute('Folder')?$Att->FirstAttribute('Folder')->Content:"";
+}
+</%init>

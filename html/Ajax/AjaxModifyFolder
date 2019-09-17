@@ -1,0 +1,10 @@
+<%init>
+return unless ($ARGS{'attachId'});
+
+my $Att = RT::Attachment->new($session{'CurrentUser'});
+$Att->Load($ARGS{'attachId'});
+
+if ($Att && $Att->Id && ($Att->FirstAttribute('Folder') || $ARGS{'Value'})) {
+    $Att->SetAttribute(Name => 'Folder', Content => $ARGS{'Value'});
+}
+</%init>
