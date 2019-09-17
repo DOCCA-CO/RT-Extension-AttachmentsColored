@@ -125,13 +125,13 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <&|/l, $rev->{'size'} &>[_1]</&>
 </td>
 %  $m->out('<td id="selecttd-'.$commentId.'" align="center" style="'. $rev->{'style'}. ' width:250px;">');
-%my $options = '['. LoadListFromTransaction(585) .']';
+%my $options = '['. LoadListFromTransaction(RT->Config->Get('ConfigTicketID')) .']';
 %my @json = @{decode_json($options)};
 <select id='select-<%$commentId%>' class='selectnode'>
 <!-- options -->
 <option></option>
 %foreach my $option (@json) {
-  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'seleced':'' %> > 
+  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > 
     <span style="padding-left:<%(20 * ($option->{level}-1))%>px;">
       <img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png">
       <&|/l, $option->{'text'} &>[_1]</&> 
@@ -169,11 +169,11 @@ jQuery(function ($) {
   $(document).ready(function() {
 
     var folderdata = [
-%print LoadListFromTransaction(585), "\n";
+%print LoadListFromTransaction(RT->Config->Get('ConfigTicketID')), "\n";
     ];
 
     function formatResult(node) {
-      var $result = $('<span title="Lorem ipsum dolor sit amet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
+      var $result = $('<span title="Könyvtárjegyzet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
       return $result;
     };
 

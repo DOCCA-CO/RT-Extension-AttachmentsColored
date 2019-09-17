@@ -8,4 +8,6 @@ Set(%AttachmentCategories, (
 
 Set($HideEmbeddedImages, 1);
 
+Set($ConfigTicketID, 585);
+
 1;
