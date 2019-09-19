@@ -125,18 +125,12 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <&|/l, $rev->{'size'} &>[_1]</&>
 </td>
 %  $m->out('<td id="selecttd-'.$commentId.'" align="center" style="'. $rev->{'style'}. ' width:250px;">');
-%my $options = '['. LoadListFromTransaction(RT->Config->Get('ConfigTicketID')) .']';
-%my @json = @{decode_json($options)};
+
 <select id='select-<%$commentId%>' class='selectnode'>
 <!-- options -->
 <option></option>
 %foreach my $option (@json) {
-  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > 
-    <span style="padding-left:<%(20 * ($option->{level}-1))%>px;">
-      <img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png">
-      <&|/l, $option->{'text'} &>[_1]</&> 
-    </span>
-  </option>
+  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
 %}
 </select>
 
@@ -168,9 +162,9 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 jQuery(function ($) {
   $(document).ready(function() {
 
-    var folderdata = [
-%print LoadListFromTransaction(RT->Config->Get('ConfigTicketID')), "\n";
-    ];
+    var folderdata = 
+% print $options;
+;
 
     function formatResult(node) {
       var $result = $('<span title="Könyvtárjegyzet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
@@ -287,7 +281,6 @@ function () {
 <%INIT>
 use utf8;
 use JSON;
-use Data::Dumper;
 
 if (!$Ticket){
  if ($id){
@@ -301,6 +294,10 @@ if (!$Ticket){
 if (!$id) { $id = $Ticket->Id; }
 
 $Attachments ||= $Ticket->Attachments;
+
+my $options = '['. LoadListFromTransaction( LoadQFCConfig( $id ) ) .']' ;
+my @json = @{decode_json($options)};
+
 
 # Avoid applying limits to this collection that may be used elsewhere
 # (e.g. transaction display)
@@ -358,6 +355,27 @@ foreach my $rev (@{$AttOrd2}){
     $att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
 }
 
+
+sub LoadQFCConfig {
+  my $id = shift;
+  my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+  $Ticket->Load( $id );
+  my $Queue = $Ticket->QueueObj;
+  my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
+##  my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') || $ConfigTikcetSubjectAlt ;
+
+
+## Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE 'Kivitelezési projekt folder struktúra'
+
+  my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
+
+  $Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+
+  my $First = $Tickets->First()->Id;
+
+  return $First ;
+}
+
 sub LoadListFromTransaction {
   my $ticketID = shift;
 
@@ -377,7 +395,7 @@ sub LoadListFromTransaction {
     $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
   }
   chop($json_text);
-  return $json_text;
+  return  Encode::encode_utf8($json_text);
 }
 
 

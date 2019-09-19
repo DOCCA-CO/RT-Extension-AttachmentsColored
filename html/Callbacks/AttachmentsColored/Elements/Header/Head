@@ -2,4 +2,5 @@
 
 <link rel="stylesheet" href="<%$RT::WebPath%>/NoAuth/css/AttachmentsColored.css" type="text/css" media="all" />
 <link rel="stylesheet" href="<%$RT::WebPath%>/NoAuth/css/select2.min.css" type="text/css" media="all" />
+<link rel="stylesheet" href="<%$RT::WebPath%>/NoAuth/css/datatables.min.css" type="text/css" media="all" />
 

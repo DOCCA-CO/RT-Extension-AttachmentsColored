@@ -1,0 +1,29 @@
+<%INIT>
+my $request_path = $HTML::Mason::Commands::r->path_info;
+$request_path =~ s!/{2,}!/!g;
+
+my $query_string = sub {
+    my %args = @_;
+    my $u    = URI->new();
+    $u->query_form(map { $_ => $args{$_} } sort keys %args);
+    return $u->query;
+};
+
+my $actions = PageMenu()->child('actions');
+
+my $id = $DECODED_ARGS->{'id'};
+
+if ($request_path =~ m{^/Ticket/}) {
+
+	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+	$Ticket->Load($id);
+	my $actions = PageMenu()->child('actions');
+
+	$actions->child( attachmentfolder =>
+	path => "/Search/AttachmentFolder.html"."?".$query_string->(id => $id),
+	title => 'Attachment folder'
+	);
+}
+
+
+</%INIT>

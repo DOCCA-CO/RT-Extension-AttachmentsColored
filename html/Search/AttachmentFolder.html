@@ -1,0 +1,287 @@
+<& /Elements/Header, Title => loc('Attachment folder') &>
+<& /Elements/Tabs &>
+
+
+<table class="display" width="100%" style="width: 100%;" cellspacing="10" cellpadding="10">
+	<tr>
+		<td width="40%" style="40%" valign="top">
+<&| /Widgets/TitleBox, title => loc('Folders') &>
+<div style="width: 100%; padding: 3px; margin: 3px;">
+	<input type="checkbox" id="show-nofolder"><label for="show-nofolder">Show attachments without folders</label>
+	<button id="show-all">Show all</button>
+	<input type="hidden" id="show-1" >
+	<input type="hidden" id="filter-node" >
+</div>
+
+%foreach my $folder (@json_tree) {
+	<div style="width: 100%; padding: 3px; margin: 3px;" id="<%$folder->{id}%>">
+		<span class="folder-item" style="padding-left:<%(20 * ($folder->{level}-1))%>px; vertical-align: middle; cursor:pointer;">
+			<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png" width="16" height="16">
+			<%$folder->{text}%>
+		</span>
+	</div>
+%}
+
+
+</&>		
+		</td>
+		<td width="60%"  style="60%"  valign="top">
+<&| /Widgets/TitleBox, title => loc('Attachments') &>
+<div style="width: 100%;" class="att-containder">
+	<table class="display" id="att-table" style="width: 100%;">
+		<thead>
+			<tr>
+				<th></th>
+				<th style="width: 300px;">Filename</th>
+				<th style="width: 175px;">Created</th>
+				<th style="width: 100px;">User</th>
+				<th style="width: 75px;">Size</th>
+				<th style="width: 75px;">Folder</th>
+				<th style="width: 100px;"></th>
+				<th style="width: 450px;">Queue</th>
+				<th style="width: 450px;">Subject</th>
+				<th style="width: 600px;">Comment</th>
+			</tr>
+		</thead>
+		<tfoot>
+			<tr>
+				<th></th>
+				<th>Filename</th>
+				<th>Created</th>
+				<th>User</th>
+				<th>Size</th>
+				<th>Folder</th>
+				<th></th>
+				<th>Queue</th>
+				<th>Subject</th>
+				<th>Comment</th>
+			</tr>
+		</tfoot>
+
+	</table>
+</div>
+
+</&>		
+
+		</td>
+	</tr>
+
+</table>
+
+<script src="<%$RT::WebPath%>/NoAuth/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="<%RT->Config->Get('WebPath')%>/NoAuth/js/dataTables.responsive.min.js"></script>
+
+<script type="text/javascript">
+%print "var data = $json;\n";
+var filter_left = "";
+var filter_right = "";
+var filter = filter_left + "|" + filter_right;
+
+jQuery(function ($) {
+
+    $(document).ready( function() {
+	    var table = $('#att-table')
+	    	.addClass( 'nowrap' )
+	    	.DataTable( {
+%print "\t\t\tdata:$json,\n";
+				responsive: true,
+		        columns : [
+					{ "data" : "cat" },
+					{ "data" : "file" },
+					{ "data" : "date" },
+					{ "data" : "user" },
+					{ "data" : "size" },
+					{ "data" : "node" },
+					
+					{ "data" : "proj" },
+					{ "data" : "queue" },
+					{ "data" : "subj" },
+					{ "data" : "rem" }
+		        ]
+    		} ) ;
+
+		$( ".folder-item" ).click( function() {
+			$("#filter-node").val( $( this ).parent().attr( 'id' ) );
+			var rx =  '^' + $( this ).parent().attr( 'id' );
+			table.columns(5).search(rx  , true, false).draw();
+		});
+
+		$("#show-nofolder").click ( function() {
+			$("#show-1").val( $("#show-nofolder").prop("checked") );
+			if($("#show-nofolder").prop("checked")) {   
+				table.columns(5).search("-1", true, false).draw();
+			} else {
+				table.columns(5).search("^(?:(?!-1).)*$\r?\n?", true, false).draw();
+			}
+		} );
+
+		$("#show-all").click ( function() {
+			table.columns().search('').draw(); 
+		} );
+
+
+		table.columns(5).search("nothing", true, false).draw();
+
+
+
+    } );
+
+
+
+
+} );
+
+
+
+
+</script>
+
+
+
+
+<%INIT>
+use utf8;
+use JSON;
+use Data::Dumper;
+use YAML::Tiny;
+use Try::Tiny;
+
+my $json = LoadTicketsWithAttachments( $id );
+my $folders = LoadListFromTransaction( LoadQFCConfig ($id) );
+my @json_tree = @{decode_json( "[$folders]" )};
+
+###
+#
+###
+
+sub LoadTicketsWithAttachments {
+	my $id = shift;
+	my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+	$Ticket->Load( $id );
+	my $Queue = $Ticket->QueueObj->Name;
+
+	my $config = LoadStarterTicket( $id );
+
+	my $TicketSet = RT::Tickets->new( RT::SystemUser );
+	my $project_id_CF = $config->{ 'project-id-cf' } ;
+	my $project_id = $Ticket->FirstCustomFieldValue( "$project_id_CF" );
+
+	my(%row, @json);
+
+	my %colormap = RT->Config->Get('AttachmentCategories');
+
+	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue' AND 'CF.{$project_id_CF}' LIKE '$project_id'" );
+
+##	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue'" );
+	my $i = 0;
+	while ( my $T = $TicketSet->Next() ) {
+		my $Attachments = $T->Attachments;
+		$Attachments = $Attachments->Clone;
+		$Attachments->LimitHasFilename;
+		if ($Attachments->Count > 0) {
+			my $project = $Ticket->FirstCustomFieldValue( "$project_id_CF" );
+			my $subj = $T->Subject;
+			while ( my $Attachment = $Attachments->Next() ) {
+				my $Att = $Attachment->Filename;
+				my $Category = ($Attachment->FirstAttribute('Category')?$Attachment->FirstAttribute('Category')->Content:'X');
+				my $Folder = ($Attachment->FirstAttribute('Folder')?$Attachment->FirstAttribute('Folder')->Content:'-1');
+				my $path = RT->Config->Get('WebPath').'/Ticket/Attachment/'.$Attachment->TransactionId.'/'.$Attachment->Id;
+				$row{ 'file' } = "<a href='$path/$Att' target='_blank'>$Att</a>"; 
+				$row{ 'date' } = $Attachment->CreatedAsString;
+				$row{ 'user' } = $Attachment->CreatorObj->Name;
+				my $filesize = $Attachment->ContentLength;
+				$row{ 'size' } = $filesize > 1024 ? sprintf( '%.1f Kb', $filesize/1024 ) : sprintf( '%d b', $filesize );
+				$row{ 'node' } = $Folder;
+				$row{ 'cat' } = "<div style='width:15px; height:15px; $colormap{$Category};'></div>"; ##   $Category;
+				$row{ 'rem' } = ($Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'');
+
+				$row{ 'queue' } = $Queue;
+				$row{ 'subj' } = $subj;
+				$row{ 'proj' } = $project_id;
+
+				push @json, {%row};
+			}
+		}
+	}
+
+	return encode_json (\@json);
+}
+
+sub LoadQFCConfig {
+	my $id = shift;
+	my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+	$Ticket->Load( $id );
+	my $Queue = $Ticket->QueueObj;
+
+##	my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
+	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') || $ConfigTikcetSubjectAlt ;
+
+	my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
+
+	$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+
+	my $First = $Tickets->First()->Id;
+
+	return $First ;
+}
+
+
+sub LoadStarterTicket {
+	my $id = shift;		# Starer ticket id
+	my $yaml;
+	my ($StartTicketObj, $StartQueueObj, $StartCustomFieldContent);
+
+	my $TicketObj = RT::Ticket->new($RT::SystemUser);
+	$TicketObj->Load($id);
+
+	my $QueueObj = $TicketObj->QueueObj;
+
+	$StartTicketObj = RT::Ticket->new($RT::SystemUser);
+	
+	my $StarterID = $QueueObj->FirstCustomFieldValue( 'Q-StarterConfigTicketId' );
+
+	$RT::Logger->info("StarterID=$StarterID");
+	
+	if ( $StarterID ne '') {
+		$StartTicketObj->Load( $StarterID );
+
+		$StartCustomFieldContent = $StartTicketObj->FirstCustomFieldValue(RT->Config->Get('TextJegyzet'));
+
+		# Create a new object with a single hashref document
+		try {
+			$yaml = YAML::Tiny->read_string( $StartCustomFieldContent );
+			return $yaml->[0];
+		} catch {
+			return undef;
+		}
+	} else {
+		return undef;
+	}
+}
+
+sub LoadListFromTransaction {
+	my $ticketID = shift;
+
+	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+	$Ticket->Load($ticketID);
+
+	##
+	#  Loaded ticket last comment => editor
+	##
+
+	my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+	my @csv_lines = split /^/m, $message;
+	my $json_text = '';
+	foreach my $line (@csv_lines) {
+		chomp($line);
+		my ($level, $id, $node) = split ';', $line;
+		$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+	}
+	chop($json_text);
+	return Encode::encode_utf8($json_text);
+}
+</%INIT>
+
+<%ARGS>
+$id => undef
+</%ARGS>
