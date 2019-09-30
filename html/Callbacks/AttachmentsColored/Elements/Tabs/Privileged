@@ -13,8 +13,7 @@ my $actions = PageMenu()->child('actions');
 
 my $id = $DECODED_ARGS->{'id'};
 
-if ($request_path =~ m{^/Ticket/}) {
-
+if ($request_path =~ m{^(/Ticket/Display.html)}) {
 	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
 	$Ticket->Load($id);
 	my $actions = PageMenu()->child('actions');

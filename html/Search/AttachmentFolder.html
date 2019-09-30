@@ -13,11 +13,22 @@
 	<input type="hidden" id="filter-node" >
 </div>
 
+<!-- 
+
+%print 'Your product id is: ', (grep $_->{id} eq '5', @{ from_json("[$folders]") })[0]{text}, "\n";
+
+-->
+
+
+
 %foreach my $folder (@json_tree) {
 	<div style="width: 100%; padding: 3px; margin: 3px;" id="<%$folder->{id}%>">
 		<span class="folder-item" style="padding-left:<%(20 * ($folder->{level}-1))%>px; vertical-align: middle; cursor:pointer;">
 			<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png" width="16" height="16">
 			<%$folder->{text}%>
+		</span>
+		<span>
+
 		</span>
 	</div>
 %}
@@ -72,7 +83,7 @@
 <script type="text/javascript" src="<%RT->Config->Get('WebPath')%>/NoAuth/js/dataTables.responsive.min.js"></script>
 
 <script type="text/javascript">
-%print "var data = $json;\n";
+%##print "var data = $json;\n";
 var filter_left = "";
 var filter_right = "";
 var filter = filter_left + "|" + filter_right;
@@ -91,7 +102,13 @@ jQuery(function ($) {
 					{ "data" : "date" },
 					{ "data" : "user" },
 					{ "data" : "size" },
-					{ "data" : "node" },
+					{ "data" : "node" ,
+                        "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                            if ( oData.node ) {
+                                $(nTd).html("<span>"+oData.nodenm+"</span>");
+                            }
+                        }
+					},
 					
 					{ "data" : "proj" },
 					{ "data" : "queue" },
@@ -102,8 +119,8 @@ jQuery(function ($) {
 
 		$( ".folder-item" ).click( function() {
 			$("#filter-node").val( $( this ).parent().attr( 'id' ) );
-			var rx =  '^' + $( this ).parent().attr( 'id' );
-			table.columns(5).search(rx  , true, false).draw();
+			var rx =  '^' + $( this ).parent().attr( 'id' ) + '$';
+			table.columns(5).search(rx, true, false).draw();
 		});
 
 		$("#show-nofolder").click ( function() {
@@ -131,6 +148,18 @@ jQuery(function ($) {
 
 } );
 
+
+function countTypesForNode(resultArray, nodeVal) {
+   var i,
+       types,
+       count = 0;
+   for (i=0, types = {}; i < resultArray.length; i++)
+      if (resultArray[i].bulan === nodeVal && !types[resultArray[i].type]) {
+         types[resultArray[i].type] = true;
+         count++;
+      }
+   return count;
+}
 
 
 
@@ -161,6 +190,7 @@ sub LoadTicketsWithAttachments {
 	my $Queue = $Ticket->QueueObj->Name;
 
 	my $config = LoadStarterTicket( $id );
+	my $folders = LoadListFromTransaction( LoadQFCConfig ($id) );
 
 	my $TicketSet = RT::Tickets->new( RT::SystemUser );
 	my $project_id_CF = $config->{ 'project-id-cf' } ;
@@ -171,7 +201,7 @@ sub LoadTicketsWithAttachments {
 	my %colormap = RT->Config->Get('AttachmentCategories');
 
 	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue' AND 'CF.{$project_id_CF}' LIKE '$project_id'" );
-
+	my $cnt = $TicketSet->Count;
 ##	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue'" );
 	my $i = 0;
 	while ( my $T = $TicketSet->Next() ) {
@@ -182,6 +212,7 @@ sub LoadTicketsWithAttachments {
 			my $project = $Ticket->FirstCustomFieldValue( "$project_id_CF" );
 			my $subj = $T->Subject;
 			while ( my $Attachment = $Attachments->Next() ) {
+				next if ($Attachment->Filename =~ /_rr\.(jpg|jpeg|png)/);
 				my $Att = $Attachment->Filename;
 				my $Category = ($Attachment->FirstAttribute('Category')?$Attachment->FirstAttribute('Category')->Content:'X');
 				my $Folder = ($Attachment->FirstAttribute('Folder')?$Attachment->FirstAttribute('Folder')->Content:'-1');
@@ -192,11 +223,13 @@ sub LoadTicketsWithAttachments {
 				my $filesize = $Attachment->ContentLength;
 				$row{ 'size' } = $filesize > 1024 ? sprintf( '%.1f Kb', $filesize/1024 ) : sprintf( '%d b', $filesize );
 				$row{ 'node' } = $Folder;
+				$row{ 'nodenm' } = (grep $_->{id} eq $Folder, @{ from_json("[$folders]") })[0]{text};
 				$row{ 'cat' } = "<div style='width:15px; height:15px; $colormap{$Category};'></div>"; ##   $Category;
-				$row{ 'rem' } = ($Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'');
+				$row{ 'rem' } = $Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'';
 
 				$row{ 'queue' } = $Queue;
-				$row{ 'subj' } = $subj;
+				my $link = RT->Config->Get('WebPath') . '/Ticket/Display.html?id=' . $T->id;
+				$row{ 'subj' } =  "<a href='$link' target='_blank'>$subj</a>"  ;
 				$row{ 'proj' } = $project_id;
 
 				push @json, {%row};
@@ -204,7 +237,7 @@ sub LoadTicketsWithAttachments {
 		}
 	}
 
-	return encode_json (\@json);
+	return Encode::decode_utf8( encode_json (\@json) );
 }
 
 sub LoadQFCConfig {
@@ -214,7 +247,7 @@ sub LoadQFCConfig {
 	my $Queue = $Ticket->QueueObj;
 
 ##	my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
-	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') || $ConfigTikcetSubjectAlt ;
+	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura');
 
 	my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
 

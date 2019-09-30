@@ -361,8 +361,8 @@ sub LoadQFCConfig {
   my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
   $Ticket->Load( $id );
   my $Queue = $Ticket->QueueObj;
-  my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
-##  my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') || $ConfigTikcetSubjectAlt ;
+##  my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó') || ; 
+  my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura');
 
 
 ## Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE 'Kivitelezési projekt folder struktúra'
