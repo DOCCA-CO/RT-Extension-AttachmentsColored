@@ -13,14 +13,6 @@
 	<input type="hidden" id="filter-node" >
 </div>
 
-<!-- 
-
-%print 'Your product id is: ', (grep $_->{id} eq '5', @{ from_json("[$folders]") })[0]{text}, "\n";
-
--->
-
-
-
 %foreach my $folder (@json_tree) {
 	<div style="width: 100%; padding: 3px; margin: 3px;" id="<%$folder->{id}%>">
 		<span class="folder-item" style="padding-left:<%(20 * ($folder->{level}-1))%>px; vertical-align: middle; cursor:pointer;">
