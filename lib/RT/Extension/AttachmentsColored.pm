@@ -4,7 +4,7 @@ our $VERSION = '0.1';
 
 RT->AddStyleSheets('AttachmentsColored.css');
 RT->AddStyleSheets('select2.min.css');
-RT->AddStyleSheets('datatables.min.css');
+RT->AddStyleSheets('jquery.dataTables.css');
 
 
 1;
