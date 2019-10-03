@@ -13,6 +13,7 @@
 	<input type="hidden" id="filter-node" >
 </div>
 
+<div class="folder-container" style="max-height:550px; width:100%; border-right:1px solid silver; margin-top:3px; overflow:auto; padding: 5px;">
 %foreach my $folder (@json_tree) {
 	<div style="width: 100%; padding: 3px; margin: 3px;" id="<%$folder->{id}%>">
 		<span class="folder-item" style="padding-left:<%(20 * ($folder->{level}-1))%>px; vertical-align: middle; cursor:pointer;">
@@ -24,7 +25,7 @@
 		</span>
 	</div>
 %}
-
+</div>
 
 </&>		
 		</td>
@@ -120,7 +121,8 @@ jQuery(function ($) {
 			if($("#show-nofolder").prop("checked")) {   
 				table.columns(5).search("-1", true, false).draw();
 			} else {
-				table.columns(5).search("^(?:(?!-1).)*$\r?\n?", true, false).draw();
+				//table.columns(5).search("^(?:(?!-1).)*$\r?\n?", true, false).draw();
+				table.columns(5).search("nothing", true, false).draw();
 			}
 		} );
 
@@ -180,19 +182,29 @@ sub LoadTicketsWithAttachments {
 	my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
 	$Ticket->Load( $id );
 	my $Queue = $Ticket->QueueObj->Name;
+	my $QueueObj = $Ticket->QueueObj;
 
-	my $config = LoadStarterTicket( $id );
-	my $folders = LoadListFromTransaction( LoadQFCConfig ($id) );
+	##my $config = LoadStarterTicket( $id );
+	my $folders = LoadListFromTransaction( LoadQFCConfig ($id) ) || "" ;
 
 	my $TicketSet = RT::Tickets->new( RT::SystemUser );
-	my $project_id_CF = $config->{ 'project-id-cf' } ;
-	my $project_id = $Ticket->FirstCustomFieldValue( "$project_id_CF" );
+## ( 'QueueCF.{Q-CRM kód}' = 'Teszt234' OR 'QueueCF.{Q-Projekt kód}' = 'Teszt234' OR 'CF.{Ajánlatszám/munkaszám}' = 'Teszt234' OR 'CF.{Ajánlatszám/munkaszám}' = 'Teszt234' ) AND (  Status = 'new' OR Status = 'open' OR Status = 'stalled' )
+## ('QueueCF.{Q-Projekt kód}' = '$text_to_search' OR 'CF.{Ajánlatszám/munkaszám}' = '$text_to_search')
+	my $q_crm_code = $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' );
+	my $q_project_code = $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' );
+	my $crm_code = $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' )  || $q_crm_code || $q_project_code;
+	my $project_code = $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' )  || $q_project_code || $q_crm_code;
 
 	my(%row, @json);
 
 	my %colormap = RT->Config->Get('AttachmentCategories');
 
-	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue' AND 'CF.{$project_id_CF}' LIKE '$project_id'" );
+####	'CF.{Projekt kód}' LIKE 'LONDON'	
+####   "('QueueCF.{Q-CRM kód}' = '$crm' OR 'QueueCF.{Q-Projekt kód}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm')"
+	my $SQL = "(id = $id OR 'QueueCF.{Q-CRM kód}' = '$q_crm_code' OR 'QueueCF.{Q-Projekt kód}' = '$q_project_code' OR 'CF.{Projekt kód}' = '$crm_code' OR 'CF.{Ajánlatszám/munkaszám}' = '$project_code') AND (Status = 'new' OR Status = 'open' OR Status = 'stalled')";
+	RT::Logger->info("### \n LoadTicketsWithAttachments->SQL = $SQL \n ###");
+	RT::Logger->info( "### \n folders = $folders \n ###" );
+	$TicketSet->FromSQL( $SQL );
 	my $cnt = $TicketSet->Count;
 ##	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue'" );
 	my $i = 0;
@@ -201,11 +213,13 @@ sub LoadTicketsWithAttachments {
 		$Attachments = $Attachments->Clone;
 		$Attachments->LimitHasFilename;
 		if ($Attachments->Count > 0) {
-			my $project = $Ticket->FirstCustomFieldValue( "$project_id_CF" );
 			my $subj = $T->Subject;
+			RT::Logger->info( sprintf("id=%d, subj=%s, in queue=%s", $T->Id, $T->Subject, $T->QueueObj->Name) );
+			my $json_folders = decode_json( "[$folders]" ) if ( $folders );
 			while ( my $Attachment = $Attachments->Next() ) {
 				next if ($Attachment->Filename =~ /_rr\.(jpg|jpeg|png)/);
 				my $Att = $Attachment->Filename;
+				
 				my $Category = ($Attachment->FirstAttribute('Category')?$Attachment->FirstAttribute('Category')->Content:'X');
 				my $Folder = ($Attachment->FirstAttribute('Folder')?$Attachment->FirstAttribute('Folder')->Content:'-1');
 				my $path = RT->Config->Get('WebPath').'/Ticket/Attachment/'.$Attachment->TransactionId.'/'.$Attachment->Id;
@@ -215,15 +229,21 @@ sub LoadTicketsWithAttachments {
 				my $filesize = $Attachment->ContentLength;
 				$row{ 'size' } = $filesize > 1024 ? sprintf( '%.1f Kb', $filesize/1024 ) : sprintf( '%d b', $filesize );
 				$row{ 'node' } = $Folder;
-				$row{ 'nodenm' } = (grep $_->{id} eq $Folder, @{ from_json("[$folders]") })[0]{text};
+				unless( $folders && $Folder ) {
+					$row{ 'nodenm' } = " - ";
+				} else {
+					try {
+						$row{ 'nodenm' } = (grep $_->{id} eq $Folder, @{ $json_folders } )[0]{text};	
+					} catch {
+						$row{ 'nodenm' } = " - ";
+					}
+				};
 				$row{ 'cat' } = "<div style='width:15px; height:15px; $colormap{$Category};'></div>"; ##   $Category;
 				$row{ 'rem' } = $Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'';
-
-				$row{ 'queue' } = $Queue;
+				$row{ 'queue' } = $T->QueueObj->Name;
 				my $link = RT->Config->Get('WebPath') . '/Ticket/Display.html?id=' . $T->id;
 				$row{ 'subj' } =  "<a href='$link' target='_blank'>$subj</a>"  ;
-				$row{ 'proj' } = $project_id;
-
+				$row{ 'proj' } = $project_code;
 				push @json, {%row};
 			}
 		}
@@ -233,26 +253,30 @@ sub LoadTicketsWithAttachments {
 }
 
 sub LoadQFCConfig {
-	my $id = shift;
+	my $id = shift ;
+	### $RT::Logger->info("LoadQFCConfig!id = $id");
 	my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
 	$Ticket->Load( $id );
 	my $Queue = $Ticket->QueueObj;
 
 ##	my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
-	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura');
+	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if ($Queue->FirstCustomFieldValue('Q-FolderStruktura'));
+	### $RT::Logger->info("!!! ConfigTikcetSubject = $ConfigTikcetSubject");
+	if ($ConfigTikcetSubject) {
+		my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
 
-	my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
-
-	$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
-
-	my $First = $Tickets->First()->Id;
-
-	return $First ;
+		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+		return $Tickets->First()->Id;
+	}
+	return 0 ;
 }
 
 
 sub LoadStarterTicket {
 	my $id = shift;		# Starer ticket id
+
+	### $RT::Logger->info("LoadStarterTicket!id = $id");
+
 	my $yaml;
 	my ($StartTicketObj, $StartQueueObj, $StartCustomFieldContent);
 
@@ -263,29 +287,30 @@ sub LoadStarterTicket {
 
 	$StartTicketObj = RT::Ticket->new($RT::SystemUser);
 	
-	my $StarterID = $QueueObj->FirstCustomFieldValue( 'Q-StarterConfigTicketId' );
+	my $StarterID = $QueueObj->FirstCustomFieldValue( 'Q-StarterConfigTicketId' ) if ($QueueObj->FirstCustomFieldValue( 'Q-StarterConfigTicketId' ));
 
-	$RT::Logger->info("StarterID=$StarterID");
+	### $RT::Logger->info("LoadStarterTicket!StarterID = $StarterID");
 	
-	if ( $StarterID ne '') {
+	if ( $StarterID ) {
 		$StartTicketObj->Load( $StarterID );
 
 		$StartCustomFieldContent = $StartTicketObj->FirstCustomFieldValue(RT->Config->Get('TextJegyzet'));
-
 		# Create a new object with a single hashref document
 		try {
 			$yaml = YAML::Tiny->read_string( $StartCustomFieldContent );
 			return $yaml->[0];
 		} catch {
-			return undef;
+			return 0;
 		}
 	} else {
-		return undef;
+		return 0;
 	}
 }
 
 sub LoadListFromTransaction {
 	my $ticketID = shift;
+
+	### $RT::Logger->info("LoadListFromTransaction!ticketID = $ticketID");
 
 	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
 	$Ticket->Load($ticketID);
@@ -294,16 +319,20 @@ sub LoadListFromTransaction {
 	#  Loaded ticket last comment => editor
 	##
 
-	my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
-	my @csv_lines = split /^/m, $message;
-	my $json_text = '';
-	foreach my $line (@csv_lines) {
-		chomp($line);
-		my ($level, $id, $node) = split ';', $line;
-		$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+	my $message = $Ticket->FirstCustomFieldValue('TextJegyzet') if ( $Ticket->FirstCustomFieldValue('TextJegyzet') );
+	if ($message) {
+		my @csv_lines = split /^/m, $message;
+		my $json_text = '';
+		foreach my $line (@csv_lines) {
+			chomp($line);
+			my ($level, $id, $node) = split ';', $line;
+			$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+		}
+		chop($json_text);
+		return Encode::encode_utf8($json_text);
+	} else { 
+		return undef;
 	}
-	chop($json_text);
-	return Encode::encode_utf8($json_text);
 }
 </%INIT>
 
