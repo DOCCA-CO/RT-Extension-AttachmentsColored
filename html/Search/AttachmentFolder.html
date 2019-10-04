@@ -190,10 +190,10 @@ sub LoadTicketsWithAttachments {
 	my $TicketSet = RT::Tickets->new( RT::SystemUser );
 ## ( 'QueueCF.{Q-CRM kód}' = 'Teszt234' OR 'QueueCF.{Q-Projekt kód}' = 'Teszt234' OR 'CF.{Ajánlatszám/munkaszám}' = 'Teszt234' OR 'CF.{Ajánlatszám/munkaszám}' = 'Teszt234' ) AND (  Status = 'new' OR Status = 'open' OR Status = 'stalled' )
 ## ('QueueCF.{Q-Projekt kód}' = '$text_to_search' OR 'CF.{Ajánlatszám/munkaszám}' = '$text_to_search')
-	my $q_crm_code = $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' );
-	my $q_project_code = $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' );
-	my $crm_code = $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' )  || $q_crm_code || $q_project_code;
-	my $project_code = $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Ajánlatszám/munkaszám' )  || $q_project_code || $q_crm_code;
+	my $q_crm_code = $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Sepland' ) || $Ticket->FirstCustomFieldValue( 'Munkaszám' );
+	my $q_project_code = $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Sepland' ) || $Ticket->FirstCustomFieldValue( 'Munkaszám' );
+	my $crm_code = $Ticket->FirstCustomFieldValue( 'Munkaszám' ) || $Ticket->FirstCustomFieldValue( 'Sepland' )  || $q_crm_code || $q_project_code;
+	my $project_code = $Ticket->FirstCustomFieldValue( 'Sepland' ) || $Ticket->FirstCustomFieldValue( 'Munkaszám' )  || $q_project_code || $q_crm_code;
 
 	my(%row, @json);
 
@@ -201,9 +201,9 @@ sub LoadTicketsWithAttachments {
 
 ####	'CF.{Projekt kód}' LIKE 'LONDON'	
 ####   "('QueueCF.{Q-CRM kód}' = '$crm' OR 'QueueCF.{Q-Projekt kód}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm')"
-	my $SQL = "(id = $id OR 'QueueCF.{Q-CRM kód}' = '$q_crm_code' OR 'QueueCF.{Q-Projekt kód}' = '$q_project_code' OR 'CF.{Projekt kód}' = '$crm_code' OR 'CF.{Ajánlatszám/munkaszám}' = '$project_code') AND (Status = 'new' OR Status = 'open' OR Status = 'stalled')";
+####	('CF.{Sepland}' = '$crm' OR 'CF.{Munkaszám}' = '$crm')
+	my $SQL = "(id = $id OR CF.{Sepland} = '$project_code' OR CF.{Munkaszám} = '$project_code') AND (Status = 'new' OR Status = 'open' OR Status = 'stalled')";
 	RT::Logger->info("### \n LoadTicketsWithAttachments->SQL = $SQL \n ###");
-	RT::Logger->info( "### \n folders = $folders \n ###" );
 	$TicketSet->FromSQL( $SQL );
 	my $cnt = $TicketSet->Count;
 ##	$TicketSet->FromSQL( "( Status = 'new' OR Status = 'open' OR Status = 'stalled' ) AND Queue = '$Queue'" );
@@ -261,11 +261,12 @@ sub LoadQFCConfig {
 
 ##	my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
 	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if ($Queue->FirstCustomFieldValue('Q-FolderStruktura'));
-	### $RT::Logger->info("!!! ConfigTikcetSubject = $ConfigTikcetSubject");
+	$RT::Logger->info("!!! ConfigTikcetSubject = $ConfigTikcetSubject");
 	if ($ConfigTikcetSubject) {
 		my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
 
-		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+##		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
 		return $Tickets->First()->Id;
 	}
 	return 0 ;
