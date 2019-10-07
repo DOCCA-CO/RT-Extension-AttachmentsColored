@@ -15,12 +15,12 @@ if ($request_path =~ m{^(/Ticket/Display.html)}) {
     my $Ticket = RT::Ticket->new($session{'CurrentUser'});
     $Ticket->Load($id);
     if($Ticket && $Ticket->Id){
-	my $actions = PageMenu()->child('actions');
+    	my $actions = PageMenu()->child('actions');
 
-	$actions->child( attachmentfolder =>
-	    path => "/Search/AttachmentFolder.html"."?".$query_string->(id => $id),
-	    title => 'Attachment folder'
-	);
+    	$actions->child( attachmentfolder =>
+    	    path => "/Search/AttachmentFolder.html"."?".$query_string->(id => $id),
+    	    title => 'Attachment folder'
+    	);
     }
 }
 
