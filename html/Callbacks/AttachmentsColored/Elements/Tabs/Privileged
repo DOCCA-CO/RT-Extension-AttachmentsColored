@@ -9,20 +9,19 @@ my $query_string = sub {
     return $u->query;
 };
 
-my $actions = PageMenu()->child('actions');
-
 my $id = $DECODED_ARGS->{'id'};
 
 if ($request_path =~ m{^(/Ticket/Display.html)}) {
-	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
-	$Ticket->Load($id);
+    my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+    $Ticket->Load($id);
+    if($Ticket && $Ticket->Id){
 	my $actions = PageMenu()->child('actions');
 
 	$actions->child( attachmentfolder =>
-	path => "/Search/AttachmentFolder.html"."?".$query_string->(id => $id),
-	title => 'Attachment folder'
+	    path => "/Search/AttachmentFolder.html"."?".$query_string->(id => $id),
+	    title => 'Attachment folder'
 	);
+    }
 }
-
 
 </%INIT>
