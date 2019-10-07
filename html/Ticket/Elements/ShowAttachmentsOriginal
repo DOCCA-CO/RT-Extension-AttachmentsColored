@@ -54,7 +54,7 @@
 <div class="attachment-list">
 <table>
 % foreach my $key (sort { lc($a) cmp lc($b) } keys %documents) {
-% next if($key =~ /_rr\.(jpg|png)/);
+% next if($key =~ /_rr\.(jpg|png|jpeg)/);
 <tr><td>
 %# <%$key%><br />
 <%$key%>
