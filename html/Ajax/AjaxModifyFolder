@@ -5,6 +5,73 @@ my $Att = RT::Attachment->new($session{'CurrentUser'});
 $Att->Load($ARGS{'attachId'});
 
 if ($Att && $Att->Id && ($Att->FirstAttribute('Folder') || $ARGS{'Value'})) {
+    my $Ticket = RT::Ticket->new($RT::SystemUser);
+    $Ticket->Load($ARGS{'ticketId'}) if($ARGS{'ticketId'});
+
+    
+    my $options = '['. LoadListFromTransaction(RT->Config->Get('ConfigTicketID')) .']';
+    use JSON;
+    my @json = @{decode_json($options)};
+
+    if($Ticket && $Ticket->Id && $Att->FirstAttribute('Folder')){
+#	my $text = "";
+#	foreach my $option (@json) {
+#	    if($option->{id} == $Att->FirstAttribute('Folder')->Content){
+#		$text = $option->{text};
+#		last;
+#	    }
+#	}
+	if($Att->FirstAttribute('Folder')){
+	    my $Cf = RT::CustomField->new($RT::SystemUser);
+	    $Cf->Load('_Attachments_Folder_Attribute');
+	    my $Values = $Ticket->CustomFieldValues($Cf->Id);
+	    my $attId = $ARGS{'attachId'};
+	    while(my $Value = $Values->Next){
+    		if($Value->Content =~ /$attId/){
+		    my ($val, $msg) = $Ticket->DeleteCustomFieldValue(
+       	    		    Field => $Cf,
+       	    		    ValueId => $Value->Id,
+   		    );
+		    last;
+		}
+	    }
+    	}
+    }
+
     $Att->SetAttribute(Name => 'Folder', Content => $ARGS{'Value'});
+
+    my $text = "";
+    foreach my $option (@json) {
+	    if($option->{id} == $ARGS{'Value'}){
+		$text = $option->{text};
+		last;
+	    }
+    }
+    $Ticket->AddCustomFieldValue( Field => '_Attachments_Folder_Attribute', Value => $ARGS{'attachId'}.": ".$text) if($Ticket && $Ticket->Id && $text);
+
 }
+
+sub LoadListFromTransaction {
+  my $ticketID = shift;
+
+  my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+  $Ticket->Load($ticketID);
+
+##
+#  Loaded ticket last comment => editor
+##
+
+  my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+  my @csv_lines = split /^/m, $message;
+  my $json_text = '';
+  foreach my $line (@csv_lines) {
+    chomp($line);
+    my ($level, $id, $node) = split ';', $line;
+    $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+  }
+  chop($json_text);
+  return $json_text;
+}
+
+
 </%init>
