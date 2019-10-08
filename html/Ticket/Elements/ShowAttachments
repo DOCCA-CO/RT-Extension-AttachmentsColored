@@ -371,9 +371,9 @@ sub LoadQFCConfig {
 
   $Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
 
-  my $First = $Tickets->First()->Id;
+  my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
 
-  return $First ;
+  return $First?$First:0 ; ;
 }
 
 sub LoadListFromTransaction {
@@ -381,7 +381,7 @@ sub LoadListFromTransaction {
 
   my $Ticket = RT::Ticket->new($session{'CurrentUser'});
   $Ticket->Load($ticketID);
-
+  return 0 unless($Ticket && $Ticket->Id);
 ##
 #  Loaded ticket last comment => editor
 ##
