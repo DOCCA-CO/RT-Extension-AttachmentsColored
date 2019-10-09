@@ -370,10 +370,12 @@ sub LoadQFCConfig {
   my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
 
   $Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
-
-  my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
-
-  return $First?$First:0 ; ;
+  if($Tickets && $Tickets->First){
+	my $First = $Tickets->First->Id;
+	return $First;
+  }else{
+	return 0;
+  }
 }
 
 sub LoadListFromTransaction {
@@ -381,21 +383,26 @@ sub LoadListFromTransaction {
 
   my $Ticket = RT::Ticket->new($session{'CurrentUser'});
   $Ticket->Load($ticketID);
-  return 0 unless($Ticket && $Ticket->Id);
+  
+  if($Ticket && $Ticket->Id){
+  
 ##
 #  Loaded ticket last comment => editor
 ##
 
-  my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
-  my @csv_lines = split /^/m, $message;
-  my $json_text = '';
-  foreach my $line (@csv_lines) {
-    chomp($line);
-    my ($level, $id, $node) = split ';', $line;
-    $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+    my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+    my @csv_lines = split /^/m, $message;
+    my $json_text = '';
+    foreach my $line (@csv_lines) {
+	chomp($line);
+	my ($level, $id, $node) = split ';', $line;
+	$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+    }
+    chop($json_text);
+    return  Encode::encode_utf8($json_text);
+  }else{
+     return 0;
   }
-  chop($json_text);
-  return  Encode::encode_utf8($json_text);
 }
 
 
