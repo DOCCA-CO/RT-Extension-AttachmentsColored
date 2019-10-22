@@ -390,25 +390,30 @@ sub LoadQFCConfig {
 }
 
 sub LoadListFromTransaction {
-  my $ticketID = shift;
+	my $ticketID = shift;
 
-  my $Ticket = RT::Ticket->new($session{'CurrentUser'});
-  $Ticket->Load($ticketID);
-  return 0 unless($Ticket && $Ticket->Id);
+	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+	$Ticket->Load($ticketID);
+
+	if($Ticket && $Ticket->Id){
+  
 ##
 #  Loaded ticket last comment => editor
 ##
 
-  my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
-  my @csv_lines = split /^/m, $message;
-  my $json_text = '';
-  foreach my $line (@csv_lines) {
-	chomp($line);
-	my ($level, $id, $node) = split ';', $line;
-	$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
-  }
-  chop($json_text);
-  return  Encode::encode_utf8($json_text);
+	my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+	my @csv_lines = split /^/m, $message;
+	my $json_text = '';
+	foreach my $line (@csv_lines) {
+		chomp($line);
+		my ($level, $id, $node) = split ';', $line;
+		$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+	}
+	chop($json_text);
+	return  Encode::encode_utf8($json_text);
+	} else {
+		return 0;
+	}
 }
 
 
