@@ -7,8 +7,8 @@
 		<td width="40%" style="40%" valign="top">
 <&| /Widgets/TitleBox, title => loc('Folders') &>
 <div style="width: 100%; padding: 3px; margin: 3px;">
-	<input type="checkbox" id="show-nofolder"><label for="show-nofolder">Show attachments without folders</label>
-	<button id="show-all">Show all</button>
+	<input type="checkbox" id="show-nofolder"><label for="show-nofolder"><&|/l&>Show attachments without folders</&></label>
+	<button id="show-all"><&|/l&>Show all</&></button>
 	<input type="hidden" id="show-1" >
 	<input type="hidden" id="filter-node" >
 </div>
@@ -36,29 +36,29 @@
 		<thead>
 			<tr>
 				<th></th>
-				<th style="width: 300px;">Filename</th>
-				<th style="width: 175px;">Created</th>
-				<th style="width: 100px;">User</th>
-				<th style="width: 75px;">Size</th>
-				<th style="width: 75px;">Folder</th>
-				<th style="width: 100px;"></th>
-				<th style="width: 450px;">Queue</th>
-				<th style="width: 450px;">Subject</th>
-				<th style="width: 600px;">Comment</th>
+				<th style="width: 300px;"><&|/l&>Filename</&></th>
+				<th style="width: 175px;"><&|/l&>Created</&></th>
+				<th style="width: 100px;"><&|/l&>User</&></th>
+				<th style="width: 75px;"><&|/l&>Size</&></th>
+				<th style="width: 75px;"><&|/l&>Folder</&></th>
+				<th style="width: 100px;"><&|/l&>Project</&></th>
+				<th style="width: 450px;"><&|/l&>Queue</&></th>
+				<th style="width: 450px;"><&|/l&>Subject</&></th>
+				<th style="width: 600px;"><&|/l&>Comment</&></th>
 			</tr>
 		</thead>
 		<tfoot>
 			<tr>
 				<th></th>
-				<th>Filename</th>
-				<th>Created</th>
-				<th>User</th>
-				<th>Size</th>
-				<th>Folder</th>
-				<th></th>
-				<th>Queue</th>
-				<th>Subject</th>
-				<th>Comment</th>
+				<th style="width: 300px;"><&|/l&>Filename</&></th>
+				<th style="width: 175px;"><&|/l&>Created</&></th>
+				<th style="width: 100px;"><&|/l&>User</&></th>
+				<th style="width: 75px;"><&|/l&>Size</&></th>
+				<th style="width: 75px;"><&|/l&>Folder</&></th>
+				<th style="width: 100px;"><&|/l&>Project</&></th>
+				<th style="width: 450px;"><&|/l&>Queue</&></th>
+				<th style="width: 450px;"><&|/l&>Subject</&></th>
+				<th style="width: 600px;"><&|/l&>Comment</&></th>
 			</tr>
 		</tfoot>
 
@@ -253,25 +253,28 @@ sub LoadTicketsWithAttachments {
 }
 
 sub LoadQFCConfig {
-	my $id = shift ;
-	### $RT::Logger->info("LoadQFCConfig!id = $id");
-	my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+	my $id = shift;
+	my $Ticket = RT::Ticket->new( RT::SystemUser );
 	$Ticket->Load( $id );
 	my $Queue = $Ticket->QueueObj;
 
-##	my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó'); 
 	my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if ($Queue->FirstCustomFieldValue('Q-FolderStruktura'));
-	$RT::Logger->info("!!! ConfigTikcetSubject = $ConfigTikcetSubject");
+
+	unless ($ConfigTikcetSubject) {
+		my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
+		my $FolderStructureTicket = RT::Ticket->new( $session{'CurrentUser'} );
+		RT::Logger->info("ShowAttachments __id = $__id");
+		$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
+		$ConfigTikcetSubject = $FolderStructureTicket->Subject;
+	}
+
 	if ($ConfigTikcetSubject) {
 		my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
-
-##		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
-		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
 		return $Tickets->First()->Id;
 	}
 	return 0 ;
 }
-
 
 sub LoadStarterTicket {
 	my $id = shift;		# Starer ticket id

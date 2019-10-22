@@ -1,3 +1,4 @@
+<!-- // <%loc('Attachment folder')%> -->
 <%INIT>
 my $request_path = $HTML::Mason::Commands::r->path_info;
 $request_path =~ s!/{2,}!/!g;
@@ -19,7 +20,7 @@ if ($request_path =~ m{^(/Ticket/Display.html)}) {
 
     	$actions->child( attachmentfolder =>
     	    path => "/Search/AttachmentFolder.html"."?".$query_string->(id => $id),
-    	    title => 'Attachment folder'
+    	    title => loc('Attachment folder')
     	);
     }
 }

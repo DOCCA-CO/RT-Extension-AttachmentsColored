@@ -10,4 +10,6 @@ Set($HideEmbeddedImages, 1);
 
 Set($ConfigTicketID, 585);
 
+Set($DefaultFolderStructureTicketID, 585);
+
 1;

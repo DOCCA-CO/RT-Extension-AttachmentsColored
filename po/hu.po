@@ -36,6 +36,58 @@ msgstr "Rejtett fájlok elrejtése"
 msgid "[comment]"
 msgstr "[Leírás]"
 
-#:
+#: NOT FOUND IN SOURCE
 msgid "hidden"
 msgstr "rejtett"
+
+#: 
+msgid "Folders"
+msgstr "Mappák"
+
+#: 
+msgid "Attachment folder"
+msgstr "Csatolmány böngésző"
+
+#: 
+msgid "Filename"
+msgstr "Fájlnév"
+
+#: 
+msgid "Created"
+msgstr "Feltöltve"
+
+#: 
+msgid "User"
+msgstr "Feltöltő személy"
+
+#: 
+msgid "Size"
+msgstr "Fájlméret"
+
+#: 
+msgid "Folder"
+msgstr "Mappa"
+
+#: 
+msgid "Project"
+msgstr "Project"
+
+#: 
+msgid "Queue"
+msgstr "Polc"
+
+#: 
+msgid "Subject"
+msgstr "Tárgy"
+
+#: 
+msgid "Comment"
+msgstr "Leírás"
+
+#: 
+msgid "Show attachments without folders"
+msgstr "Kategória nélküli csatolmányok"
+
+#: 
+msgid "Show all"
+msgstr "Mindent mutat"

@@ -54,10 +54,10 @@
 % my $changehidden = 'Show hidden files';
 % if ($showhidden) { $changehidden = 'Hide hidden files'; }
 <&| /Widgets/TitleBox, title => loc($changehidden), 
-        title_href => $href1,
-        title_class=> 'inverse',  
-        class => 'ticket-info-attachments',
-        color => "#336699" &>
+		title_href => $href1,
+		title_class=> 'inverse',  
+		class => 'ticket-info-attachments',
+		color => "#336699" &>
  <a name='attbox'></a>
 <table border=0 cellspacing=1 width=100% align=center>
 <%perl>
@@ -65,9 +65,9 @@ my @aob;
 foreach my $ao ('category', 'filename', 'default', 'user', 'size', 'node', 'comment')  {
 
   if($AttachmentOrder eq $ao)  {
-    push @aob, '<b>'. loc('~['. $ao. '~]'). '</b>';
+	push @aob, '<b>'. loc('~['. $ao. '~]'). '</b>';
   } else  {
-    push @aob, '<span onclick="toggleAttachmentsColored(\''.$id.'\', \''.$ao.'\', \'\',\'AttachmentOrder\', \'\'); return false;" style="cursor:pointer;"><div class="AttachmentsColoredOrder">'. loc('~['. $ao. '~]'). '</div></span>';
+	push @aob, '<span onclick="toggleAttachmentsColored(\''.$id.'\', \''.$ao.'\', \'\',\'AttachmentOrder\', \'\'); return false;" style="cursor:pointer;"><div class="AttachmentsColoredOrder">'. loc('~['. $ao. '~]'). '</div></span>';
   }
 }
 $m->out("<tr align=center><td> ".join('</td><td>', @aob)."</td></tr>");
@@ -104,9 +104,9 @@ my $rename = $rev->{'filename'};
 my $resize = 0;
 if($rename =~ /\.(jpg|jpeg|png)/){
 #    $rename =~ s/\./_rr\./;
-    my ($pre, $post) = $rename =~ /(.+)\.([^\.]+)$/;
-    $rename = $pre."_rr.".$post;
-    $resize = 1;
+	my ($pre, $post) = $rename =~ /(.+)\.([^\.]+)$/;
+	$rename = $pre."_rr.".$post;
+	$resize = 1;
 }
 
 my $filename_ = "https://".RT->Config->Get('WebDomain').(RT->Config->Get('WebPort')?":".RT->Config->Get('WebPort'):"").RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
@@ -139,7 +139,7 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <div id="comment-<%$commentId%>">
 <&|/l, $rev->{'comment'} &>[_1]</&>
 <span>
-    <img src="<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png">
+	<img src="<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png">
 </span>
 </div>
 <div id="modifyComment-<%$commentId%>" style="display:none">
@@ -162,71 +162,71 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 jQuery(function ($) {
   $(document).ready(function() {
 
-    var folderdata = 
+	var folderdata = 
 % print $options;
 ;
 
-    function formatResult(node) {
-      var $result = $('<span title="Könyvtárjegyzet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
-      return $result;
-    };
+	function formatResult(node) {
+	  var $result = $('<span title="Könyvtárjegyzet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
+	  return $result;
+	};
 
-    $('.selectnode').select2({
-      placeholder: 'Select an option',
-      width: "230px",
-      data: folderdata,
-      formatSelection: function(item) {
-        return item.text
-      },
-      formatResult: function(item) {
-        return item.text
-      },
-      templateResult: formatResult,
-      dropdownCssClass : 'bigdrop',
-      dropdownAutoWidth : true
-    });
+	$('.selectnode').select2({
+	  placeholder: 'Select an option',
+	  width: "230px",
+	  data: folderdata,
+	  formatSelection: function(item) {
+		return item.text
+	  },
+	  formatResult: function(item) {
+		return item.text
+	  },
+	  templateResult: formatResult,
+	  dropdownCssClass : 'bigdrop',
+	  dropdownAutoWidth : true
+	});
   })
 });
 
 % for (my $i = 0; $i < $commentId; $i++){
-    jQuery("#select-<%$i%>").change(function(){
-        jQuery.ajax({
-            type: 'POST',
-            url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyFolder',
-            data: {
-                'Value' : jQuery("#select-<%$i%>").val(),
-                'attachId' : jQuery("#attachId-<%$i%>").val()
-            },
-            success:function(data){
-              jQuery("#node-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Update/ShowFolderUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
-            }
-        });
-    });
+	jQuery("#select-<%$i%>").change(function(){
+		jQuery.ajax({
+			type: 'POST',
+			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyFolder',
+			data: {
+				'Value' : jQuery("#select-<%$i%>").val(),
+				'attachId' : jQuery("#attachId-<%$i%>").val()
+			},
+			success:function(data){
+			  jQuery("#node-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Update/ShowFolderUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
+			}
+		});
+	});
 %}
 
 
 % for (my $i = 0; $i < $commentId; $i++){
-    jQuery("#commenttd-<%$i%>").click(function(){
-        jQuery("#comment-<%$i%>").hide();
-        jQuery("#modifyComment-<%$i%>").show();
-        jQuery("#valueComment-<%$i%>").focus();
-    });
+	jQuery("#commenttd-<%$i%>").click(function(){
+		jQuery("#comment-<%$i%>").hide();
+		jQuery("#modifyComment-<%$i%>").show();
+		jQuery("#valueComment-<%$i%>").focus();
+	});
 
-    jQuery("#modifyComment-<%$i%>").focusout(function(){
-        jQuery.ajax({
-            type: 'POST',
-            url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyComment',
-            data: {
-                'Value' : jQuery("#valueComment-<%$i%>").val(),
-                'attachId' : jQuery("#attachId-<%$i%>").val()
-            },
-            success:function(data){
-                jQuery("#comment-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Update/ShowCommentUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
-            }
-        });
-        jQuery("#comment-<%$i%>").show();
-        jQuery("#modifyComment-<%$i%>").hide();
-    });
+	jQuery("#modifyComment-<%$i%>").focusout(function(){
+		jQuery.ajax({
+			type: 'POST',
+			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyComment',
+			data: {
+				'Value' : jQuery("#valueComment-<%$i%>").val(),
+				'attachId' : jQuery("#attachId-<%$i%>").val()
+			},
+			success:function(data){
+				jQuery("#comment-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Update/ShowCommentUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
+			}
+		});
+		jQuery("#comment-<%$i%>").show();
+		jQuery("#modifyComment-<%$i%>").hide();
+	});
 %}
 
 //document.getElementById("LoadFullHistory").style.display="";
@@ -236,38 +236,38 @@ var xOff = 10;
 var pathToImage; 
 
 function resize(e, fname){
-    pathToImage = fname;
-    jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
-    jQuery("#image-when-hovering-text").css("position", "absolute").css("top", (e.pageY - yOff) + "px")
-            .css("left", (e.pageX + xOff) + "px")
-            .fadeIn("fast");
+	pathToImage = fname;
+	jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
+	jQuery("#image-when-hovering-text").css("position", "absolute").css("top", (e.pageY - yOff) + "px")
+			.css("left", (e.pageX + xOff) + "px")
+			.fadeIn("fast");
 //    jQuery(".text-hover-image").css("background-color", "yellow");
 //    document.body.innerHTML = "<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>";
 //    document.getElementById("image-when-hovering-text").style.position = "absolute";
 }
 
 function remuve(){
-    jQuery("#image-when-hovering-text").remove();
+	jQuery("#image-when-hovering-text").remove();
 }
 
 jQuery(".text-hover-image").mousemove(function (e) {
-        jQuery("#image-when-hovering-text")
-            .css("top", (e.pageY - yOff) + "px")
-            .css("left", (e.pageX + xOff) + "px");
+		jQuery("#image-when-hovering-text")
+			.css("top", (e.pageY - yOff) + "px")
+			.css("left", (e.pageX + xOff) + "px");
 });
-    
+	
 
 /*
 jQuery(".text-hover-image").hover(function (e) {
-        jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
-        jQuery("#image-when-hovering-text")
-            .css("position", "absolute")
-            .css("top", (e.pageY - yOff) + "px")
-            .css("left", (e.pageX + xOff) + "px")
-            .fadeIn("fast");
+		jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
+		jQuery("#image-when-hovering-text")
+			.css("position", "absolute")
+			.css("top", (e.pageY - yOff) + "px")
+			.css("left", (e.pageX + xOff) + "px")
+			.fadeIn("fast");
 },
 function () {
-        
+		
 });
 
 
@@ -309,36 +309,36 @@ $Attachments->LimitHasFilename;
 
 # show newest first
 $Attachments->OrderByCols(
-    { FIELD => 'Created', ORDER => 'DESC' },
-    { FIELD => 'id',      ORDER => 'DESC' },
+	{ FIELD => 'Created', ORDER => 'DESC' },
+	{ FIELD => 'id',      ORDER => 'DESC' },
 );
 
 
 if($Ticket->CurrentUserHasRight('ModifyTicket'))  {
   if($AttAction eq 'AttachmentCategory' && $AttId && ($AttCat || $AttCat eq '0'))  {
-    my $Att = RT::Attachment->new($session{'CurrentUser'});
-    $Att->Load($AttId);
-    if($Att && $Att->id)  {
-      if($AttCat eq 'X')  {
-        $Att->DeleteAttribute('Category');
-      } else  {
-        $Att->SetAttribute(Name => 'Category', Content => $AttCat);
-      }
-    }
+	my $Att = RT::Attachment->new($session{'CurrentUser'});
+	$Att->Load($AttId);
+	if($Att && $Att->id)  {
+	  if($AttCat eq 'X')  {
+		$Att->DeleteAttribute('Category');
+	  } else  {
+		$Att->SetAttribute(Name => 'Category', Content => $AttCat);
+	  }
+	}
   } elsif($AttAction eq 'AttachmentOrder')  {
-    if($AttOrd =~ /^(filename|category|user|size|comment)$/)  {
-      $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-AttachmentOrder', Content => $AttOrd);
-    } else  {
-      $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder');
-    }
+	if($AttOrd =~ /^(filename|category|user|size|comment)$/)  {
+	  $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-AttachmentOrder', Content => $AttOrd);
+	} else  {
+	  $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder');
+	}
   } elsif($AttAction eq 'ToggleHidden')  {
-      my $sha= $Ticket->FirstAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
-      $sha = $sha->Content if $sha;
-      if ($sha ne '1') {
-       $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-ShowHidden', Content => '1' );
-      }else{
-       $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
-      }
+	  my $sha= $Ticket->FirstAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
+	  $sha = $sha->Content if $sha;
+	  if ($sha ne '1') {
+	   $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-ShowHidden', Content => '1' );
+	  }else{
+	   $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
+	  }
   }
 }
 
@@ -351,8 +351,8 @@ my $commentId = 0;
 
 my (%att, %tr);
 foreach my $rev (@{$AttOrd2}){
-    $tr{$rev->{'filename'}} = $rev->{'attachment'}->TransactionId;
-    $att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
+	$tr{$rev->{'filename'}} = $rev->{'attachment'}->TransactionId;
+	$att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
 }
 
 
@@ -363,17 +363,30 @@ sub LoadQFCConfig {
   my $Queue = $Ticket->QueueObj;
 ##  my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó') || ; 
   my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura');
+##
+# If Q-FolderStruktura CF NOT SET -- load it default id from config file
+##
+  unless ($ConfigTikcetSubject) {
+	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
+	my $FolderStructureTicket = RT::Ticket->new( $session{'CurrentUser'} );
+	RT::Logger->info("ShowAttachments __id = $__id");
+	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
+	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
 
+  }
 
 ## Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE 'Kivitelezési projekt folder struktúra'
 
   my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
 
-  $Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
+  my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
+  RT::Logger->info("ShowAttachments SQL = $SQL");
+
+  $Tickets->FromSQL( $SQL ) ;
 
   my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
 
-  return $First?$First:0 ; ;
+  return $First?$First:0;
 }
 
 sub LoadListFromTransaction {
@@ -390,9 +403,9 @@ sub LoadListFromTransaction {
   my @csv_lines = split /^/m, $message;
   my $json_text = '';
   foreach my $line (@csv_lines) {
-    chomp($line);
-    my ($level, $id, $node) = split ';', $line;
-    $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
+	chomp($line);
+	my ($level, $id, $node) = split ';', $line;
+	$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
   }
   chop($json_text);
   return  Encode::encode_utf8($json_text);
