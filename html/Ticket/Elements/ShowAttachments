@@ -130,7 +130,7 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <!-- options -->
 <option></option>
 %foreach my $option (@json) {
-  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
+  <option value='<%$option->{id}%>' <% $option->{id} eq $rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
 %}
 </select>
 
@@ -400,7 +400,6 @@ sub LoadListFromTransaction {
 ##
 #  Loaded ticket last comment => editor
 ##
-
 	my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
 	my @csv_lines = split /^/m, $message;
 	my $json_text = '';
