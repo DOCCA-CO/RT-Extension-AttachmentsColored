@@ -87,8 +87,47 @@ jQuery(function ($) {
 	    var table = $('#att-table')
 	    	.addClass( 'nowrap' )
 	    	.DataTable( {
-%print "\t\t\tdata:$json,\n";
+%print "\t\t\t\tdata:$json,\n";
 				responsive: true,
+				language: {
+					processing:     "Feldolgozás...",
+					search:         "Keresés:",
+					lengthMenu:    "_MENU_ találat oldalanként",
+					info:           "Találatok: _START_ - _END_ Összesen: _TOTAL_",
+					infoEmpty:      "Nulla találat",
+					infoFiltered:   "(_MAX_ összes rekord közül szűrve)",
+					infoPostFix:    "",
+					loadingRecords: "Betöltés....",
+					zeroRecords:    "Nincs a keresésnek megfelelő találat",
+					emptyTable:     "A táblázatban nem állnak rendelkezésre adatok",
+					paginate: {
+						first:      "Első",
+						previous:   "Előző",
+						next:       "Következő",
+						last:       "Utolsó"
+					},
+					aria: {
+						sortAscending:  ": aktiválja a növekvő rendezéshez",
+						sortDescending: ": aktiválja a csökkenő rendezéshez"
+					},
+					select: {
+						rows: {
+							"_": "%d sor kiválasztva",
+							"0": "",
+							"1": "1 sor kiválasztva"
+						}
+					},
+					buttons: {
+						print: "Nyomtatás",
+						colvis: "Oszlopok",
+						copy: "Másolás",
+						copyTitle: "Vágólapra másolás",
+						copySuccess: {
+							"_": "%d sor másolva",
+							"1": "1 sor másolva"
+						}
+					}
+				},
 		        columns : [
 					{ "data" : "cat" },
 					{ "data" : "file" },
@@ -102,7 +141,6 @@ jQuery(function ($) {
                             }
                         }
 					},
-					
 					{ "data" : "proj" },
 					{ "data" : "queue" },
 					{ "data" : "subj" },
@@ -238,7 +276,7 @@ sub LoadTicketsWithAttachments {
 						$row{ 'nodenm' } = " - ";
 					}
 				};
-				$row{ 'cat' } = "<div style='width:15px; height:15px; $colormap{$Category};'></div>"; ##   $Category;
+				$row{ 'cat' } = "<div style='width:15px; height:15px; $colormap{$Category}'></div>"; ##   $Category;
 				$row{ 'rem' } = $Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'';
 				$row{ 'queue' } = $T->QueueObj->Name;
 				my $link = RT->Config->Get('WebPath') . '/Ticket/Display.html?id=' . $T->id;
