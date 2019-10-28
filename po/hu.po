@@ -91,3 +91,7 @@ msgstr "Kategória nélküli csatolmányok"
 #: 
 msgid "Show all"
 msgstr "Mindent mutat"
+
+#:
+msgid "Select an option"
+msgstr "Válasszon"

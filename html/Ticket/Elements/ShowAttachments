@@ -172,7 +172,7 @@ jQuery(function ($) {
 	};
 
 	$('.selectnode').select2({
-	  placeholder: 'Select an option',
+	  placeholder: '<&|/l&>Select an option</&>',
 	  width: "230px",
 	  data: folderdata,
 	  formatSelection: function(item) {
