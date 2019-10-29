@@ -300,14 +300,14 @@ sub LoadQFCConfig {
 
 	unless ($ConfigTikcetSubject) {
 		my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
-		my $FolderStructureTicket = RT::Ticket->new( $session{'CurrentUser'} );
+		my $FolderStructureTicket = RT::Ticket->new( RT::SystemUser );
 		RT::Logger->info("ShowAttachments __id = $__id");
 		$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
 		$ConfigTikcetSubject = $FolderStructureTicket->Subject;
 	}
 
 	if ($ConfigTikcetSubject) {
-		my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
+		my $Tickets = RT::Tickets->new( RT::SystemUser );
 		$Tickets->FromSQL( "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'" ) ;
 		return $Tickets->First()->Id;
 	}
@@ -354,7 +354,7 @@ sub LoadListFromTransaction {
 
 	### $RT::Logger->info("LoadListFromTransaction!ticketID = $ticketID");
 
-	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+	my $Ticket = RT::Ticket->new( RT::SystemUser );
 	$Ticket->Load($ticketID);
 
 	##

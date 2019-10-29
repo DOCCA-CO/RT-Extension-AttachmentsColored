@@ -355,10 +355,9 @@ foreach my $rev (@{$AttOrd2}){
 	$att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
 }
 
-
 sub LoadQFCConfig {
   my $id = shift;
-  my $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+  my $Ticket = RT::Ticket->new( RT::SystemUser );
   $Ticket->Load( $id );
   my $Queue = $Ticket->QueueObj;
 ##  my $ConfigTikcetSubject = $Ticket->FirstCustomFieldValue('Folder választó') || ; 
@@ -368,7 +367,7 @@ sub LoadQFCConfig {
 ##
   unless ($ConfigTikcetSubject) {
 	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
-	my $FolderStructureTicket = RT::Ticket->new( $session{'CurrentUser'} );
+	my $FolderStructureTicket = RT::Ticket->new( RT::SystemUser );
 	RT::Logger->info("ShowAttachments __id = $__id");
 	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
 	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
@@ -377,7 +376,7 @@ sub LoadQFCConfig {
 
 ## Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE 'Kivitelezési projekt folder struktúra'
 
-  my $Tickets = RT::Tickets->new( $session{'CurrentUser'} );
+  my $Tickets = RT::Tickets->new( RT::SystemUser );
 
   my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
   RT::Logger->info("ShowAttachments SQL = $SQL");
@@ -392,7 +391,7 @@ sub LoadQFCConfig {
 sub LoadListFromTransaction {
 	my $ticketID = shift;
 
-	my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+	my $Ticket = RT::Ticket->new( RT::SystemUser );
 	$Ticket->Load($ticketID);
 
 	if($Ticket && $Ticket->Id){
