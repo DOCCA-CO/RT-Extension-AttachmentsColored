@@ -255,7 +255,7 @@ sub LoadTicketsWithAttachments {
 			RT::Logger->info( sprintf("id=%d, subj=%s, in queue=%s", $T->Id, $T->Subject, $T->QueueObj->Name) );
 			my $json_folders = decode_json( "[$folders]" ) if ( $folders );
 			while ( my $Attachment = $Attachments->Next() ) {
-				next if ($Attachment->Filename =~ /_rr\.(jpg|jpeg|png)/);
+				next if ($Attachment->Filename =~ /_rr\.(jpg|jpeg|png)/i);
 				my $Att = $Attachment->Filename;
 				
 				my $Category = ($Attachment->FirstAttribute('Category')?$Attachment->FirstAttribute('Category')->Content:'X');
