@@ -8,8 +8,8 @@ Set(%AttachmentCategories, (
 
 Set($HideEmbeddedImages, 1);
 
-Set($ConfigTicketID, 585);
+Set($ConfigTicketID, 2);
 
-Set($DefaultFolderStructureTicketID, 585);
+Set($DefaultFolderStructureTicketID, 2);
 
 1;

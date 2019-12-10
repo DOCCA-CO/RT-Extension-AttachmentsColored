@@ -109,17 +109,12 @@ if($rename =~ /\.(jpg|jpeg|png)/){
 	$resize = 1;
 }
 
-my $filename_ = "//".RT->Config->Get('WebDomain').(RT->Config->Get('WebPort')?":".RT->Config->Get('WebPort'):"").RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
+my $filename_ = "https://".RT->Config->Get('WebDomain').(RT->Config->Get('WebPort')?":".RT->Config->Get('WebPort'):"").RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
 $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
 </%perl>
-% unless (($rev->{'attachment'}->ContentEncoding eq 'none') and ($rev->{'attachment'}->ContentType eq 'text/uri-list')) {
  <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
-% } else {
- <a href="<%$rev->{'attachment'}->Content%>" target="_blank">  
-% }
 <% $rev->{'filename'} %>
-</a>
-</td>
+</a></td>
 %  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
 <&|/l, $rev->{'date'}  &>[_1]</&>
 </td>
@@ -134,10 +129,9 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <select id='select-<%$commentId%>' class='selectnode'>
 <!-- options -->
 <option></option>
-% if (!@json) {
-% foreach my $option (@json) {
-  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
-%} }
+%foreach my $option (@json) {
+  <option value='<%$option->{'id'}%>' <% $option->{'id'} eq $rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
+%}
 </select>
 
 </td>
@@ -169,11 +163,11 @@ jQuery(function ($) {
   $(document).ready(function() {
 
 	var folderdata = 
-% print Encode::decode_utf8( $options );
+% print $options;
 ;
 
 	function formatResult(node) {
-	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
+	  var $result = $('<span title="Könyvtárjegyzet" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
 	  return $result;
 	};
 
@@ -289,6 +283,7 @@ use utf8;
 use JSON;
 use Encode;
 
+
 if (!$Ticket){
  if ($id){
   $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
@@ -303,9 +298,7 @@ if (!$id) { $id = $Ticket->Id; }
 $Attachments ||= $Ticket->Attachments;
 
 my $options = '['. LoadListFromTransaction( LoadQFCConfig( $id ) ) .']' ;
-RT::Logger->info("json = $options");
-
-my @json = @{decode_json( $options )};
+my @json = @{decode_json($options)};
 
 
 # Avoid applying limits to this collection that may be used elsewhere
@@ -364,7 +357,6 @@ foreach my $rev (@{$AttOrd2}){
 	$att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
 }
 
-
 sub LoadQFCConfig {
   my $id = shift;
   my $Ticket = RT::Ticket->new( RT::SystemUser );
@@ -381,11 +373,10 @@ sub LoadQFCConfig {
 	RT::Logger->info("ShowAttachments __id = $__id");
 	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
 	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
+
   }
 
 ## Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE 'Kivitelezési projekt folder struktúra'
-
-  return if ($ConfigTikcetSubject eq '');
 
   my $Tickets = RT::Tickets->new( RT::SystemUser );
 
@@ -405,9 +396,8 @@ sub LoadListFromTransaction {
 	my $Ticket = RT::Ticket->new( RT::SystemUser );
 	$Ticket->Load($ticketID);
 
-##	return unless($Ticket && $Ticket->Id);
-
 	if($Ticket && $Ticket->Id){
+  
 ##
 #  Loaded ticket last comment => editor
 ##
@@ -416,42 +406,20 @@ sub LoadListFromTransaction {
 	my $json_text = '';
 	foreach my $line (@csv_lines) {
 		chomp($line);
-		my ($level, $id, $node, $libID) = split ';', $line;
-		my $lib = LoadLibFromTransaction( $libID );
-		$node = Encode::encode_utf8( $node );
-		$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\", \"lib\": \"$lib\" },";
+		my ($level, $id, $node) = split ';', $line;
+		$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\" },";
 	}
 	chop($json_text);
-##	RT::Logger->info( "kalap:  $json_text \n" );
-	return $json_text;
+	return  Encode::encode_utf8($json_text);
 	} else {
-		return undef;
+		return 0;
 	}
 }
 
-sub LoadLibFromTransaction {
-	my $ticketID = shift;
-	return "N/A" unless ($ticketID);
-	my $Ticket = RT::Ticket->new( RT::SystemUser );
-	$Ticket->Load($ticketID);
-	if($Ticket && $Ticket->Id){
-##
-#  Loaded ticket CF => editor
-##
-		my $message =  $Ticket->FirstCustomFieldValue('TextJegyzet');
-		if ( $message ) {
-			$message =~ s/\R/&#013;/g;
-			return  Encode::encode_utf8( $message );
-##			return "Jegyzet";
-		} else {
-			return "Jegyzet";
-		}
-	} else {
-		return "N/A";
-	}
-}
+
 
 </%INIT>
+
 
 <%ARGS>
 $Ticket => undef

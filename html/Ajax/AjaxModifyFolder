@@ -1,4 +1,5 @@
 <%init>
+use utf8;
 return unless ($ARGS{'attachId'});
 
 my $Att = RT::Attachment->new($session{'CurrentUser'});
@@ -61,7 +62,7 @@ sub LoadListFromTransaction {
 #  Loaded ticket last comment => editor
 ##
 
-  my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+  my $message = Encode::encode_utf8($Ticket->FirstCustomFieldValue('TextJegyzet'));
   my @csv_lines = split /^/m, $message;
   my $json_text = '';
   foreach my $line (@csv_lines) {
