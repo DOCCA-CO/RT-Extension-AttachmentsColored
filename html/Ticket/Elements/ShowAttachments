@@ -134,10 +134,11 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <select id='select-<%$commentId%>' class='selectnode'>
 <!-- options -->
 <option></option>
-% if (!@json) {
+%# if (!@json) {
 % foreach my $option (@json) {
   <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
-%} }
+%# }
+% }
 </select>
 
 </td>
