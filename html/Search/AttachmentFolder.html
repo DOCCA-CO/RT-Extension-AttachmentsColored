@@ -260,8 +260,17 @@ sub LoadTicketsWithAttachments {
 				
 				my $Category = ($Attachment->FirstAttribute('Category')?$Attachment->FirstAttribute('Category')->Content:'X');
 				my $Folder = ($Attachment->FirstAttribute('Folder')?$Attachment->FirstAttribute('Folder')->Content:'-1');
-				my $path = RT->Config->Get('WebPath').'/Ticket/Attachment/'.$Attachment->TransactionId.'/'.$Attachment->Id;
-				$row{ 'file' } = "<a href='$path/$Att' target='_blank'>$Att</a>"; 
+				my $path = '';
+				unless ($Attachment->ContentType eq 'text/uri-list') {
+					$path = RT->Config->Get('WebPath').'/Ticket/Attachment/'.$Attachment->TransactionId.'/'.$Attachment->Id;
+				} else {
+					$path = $Attachment->Content;
+				};
+				unless ($Attachment->ContentType eq 'text/uri-list') {
+					$row{ 'file' } = "<a href='$path/$Att' target='_blank'>$Att</a>"; 
+				} else {
+					$row{ 'file' } = "<a href='$path' target='_blank'>$Att</a>";
+				}
 				$row{ 'date' } = $Attachment->CreatedAsString;
 				$row{ 'user' } = $Attachment->CreatorObj->Name;
 				my $filesize = $Attachment->ContentLength;
