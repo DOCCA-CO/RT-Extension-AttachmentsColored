@@ -110,12 +110,24 @@ if($rename =~ /\.(jpg|jpeg|png)/i){
 }
 
 my $filename_ = "//".RT->Config->Get('WebDomain').(RT->Config->Get('WebPort')?":".RT->Config->Get('WebPort'):"").RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
-$m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
+$m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
 </%perl>
 % unless (($rev->{'attachment'}->ContentEncoding eq 'none') and ($rev->{'attachment'}->ContentType eq 'text/uri-list')) {
  <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
 % } else {
+% if ( index( lc( $rev->{'attachment'}->Content ), 'dropbox' ) > 0) {
+% 	$m->out( '<i class="cloudicons8-16-dropdox"></i>' );
+% } elsif ( index( lc( $rev->{'attachment'}->Content ), 'google' ) > 0 ) {
+% 	$m->out( '<i class="cloudicons8-16-gdrive"></i>');
+% } elsif ( index( lc( $rev->{'attachment'}->Content ), 'youtu' ) > 0 ) {
+% 	$m->out( '<i class="cloudicons8-youtube-play-16"></i>');
+% } elsif ( index( lc( $rev->{'attachment'}->Content ), 'soundcloud' ) > 0 ) {
+% 	$m->out( '<i class="cloudicons8-soundcloud-16"></i>');
+% } else {
+% 	$m->out( '<i class="cloudicons8-16-cloud"></i>');
+% }
  <a href="<%$rev->{'attachment'}->Content%>" target="_blank">  
+
 % }
 <% $rev->{'filename'} %>
 </a>
@@ -134,10 +146,8 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 <select id='select-<%$commentId%>' class='selectnode'>
 <!-- options -->
 <option></option>
-%# if (!@json) {
 % foreach my $option (@json) {
   <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
-%# }
 % }
 </select>
 
@@ -160,8 +170,6 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 </div>
 % }
 
-
-
 <script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -169,9 +177,8 @@ $m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-imag
 jQuery(function ($) {
   $(document).ready(function() {
 
-	var folderdata = 
-% print Encode::decode_utf8( $options );
-;
+	var folderdata = <%$options |n%>;
+%# print Encode::decode_utf8( $options );
 
 	function formatResult(node) {
 	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
@@ -289,6 +296,7 @@ function () {
 use utf8;
 use JSON;
 use Encode;
+use Data::Dumper;
 
 if (!$Ticket){
  if ($id){
@@ -303,10 +311,10 @@ if (!$id) { $id = $Ticket->Id; }
 
 $Attachments ||= $Ticket->Attachments;
 
-my $options = '['. LoadListFromTransaction( LoadQFCConfig( $id ) ) .']' ;
-RT::Logger->info("json = $options");
+my @json = LoadListFromTransaction( LoadQFCConfig( $id ) ); ## @{decode_json( $options )};
 
-my @json = @{decode_json( $options )};
+my $options =  to_json \@json, { pretty => 1};  ##'['. LoadListFromTransaction( LoadQFCConfig( $id ) ) .']' ;
+## RT::Logger->info("json = $options");
 
 
 # Avoid applying limits to this collection that may be used elsewhere
@@ -379,9 +387,10 @@ sub LoadQFCConfig {
   unless ($ConfigTikcetSubject) {
 	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
 	my $FolderStructureTicket = RT::Ticket->new( RT::SystemUser );
-	RT::Logger->info("ShowAttachments __id = $__id");
+	##RT::Logger->info("ShowAttachments __id = $__id");
 	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
 	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
+
   }
 
 ## Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE 'Kivitelezési projekt folder struktúra'
@@ -391,7 +400,7 @@ sub LoadQFCConfig {
   my $Tickets = RT::Tickets->new( RT::SystemUser );
 
   my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
-  RT::Logger->info("ShowAttachments SQL = $SQL");
+  ##RT::Logger->info("ShowAttachments SQL = $SQL");
 
   $Tickets->FromSQL( $SQL ) ;
 
@@ -415,16 +424,18 @@ sub LoadListFromTransaction {
 	my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
 	my @csv_lines = split /^/m, $message;
 	my $json_text = '';
+	my @_json = ();
 	foreach my $line (@csv_lines) {
 		chomp($line);
 		my ($level, $id, $node, $libID) = split ';', $line;
 		my $lib = LoadLibFromTransaction( $libID );
+		push ( @_json, { id=>$id, text=>$node, level=>$level, lib=>$lib } ); 
 		$node = Encode::encode_utf8( $node );
-		$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\", \"lib\": \"$lib\" },";
+		##$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\", \"lib\": \"$lib\" },";
 	}
-	chop($json_text);
-##	RT::Logger->info( "kalap:  $json_text \n" );
-	return $json_text;
+	##chop($json_text);
+	## RT::Logger->info( "kalap:  ". to_json(\@_json) );
+	return @_json;
 	} else {
 		return undef;
 	}
@@ -442,7 +453,7 @@ sub LoadLibFromTransaction {
 		my $message =  $Ticket->FirstCustomFieldValue('TextJegyzet');
 		if ( $message ) {
 			$message =~ s/\R/&#013;/g;
-			return  Encode::encode_utf8( $message );
+			return  Encode::_encode_utf8( $message );
 ##			return "Jegyzet";
 		} else {
 			return "Jegyzet";
