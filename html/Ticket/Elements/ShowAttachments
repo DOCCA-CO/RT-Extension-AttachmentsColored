@@ -180,7 +180,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 jQuery(function ($) {
   $(document).ready(function() {
 % $m->out("// kalap\n");
-% $m->out('var folderdata = ' . to_json( \@json, { pretty => 1} ) . ';');
+% print 'var folderdata = ' . to_json( \@json ) . ';';
 
 	function formatResult(node) {
 	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
@@ -275,10 +275,11 @@ jQuery(".text-hover-image").mousemove(function (e) {
 </script>
 
 <%INIT>
+use strict;
+use warnings;
 use utf8;
 use JSON;
 use Encode;
-use Data::Dumper;
 
 if (!$Ticket){
  if ($id){
