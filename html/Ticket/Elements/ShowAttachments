@@ -147,7 +147,10 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 <!-- options -->
 <option></option>
 % foreach my $option (@json) {
-  <option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
+	<option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > 
+		<span style="padding-left:<%20*($option->{id}-1)%> px;"><img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png" />
+		<&|/l,  $option->{'text'} &>[_1]</&> </span>
+	</option>
 % }
 </select>
 
@@ -176,26 +179,9 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 
 jQuery(function ($) {
   $(document).ready(function() {
-
-	var folderdata = <%$options |n%>;
-%# print Encode::decode_utf8( $options );
-
-	function formatResult(node) {
-	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
-	  return $result;
-	};
-
 	$('.selectnode').select2({
 	  placeholder: '<&|/l&>Select an option</&>',
 	  width: "230px",
-	  data: folderdata,
-	  formatSelection: function(item) {
-		return item.text
-	  },
-	  formatResult: function(item) {
-		return item.text
-	  },
-	  templateResult: formatResult,
 	  dropdownCssClass : 'bigdrop',
 	  dropdownAutoWidth : true
 	});
@@ -270,26 +256,6 @@ jQuery(".text-hover-image").mousemove(function (e) {
 			.css("left", (e.pageX + xOff) + "px");
 });
 	
-
-/*
-jQuery(".text-hover-image").hover(function (e) {
-		jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
-		jQuery("#image-when-hovering-text")
-			.css("position", "absolute")
-			.css("top", (e.pageY - yOff) + "px")
-			.css("left", (e.pageX + xOff) + "px")
-			.fadeIn("fast");
-},
-function () {
-		
-});
-
-
-*/
-
-
-
-
 </script>
 
 <%INIT>
@@ -313,7 +279,8 @@ $Attachments ||= $Ticket->Attachments;
 
 my @json = LoadListFromTransaction( LoadQFCConfig( $id ) ); ## @{decode_json( $options )};
 
-my $options =  to_json \@json, { pretty => 1};  ##'['. LoadListFromTransaction( LoadQFCConfig( $id ) ) .']' ;
+my $options =  to_json( \@json, { pretty => 1} );
+
 ## RT::Logger->info("json = $options");
 
 
@@ -430,8 +397,8 @@ sub LoadListFromTransaction {
 		my ($level, $id, $node, $libID) = split ';', $line;
 		my $lib = LoadLibFromTransaction( $libID );
 		push ( @_json, { id=>$id, text=>$node, level=>$level, lib=>$lib } ); 
-		$node = Encode::encode_utf8( $node );
-		##$json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\", \"lib\": \"$lib\" },";
+		## $node = Encode::encode_utf8( $node );
+		## $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\", \"lib\": \"$lib\" },";
 	}
 	##chop($json_text);
 	## RT::Logger->info( "kalap:  ". to_json(\@_json) );
