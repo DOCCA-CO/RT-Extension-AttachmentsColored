@@ -180,7 +180,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 jQuery(function ($) {
   $(document).ready(function() {
 
-	var folderdata = <% $options |n%>;
+	var folderdata = <% to_json( \@json, { pretty => 1} ) |n%>;
 	function formatResult(node) {
 	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
 	  return $result;
@@ -292,9 +292,7 @@ if (!$id) { $id = $Ticket->Id; }
 
 $Attachments ||= $Ticket->Attachments;
 
-my @json = LoadListFromTransaction( LoadQFCConfig( $id ) ); ## @{decode_json( $options )};
-
-my $options =  to_json( \@json, { pretty => 1} );
+my @json = LoadListFromTransaction( LoadQFCConfig( $id ) ); 
 
 ## RT::Logger->info("json = $options");
 
