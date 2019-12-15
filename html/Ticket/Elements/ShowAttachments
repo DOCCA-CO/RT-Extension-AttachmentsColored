@@ -147,10 +147,10 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 <!-- options -->
 <option></option>
 % foreach my $option (@json) {
-	<option value='<%$option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > 
-		<span style="padding-left:<%20*($option->{id}-1)%> px;"><img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png" />
-		<&|/l,  $option->{'text'} &>[_1]</&> </span>
-	</option>
+<!-- kalap <% ref($option) %> -->
+% if ( ref( $option ) eq 'HASH' ) {
+  <option value='<% $option->{id}%>' <% $option->{id}==$rev->{'node'}?'selected':'' %> > <&|/l,  $option->{'text'} &>[_1]</&> </option>
+% }
 % }
 </select>
 
@@ -179,9 +179,24 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 
 jQuery(function ($) {
   $(document).ready(function() {
+
+	var folderdata = <%$options . ';' |n%>;
+	function formatResult(node) {
+	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
+	  return $result;
+	};
+
 	$('.selectnode').select2({
 	  placeholder: '<&|/l&>Select an option</&>',
 	  width: "230px",
+	  data: folderdata,
+	  formatSelection: function(item) {
+		return item.text
+	  },
+	  formatResult: function(item) {
+		return item.text
+	  },
+	  templateResult: formatResult,
 	  dropdownCssClass : 'bigdrop',
 	  dropdownAutoWidth : true
 	});
