@@ -180,7 +180,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 jQuery(function ($) {
   $(document).ready(function() {
 
-	var folderdata = <%$options . ';' |n%>;
+	var folderdata = <% $options |n%>;
 	function formatResult(node) {
 	  var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
 	  return $result;
