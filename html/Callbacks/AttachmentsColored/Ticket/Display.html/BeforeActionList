@@ -1,22 +1,22 @@
 <%init>
 if($Ticket && $Ticket->id && $Ticket->CurrentUserHasRight('ModifyTicket'))  {
-  if($Action eq 'AttachmentCategory' && $AttId && ($AttCat || $AttCat eq '0'))  {
-    my $Att = RT::Attachment->new($session{'CurrentUser'});
-    $Att->Load($AttId);
-    if($Att && $Att->id)  {
-      if($AttCat eq 'X')  {
-        $Att->DeleteAttribute('Category');
-      } else  {
-        $Att->SetAttribute(Name => 'Category', Content => $AttCat);
-      }
-    }
-  } elsif($Action eq 'AttachmentOrder')  {
-    if($AttOrd =~ /^(filename|category|user|size|node|comment)$/)  {
-      $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-AttachmentOrder', Content => $AttOrd);
-    } else  {
-      $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder');
-    }
-  }
+	if($Action eq 'AttachmentCategory' && $AttId && ($AttCat || $AttCat eq '0'))  {
+		my $Att = RT::Attachment->new($session{'CurrentUser'});
+		$Att->Load($AttId);
+		if($Att && $Att->id)  {
+			if($AttCat eq 'X')  {
+				$Att->DeleteAttribute('Category');
+			} else  {
+				$Att->SetAttribute(Name => 'Category', Content => $AttCat);
+			}
+		}
+	} elsif($Action eq 'AttachmentOrder')  {
+		if($AttOrd =~ /^(filename|category|user|size|node|comment)$/)  {
+			$Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-AttachmentOrder', Content => $AttOrd);
+		} else  {
+			$Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder');
+		}
+	}
 }
 </%init>
 
