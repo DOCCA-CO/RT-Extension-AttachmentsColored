@@ -174,7 +174,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 
 <script type="text/javascript">
 % $m->out("// kalap\n");
-% print 'var folderdata = ' . encode_json( \@json ) . ';';
+% print 'var folderdata = ' . to_json( \@json ) . ';';
 
 
 
