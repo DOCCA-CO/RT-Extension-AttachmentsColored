@@ -1,2 +1,5 @@
-<!-- AttachmentColored/Footer/Default here -->
+<!-- AttachmentColored/Footer/Default begin -->
 
+<script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js?v=<%rand(100)%>" type="text/javascript"></script>
+
+<!-- AttachmentColored/Footer/Default end -->

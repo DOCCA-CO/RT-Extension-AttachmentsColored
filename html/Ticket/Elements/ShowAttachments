@@ -174,10 +174,8 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 
 <script type="text/javascript">
 % $m->out("// kalap\n");
-% print 'var folderdata = ' . to_json( \@json ) . ';';
-
-
-
+% if ( ref( \@json ) eq 'ARRAY' ) { print 'var folderdata = ' . to_json( \@json ) . ';' } else {print 'var folderdata;';}
+%# print 'var folderdata = ' . to_json( \@json ) . ';';
 
 % for (my $i = 0; $i < $commentId; $i++){
 	jQuery("#commenttd-<%$i%>").click(function(){
