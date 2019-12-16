@@ -152,6 +152,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 % }
 % }
 </select>
+<span style="font-">&nbsp;X&nbsp;</span>
 </td>
 %  $m->out('<td id="commenttd-'.$commentId.'" align="center" style="'. $rev->{'style'}. ' width:250px;cursor:pointer;">');
 <div id="comment-<%$commentId%>">
@@ -171,8 +172,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 </div>
 % }
 
-<script src="<%$RT::WebPath%>/NoAuth/js/jquery-1.11.3.min.js" type="text/javascript"></script>
-<script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js" type="text/javascript"></script>
+
 
 <script type="text/javascript">
 
@@ -186,7 +186,7 @@ jQuery(function ($) {
 	  return $result;
 	};
 
-	$('.selectnode').select2({
+	$('select').select2({
 	  placeholder: '<&|/l&>Select an option</&>',
 	  width: "230px",
 	  data: folderdata,
@@ -273,6 +273,8 @@ jQuery(".text-hover-image").mousemove(function (e) {
 });
 	
 </script>
+
+<script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js" type="text/javascript"></script>
 
 <%INIT>
 use strict;
