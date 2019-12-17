@@ -25,4 +25,17 @@ if ($request_path =~ m{^(/Ticket/Display.html)}) {
     }
 }
 
+if ($request_path =~ m{^(/Search/AttachmentFolder.html)}) {
+    my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+    $Ticket->Load($id);
+    if($Ticket && $Ticket->Id){
+        my $cloud = PageMenu(); ##->child('actions');
+
+        $cloud->child( attachmentfolder =>
+            path => "/Ticket/Display.html"."?".$query_string->(id => $id),
+            title => loc('Display')
+        );
+    }
+}
+
 </%INIT>

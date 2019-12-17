@@ -174,8 +174,9 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 
 <script type="text/javascript">
 % $m->out("// kalap\n");
-% if ( ref( \@json ) eq 'ARRAY' ) { print 'var folderdata = ' . to_json( \@json ) . ';' } else {print 'var folderdata;';}
+%# if ( ref( \@json ) eq 'ARRAY' ) { print 'var folderdata = ' . $str_json . ';' } else {print 'var folderdata;';}
 %# print 'var folderdata = ' . to_json( \@json ) . ';';
+<% "var folderdata = " . to_json( \@json ) . ";" | n %>
 
 % for (my $i = 0; $i < $commentId; $i++){
 	jQuery("#commenttd-<%$i%>").click(function(){
@@ -259,11 +260,10 @@ jQuery(function ($) {
 
 </script>
 
-<script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js?v=<%rand(100)%>" type="text/javascript"></script>
+<script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js?v=<%rand(100)%>" type="text/javascript" defer></script>
 
 <%INIT>
-use strict;
-use warnings;
+
 use utf8;
 use JSON;
 use Encode;
@@ -285,6 +285,9 @@ my @json = LoadListFromTransaction( LoadQFCConfig( $id ) );
 my @folders = @json;
 
 ## RT::Logger->info("json = $options");
+
+my $str_json = to_json( \@json );
+$str_json =~ s/\\/\//g ;
 
 
 # Avoid applying limits to this collection that may be used elsewhere

@@ -271,6 +271,7 @@ sub LoadTicketsWithAttachments {
 				} else {
 					$row{ 'file' } = "<a href='$path' target='_blank'>$Att</a>";
 				}
+				$row{ 'file' } .= '<br /><span style="font-style: oblique; font-color: #EEE">' . $Attachment->FirstAttribute('Comment')->Content . '</span>' if ($Attachment->FirstAttribute('Comment'));
 				$row{ 'date' } = $Attachment->CreatedAsString;
 				$row{ 'user' } = $Attachment->CreatorObj->Name;
 				my $filesize = $Attachment->ContentLength;
