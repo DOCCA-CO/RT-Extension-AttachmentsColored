@@ -426,7 +426,7 @@ sub LoadLibFromTransaction {
 		my $message =  $Ticket->FirstCustomFieldValue('TextJegyzet');
 		if ( $message ) {
 			$message =~ s/\R/&#013;/g;
-			return  Encode::_encode_utf8( $message );
+			return  Encode::encode_utf8( $message );
 ##			return "Jegyzet";
 		} else {
 			return "Jegyzet";
