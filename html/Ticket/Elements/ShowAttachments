@@ -176,7 +176,7 @@ $m->out('<td valign="middle" align="center" style="'. $rev->{'style'}. '" class=
 % $m->out("// kalap\n");
 %# if ( ref( \@json ) eq 'ARRAY' ) { print 'var folderdata = ' . $str_json . ';' } else {print 'var folderdata;';}
 %# print 'var folderdata = ' . to_json( \@json ) . ';';
-<% "var folderdata = " . to_json( \@json ) . ";" | n %>
+<% "var folderdata = " . $str_json . ";" | n %>
 
 % for (my $i = 0; $i < $commentId; $i++){
 	jQuery("#commenttd-<%$i%>").click(function(){
@@ -228,14 +228,11 @@ jQuery(".text-hover-image").mousemove(function (e) {
 			.css("top", (e.pageY - yOff) + "px")
 			.css("left", (e.pageX + xOff) + "px");
 });
-	
-</script>
 
-<script type="text/javascript">
 
 jQuery(function ($) {
 	$(document).ready(function() {
-
+		console.log('select2 init');
 		function formatResult(node) {
 			var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
 			return $result;
@@ -255,12 +252,11 @@ jQuery(function ($) {
 			dropdownCssClass : 'bigdrop',
 			dropdownAutoWidth : true
 		});
+		console.log('select2 done');
 	})
 });
 
 </script>
-
-<script src="<%$RT::WebPath%>/NoAuth/js/select2.full.min.js?v=<%rand(100)%>" type="text/javascript" defer></script>
 
 <%INIT>
 
@@ -281,12 +277,12 @@ if (!$id) { $id = $Ticket->Id; }
 
 $Attachments ||= $Ticket->Attachments;
 
-my @json = LoadListFromTransaction( LoadQFCConfig( $id ) ); 
-my @folders = @json;
+my $json = LoadListFromTransaction( LoadQFCConfig( $id ) ); 
+my @folders = @{$json} if(ref($json) eq 'ARRAY') ;
 
 ## RT::Logger->info("json = $options");
 
-my $str_json = to_json( \@json );
+my $str_json = to_json( \@folders );
 $str_json =~ s/\\/\//g ;
 
 
@@ -403,12 +399,10 @@ sub LoadListFromTransaction {
 		my ($level, $id, $node, $libID) = split ';', $line;
 		my $lib = LoadLibFromTransaction( $libID );
 		push ( @_json, { id=>$id, text=>$node, level=>$level, lib=>$lib } ); 
-		## $node = Encode::encode_utf8( $node );
-		## $json_text .= "{ \"id\": \"$id\", \"text\": \"$node\", \"level\": \"$level\", \"lib\": \"$lib\" },";
 	}
 	##chop($json_text);
 	## RT::Logger->info( "kalap:  ". to_json(\@_json) );
-	return @_json;
+	return \@_json;
 	} else {
 		return undef;
 	}
@@ -437,6 +431,8 @@ sub LoadLibFromTransaction {
 }
 
 </%INIT>
+
+
 
 <%ARGS>
 $Ticket => undef
