@@ -13,7 +13,7 @@ div.AttachmentsColoredOrder {
 /* The container */
 .container {
 	display: inline-block;
-	position: absolute;
+	position: relative;
 	padding-left: 3px;
 	margin-bottom: 20px;
 	cursor: pointer;
