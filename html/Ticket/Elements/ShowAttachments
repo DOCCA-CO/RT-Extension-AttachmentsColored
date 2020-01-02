@@ -176,7 +176,7 @@
 		                columns: [
 		                    { "data":"category",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									var rgroup = "<div style='width: 150px !important;'>";
+									var rgroup = "";
 									for (var key in colors) {
 										rgroup += "<label class='container'>";
 										rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
@@ -188,7 +188,7 @@
 									}
 									//&#x2612;
 									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:27px; height:21px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; padding-top:5px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
-									rgroup += "</div>";
+									rgroup += "";
 									$(nTd).html( rgroup );
 								}
 		                    },
