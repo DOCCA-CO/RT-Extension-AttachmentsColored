@@ -109,6 +109,12 @@ sub LoadTicketAttachments{
 		my $trid = $attach->TransactionId;
 		my $attid = $attach->Id;
 		my $filename = '';
+		my $date_unix = $attach->CreatedObj->Unix;
+		my $date = $attach->CreatedAsString;
+		my $creator = $attach->CreatorObj->Name;
+		my $comment = ($attach->FirstAttribute('Comment')?$attach->FirstAttribute('Comment')->Content:'');
+		my $content = $attach->Content if ($attach->ContentType eq 'text/uri-list');
+
 		if ($attach->ContentType eq 'text/uri-list') {
 			if ( index( lc( $attach->Content ), 'dropbox' ) > 0) {
 				$icon = '<i class="cloudicons8-16-dropdox"></i>' ;
@@ -121,15 +127,21 @@ sub LoadTicketAttachments{
 			} else {
 				$icon = '<i class="cloudicons8-16-cloud"></i>';
 			};
-			$filename = sprintf("<a href='%s' target='_blank'>%s %s</a>", $attach->Content, $icon, $attach->Filename);
+			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
+			$filename = '<span class="dropdown">' if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<a href='%s' target='_blank'>%s %s</a>", $attach->Content, $icon, $attach->Filename);
+			$filename .= '<div class="dropdown-content">' if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 160 ) if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= '</span>' if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
 		} else {
-			$filename = sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' target='_blank'>%s</a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
+			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
+			$filename = '<span class="dropdown">' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' target='_blank'>%s</a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
+			$filename .= '<div class="dropdown-content">' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;'>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $comment, 160 ) if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= '</span>' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+
 		}
-		my $date_unix = $attach->CreatedObj->Unix;
-		my $date = $attach->CreatedAsString;
-		my $creator = $attach->CreatorObj->Name;
-		my $comment = ($attach->FirstAttribute('Comment')?$attach->FirstAttribute('Comment')->Content:'');
-		my $content = $attach->Content if ($attach->ContentType eq 'text/uri-list');
 		push ( @_json, { category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
 	}
 	return @_json;

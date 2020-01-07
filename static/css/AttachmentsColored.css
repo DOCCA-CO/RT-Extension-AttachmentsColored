@@ -36,8 +36,8 @@ div.AttachmentsColoredOrder {
 	position: absolute;
 	top: 0;
 	left: 0;
-	height: 25px;
-	width: 25px;
+	height: 20px;
+	width: 20px;
 /*  background-color: #eee;*/
 	border-radius: 50%;
 	border: 1px solid;
@@ -67,14 +67,42 @@ div.AttachmentsColoredOrder {
 
 /* Style the indicator (dot/circle) */
 .container .checkmark:after {
-	top: 9px;
-	left: 9px;
-	width: 8px;
-	height: 8px;
+	top: 7px;
+	left: 7px;
+	width: 6px;
+	height: 6px;
 	border-radius: 50%;
 	background: white;
 }
 
 .hiddenrow {
 	display: none;
+}
+
+.sorting_1, .sorting_2, .sorting_3 {
+	filter: alpha(opacity=70);
+	opacity:0.7;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.desc {
+  padding: 15px;
+  text-align: center;
 }

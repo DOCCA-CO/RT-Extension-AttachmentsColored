@@ -37,7 +37,7 @@ msgid "comment"
 msgstr "Leírás"
 
 #: NOT FOUND IN SOURCE
-msgid "node"
+msgid "Node"
 msgstr "Mappa"
 
 #: NOT FOUND IN SOURCE

@@ -56,25 +56,25 @@
 <table id="attachments" class="display nowrap" width="100%">
 	<thead>
 		<tr>
-			<th><&|/l&>category</&></th>
-			<th><&|/l&>filename</&></th>
-			<th><&|/l&>date</&></th>
-			<th><&|/l&>user</&></th>
-			<th><&|/l&>size</&></th>
-			<th><&|/l&>node</&></th>
-			<th><&|/l&>comment</&></th>
+			<th><&|/l&>Category</&></th>
+			<th><&|/l&>Filename</&></th>
+			<th><&|/l&>Date</&></th>
+			<th><&|/l&>User</&></th>
+			<th><&|/l&>Size</&></th>
+			<th><&|/l&>Node</&></th>
+			<th><&|/l&>Comment</&></th>
 		</tr>
 	</thead>
 
 	<tfoot>
 		<tr>
-			<th><&|/l&>category</&></th>
-			<th><&|/l&>filename</&></th>
-			<th><&|/l&>date</&></th>
-			<th><&|/l&>user</&></th>
-			<th><&|/l&>size</&></th>
-			<th><&|/l&>node</&></th>
-			<th><&|/l&>comment</&></th>
+			<th><&|/l&>Category</&></th>
+			<th><&|/l&>Filename</&></th>
+			<th><&|/l&>Date</&></th>
+			<th><&|/l&>User</&></th>
+			<th><&|/l&>Size</&></th>
+			<th><&|/l&>Node</&></th>
+			<th><&|/l&>Comment</&></th>
 		</tr>
 	</tfoot>
 
@@ -143,10 +143,13 @@
 								}
 							}
 						},
+						pageLength: 100,
+						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
 						dom: 'Bl<"toolbar">frtip',
 						initComplete: function() {
 							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;"><&|/l&>Show hidden files</&></label>');
-							$("div.toolbar").css( 'padding-top', '5px' );
+							$("div.toolbar").css( 'margin-top', '3px' );
+							$("div.toolbar").css( 'display', 'inline-block' );
 						},
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
@@ -187,7 +190,7 @@
 										// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
 									}
 									//&#x2612;
-									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:27px; height:21px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; padding-top:5px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
+									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
 									rgroup += "";
 									$(nTd).html( rgroup );
 								}
@@ -204,7 +207,7 @@
 							},
 		                    { "data":"comment",
 		                    	"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<input id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' readonly>&nbsp;<img style='cursor:pointer;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
+									$(nTd).html( "<input style='border-style:none; padding: 5px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp;<img style='cursor:pointer; padding-left: 5px;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
 								}
 		                    }
 		                ],
@@ -228,7 +231,9 @@
 		//dt.cell({row:row, column:0}).data(value);
 		jQuery(dt.row(row).node()).css( 'background-color', colors[value] );
 		if (value == 'hidden') {
-			jQuery(dt.row(row).node()).hide();
+			if (!jQuery("#showhide").is(":checked")) {
+				jQuery(dt.row(row).node()).hide();	
+			}
 		};
 		jQuery.ajax({
 			type: 'POST',
@@ -276,7 +281,7 @@
 					jQuery(dt.row(index).node()).show();
 				}
 			} else {
-				if (dt.cell(index, 0).data() == 'hidden') {
+				if (jQuery( dt.row(index).node() ).find("input[name^='rad']:checked").val() == 'hidden') {
 					jQuery(dt.row(index).node()).hide();
 				}
 			}
@@ -284,11 +289,11 @@
 	}
 
 	function editComment( editID ) {
-		jQuery( "#"+editID ).prop( "readonly", false ).focus();
+		jQuery( "#"+editID ).prop( "disabled", false ).focus();
 	}
 
 	function saveComment ( editID, editVal ) {
-		jQuery( "#"+editID ).prop( "readonly", true );
+		jQuery( "#"+editID ).prop( "disabled", true );
 		jQuery.ajax({
 			type: 'POST',
 			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyComment',
