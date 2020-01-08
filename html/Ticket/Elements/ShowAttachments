@@ -152,6 +152,8 @@
 							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;"><&|/l&>Show hidden files</&></label>');
 							//$("div.toolbar").css( 'margin-top', '3px' );
 							$("div.toolbar").css( 'display', 'inline-block' );
+							//$("div.toolbar").css( 'line-height', '25px' );
+							$("div.toolbar").css( 'text-align', 'center' );
 						},
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
