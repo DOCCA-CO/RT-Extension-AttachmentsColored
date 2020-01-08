@@ -146,7 +146,7 @@ sub LoadTicketAttachments{
 			$filename .= '</span>' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
 
 		}
-		push ( @_json, { category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
+		push ( @_json, { category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
 	}
 	return @_json;
 }

@@ -82,6 +82,8 @@
 
 
 <script src="<%$RT::WebPath%>/NoAuth/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="<%$RT::WebPath%>/NoAuth/js/file-size.js" type="text/javascript"></script>
+<!-- <script src="<%$RT::WebPath%>/NoAuth/js/datetime-moment.js" type="text/javascript"></script> -->
 <script src="<%RT->Config->Get('WebPath')%>/NoAuth/js/dataTables.responsive.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -144,11 +146,11 @@
 							}
 						},
 						pageLength: 100,
-						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
 						dom: 'Bl<"toolbar">frtip',
 						initComplete: function() {
 							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;"><&|/l&>Show hidden files</&></label>');
-							$("div.toolbar").css( 'margin-top', '3px' );
+							//$("div.toolbar").css( 'margin-top', '3px' );
 							$("div.toolbar").css( 'display', 'inline-block' );
 						},
 						data: data.attachments,
@@ -196,7 +198,11 @@
 								}
 		                    },
 		                    { "data":"filename" },
-		                    { "data":"date" },
+		                    { "data":"date_unix",
+								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+									$(nTd).text( oData.date );
+								}
+	                    	},
 
 		                    { "data":"creator" },
 		                    { "data":"size" },
@@ -211,6 +217,9 @@
 								}
 		                    }
 		                ],
+						columnDefs: [
+							{ type: 'file-size', targets: 4 }
+						],
 		                order: [ 2, 'asc' ],
 					});
 				}
