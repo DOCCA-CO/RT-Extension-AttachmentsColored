@@ -62,7 +62,7 @@
 			<th><&|/l&>User</&></th>
 			<th><&|/l&>Size</&></th>
 			<th><&|/l&>Node</&></th>
-			<th><&|/l&>Comment</&></th>
+			<th><&|/l&>comment</&></th>
 		</tr>
 	</thead>
 
@@ -74,7 +74,7 @@
 			<th><&|/l&>User</&></th>
 			<th><&|/l&>Size</&></th>
 			<th><&|/l&>Node</&></th>
-			<th><&|/l&>Comment</&></th>
+			<th><&|/l&>comment</&></th>
 		</tr>
 	</tfoot>
 

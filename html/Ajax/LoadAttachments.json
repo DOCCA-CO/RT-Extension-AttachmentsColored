@@ -102,7 +102,7 @@ sub LoadTicketAttachments{
 	);
 	while ( my $attach = $Attachments->Next() ) {
 		next unless ($attach->Filename);
-		next if ($attach->Filename =~ /_rr\.(jpg|jpeg|png)/i);
+		next if (lc($attach->Filename) =~ /_rr\.(jpg|jpeg|png)/i);
 		my $catt = ($attach->FirstAttribute('Category')?$attach->FirstAttribute('Category')->Content:'X');
 		my $node = ($attach->FirstAttribute('Folder')?$attach->FirstAttribute('Folder')->Content:'');
 		my $size = $attach->FriendlyContentLength;
@@ -128,22 +128,22 @@ sub LoadTicketAttachments{
 				$icon = '<i class="cloudicons8-16-cloud"></i>';
 			};
 			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
-			$filename = '<span class="dropdown">' if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<a href='%s' target='_blank'>%s %s</a>", $attach->Content, $icon, $attach->Filename);
-			$filename .= '<div class="dropdown-content">' if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 160 ) if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ );
-			$filename .= '</div>' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ );
-			$filename .= '</span>' if ($content =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename = '<span class="dropdown">' if (lc($content) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<a href='%s' target='_blank'><span style='display:block; white-space: normal;'>%s %s</span></a>", $attach->Content, $icon, $attach->Filename);
+			$filename .= '<div class="dropdown-content">' if (lc($content) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 160 ) if (lc($content) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if (lc($content) =~ /\.(png|jpg|jpeg|gif|bmp)$/ );
+			$filename .= '</div>' if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ );
+			$filename .= '</span>' if (lc($content) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
 		} else {
 			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
-			$filename = '<span class="dropdown">' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' target='_blank'>%s</a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
-			$filename .= '<div class="dropdown-content">' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;'>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $comment, 160 ) if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ );
-			$filename .= '</div>' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= '</span>' if ($attach->Filename =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename = '<span class="dropdown">' if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' target='_blank'><span style='display:block; white-space: normal;'>%s</span></a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
+			$filename .= '<div class="dropdown-content">' if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;'>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $comment, 160 ) if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ );
+			$filename .= '</div>' if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
+			$filename .= '</span>' if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
 
 		}
 		push ( @_json, { category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
