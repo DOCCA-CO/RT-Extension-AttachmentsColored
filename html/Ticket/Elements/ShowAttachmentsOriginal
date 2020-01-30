@@ -57,7 +57,8 @@
 % next if($key =~ /_rr\.(jpg|png|jpeg)/i);
 <tr><td>
 %# <%$key%><br />
-<%$key%>
+% my ($kiterjesztes) = $key =~ /\.([^\.]+)$/;
+<%length($key) > 35?(substr $key, 0, 30)."...".($kiterjesztes?$kiterjesztes:""): $key%>
 </td><td>
 <ul <% $Selectable ? 'class="selectable"' : '' |n %> >
 % foreach my $rev (@{$documents{$key}}) {
