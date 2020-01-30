@@ -316,6 +316,22 @@
 		});
 	}
 
+	function copyClipboard( aID ) {
+	/* Get the text field */
+		var copyText = document.getElementById(aID).getAttribute("href").replace('file:','');
+		/* Select the text field */
+		document.addEventListener('copy', function(e) {
+			e.clipboardData.setData('text/plain', copyText);
+			e.preventDefault();
+		}, true);
+
+		/* Copy the text inside the text field */
+		document.execCommand("copy");
+
+		/* Alert the copied text */
+		alert("Copied the text: " + copyText);
+	}
+
 </script>
 
 </&>
