@@ -179,7 +179,7 @@
 							};
 							if ( (data['category'] == "hidden" ) && ( $('#showhide').val() != '1') ) {
 								$(row).hide();
-							}
+							};
 						},
 		                columns: [
 		                    { "data":"category",
@@ -195,8 +195,11 @@
 										// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
 									}
 									//&#x2612;
+									rgroup += "<label style='display: inline-block;	position: relative; margin-bottom: 20px;'>";
 									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
+									rgroup += "</label>";
 									rgroup += "";
+									$(nTd).css( 'width', '180px' );
 									$(nTd).html( rgroup );
 								}
 		                    },
@@ -211,12 +214,12 @@
 		                    { "data":"size" },
 		                    { "data":"node" ,
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<select class='selectnode' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option></select>" );
+									$(nTd).html( "<select class='selectnode' style='width:200px;' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option></select>" );
 								}
 							},
 		                    { "data":"comment",
 		                    	"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<input style='border-style:none; padding: 5px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp;<img style='cursor:pointer; padding-left: 5px;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
+									$(nTd).html( "<input style='border-style:none; padding: 5px; width: 150px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp;<img style='cursor:pointer; padding-left: 5px;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
 								}
 		                    }
 		                ],
@@ -318,7 +321,7 @@
 
 	function copyClipboard( aID ) {
 	/* Get the text field */
-		var copyText = document.getElementById(aID).getAttribute("href").replace('file:','');
+		var copyText = document.getElementById(aID).getAttribute("href").replace('file:////','');
 		/* Select the text field */
 		document.addEventListener('copy', function(e) {
 			e.clipboardData.setData('text/plain', copyText);

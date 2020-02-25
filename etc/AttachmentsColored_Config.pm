@@ -6,8 +6,6 @@ Set(%AttachmentCategories, (
 	'hidden' => '#DCDCDC'
 ));
 
-Set($HideEmbeddedImages, 1);
-
 Set($ConfigTicketID, 2);
 
 Set($DefaultFolderStructureTicketID, 2);

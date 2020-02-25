@@ -129,7 +129,7 @@ sub LoadTicketAttachments{
 			};
 			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
 			$filename = '<span class="dropdown">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<a href='%s' id='att-$attid' style='display:inline-block;' target='_blank'><span style='display:block; white-space: normal;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $icon, $attach->Filename);
+			$filename .= sprintf("<a href='%s' id='att-$attid'  target='_blank'><span style='display:block; white-space: normal; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $icon, $attach->Filename);
 			$filename .= '<div class="dropdown-content">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 160 ) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
@@ -139,7 +139,7 @@ sub LoadTicketAttachments{
 		} else {
 			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
 			$filename = '<span class="dropdown">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' target='_blank'><span style='display:block; white-space: normal;'>%s</span></a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
+			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s'  target='_blank'><span style='display:block; white-space: normal; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s</span></a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
 
 			$filename .= '<div class="dropdown-content">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;'>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $comment, 160 ) if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
