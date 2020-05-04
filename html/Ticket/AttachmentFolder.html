@@ -285,7 +285,7 @@ sub LoadTicketsWithAttachments {
 						$row{ 'nodenm' } = " - ";
 					}
 				};
-				$row{ 'cat' } = "<div style='width:15px; height:15px; $colormap{$Category}'></div>"; ##   $Category;
+				$row{ 'cat' } = "<div style='width:15px; height:15px; background-color: $colormap{$Category}'></div>"; ##   $Category;
 				$row{ 'rem' } = $Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'';
 				$row{ 'queue' } = $T->QueueObj->Name;
 				my $link = RT->Config->Get('WebPath') . '/Ticket/Display.html?id=' . $T->id;

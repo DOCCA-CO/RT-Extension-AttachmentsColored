@@ -5,24 +5,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit"
 
 #: NOT FOUND IN SOURCE
-msgid "[category]"
-msgstr "[Kategória]"
+msgid "category"
+msgstr "Kategória"
 
 #: NOT FOUND IN SOURCE
-msgid "[default]"
-msgstr "[Dátum]"
+msgid "date"
+msgstr "Dátum"
 
 #: NOT FOUND IN SOURCE
-msgid "[filename]"
-msgstr "[Fájlnév ABC]"
+msgid "filename"
+msgstr "Fájlnév ABC"
 
 #: NOT FOUND IN SOURCE
-msgid "[size]"
-msgstr "[Fájlméret]"
+msgid "size"
+msgstr "Fájlméret"
 
 #: NOT FOUND IN SOURCE
-msgid "[user]"
-msgstr "[Feltöltő személy ABC]"
+msgid "user"
+msgstr "Feltöltő személy ABC"
 
 #: NOT FOUND IN SOURCE
 msgid "Show hidden files"
@@ -33,12 +33,12 @@ msgid "Hide hidden files"
 msgstr "Rejtett fájlok elrejtése"
 
 #: NOT FOUND IN SOURCE
-msgid "[comment]"
-msgstr "[Leírás]"
+msgid "comment"
+msgstr "Leírás"
 
 #: NOT FOUND IN SOURCE
-msgid "[node]"
-msgstr "[Mappa]"
+msgid "Node"
+msgstr "Mappa"
 
 #: NOT FOUND IN SOURCE
 msgid "hidden"

@@ -1,0 +1,156 @@
+<%INIT>
+
+use utf8;
+use JSON;
+use Encode;
+
+my (@folder, @att);
+
+return unless ($ARGS{'ticketId'});
+
+$r->content_type('application/json');
+
+my $ticketId = $ARGS{'ticketId'};
+my $Ticket = RT::Ticket->new( RT::SystemUser );
+$Ticket->Load( $ticketId );
+my $Queue = $Ticket->QueueObj;
+
+my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if $Queue->FirstCustomFieldValue('Q-FolderStruktura');
+
+unless ($ConfigTikcetSubject) {
+	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
+	my $FolderStructureTicket = RT::Ticket->new( RT::SystemUser );
+	##RT::Logger->info("ShowAttachments __id = $__id");
+	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
+	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
+}
+
+my %colormap = RT->Config->Get('AttachmentCategories');
+my $Tickets = RT::Tickets->new( RT::SystemUser );
+my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
+RT::Logger->info("LoadNodes.json = $SQL");
+$Tickets->FromSQL( $SQL ) ;
+my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
+
+unless ($First) {
+	RT::Logger->info("LoadNodes.json: No Config");
+	$m->abort();
+} else {
+	@folder = LoadListFromTransaction($First);
+	@att = LoadTicketAttachments($Ticket->Attachments);
+	my $json_text = to_json({folders=>\@folder, attachments=>\@att}, {utf8 => 1, pretty => 1});
+	$m->print($json_text);
+	$m->abort();
+}
+
+sub LoadListFromTransaction {
+	my $ticketID = shift;
+
+	my $Ticket = RT::Ticket->new( RT::SystemUser );
+	$Ticket->Load($ticketID);
+
+	if($Ticket && $Ticket->Id){
+##
+#  Loaded ticket last comment => editor
+##
+		my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+		my @csv_lines = split /^/m, $message;
+		my $json_text = '';
+		my @_json = ();
+		foreach my $line (@csv_lines) {
+			chomp($line);
+			my ($level, $id, $node, $libID) = split ';', $line;
+			my $lib = LoadLibFromTransaction( $libID );
+			push ( @_json, { id=>$id, text=>$node, level=>$level, lib=>$lib } ); 
+		}
+		return @_json;
+	} else {
+		return undef;
+	}
+}
+
+sub LoadLibFromTransaction {
+	my $ticketID = shift;
+	return "N/A" unless ($ticketID);
+	my $Ticket = RT::Ticket->new( RT::SystemUser );
+	$Ticket->Load($ticketID);
+	if($Ticket && $Ticket->Id){
+##
+#  Loaded ticket CF => editor
+##
+		my $message =  $Ticket->FirstCustomFieldValue('TextJegyzet');
+		if ( $message ) {
+			$message =~ s/\R/&#013;/g;
+			return  Encode::encode_utf8( $message );
+		} else {
+			return "Jegyzet";
+		}
+	} else {
+		return "N/A";
+	}
+}
+
+sub LoadTicketAttachments{
+	my $Attachments = shift;
+	my @_json = ();
+	my $icon;
+
+	$Attachments = $Attachments->Clone;
+	$Attachments->OrderByCols(
+		{ FIELD => 'Created', ORDER => 'DESC' },
+		{ FIELD => 'id',      ORDER => 'DESC' },
+	);
+	while ( my $attach = $Attachments->Next() ) {
+		next unless ($attach->Filename);
+		next if (lc($attach->Filename) =~ /_rr\.(jpg|jpeg|png)/i);
+		my $catt = ($attach->FirstAttribute('Category')?$attach->FirstAttribute('Category')->Content:'X');
+		my $node = ($attach->FirstAttribute('Folder')?$attach->FirstAttribute('Folder')->Content:'');
+		my $size = $attach->FriendlyContentLength;
+		my $trid = $attach->TransactionId;
+		my $attid = $attach->Id;
+		my $filename = '';
+		my $date_unix = $attach->CreatedObj->Unix;
+		my $date = $attach->CreatedAsString;
+		my $creator = $attach->CreatorObj->Name;
+		my $comment = ($attach->FirstAttribute('Comment')?$attach->FirstAttribute('Comment')->Content:'');
+		my $content = $attach->Content if ($attach->ContentType eq 'text/uri-list');
+
+		if ($attach->ContentType eq 'text/uri-list') {
+			if ( index( lc( $attach->Content ), 'dropbox' ) > 0) {
+				$icon = '<i class="cloudicons8-16-dropdox"></i>' ;
+			} elsif ( index( lc( $attach->Content ), 'google' ) > 0 ) {
+				$icon = '<i class="cloudicons8-16-gdrive"></i>';
+			} elsif ( index( lc( $attach->Content ), 'youtu' ) > 0 ) {
+				$icon = '<i class="cloudicons8-youtube-play-16"></i>';
+			} elsif ( index( lc( $attach->Content ), 'soundcloud' ) > 0 ) {
+				$icon = '<i class="cloudicons8-soundcloud-16"></i>';
+			} else {
+				$icon = '<i class="cloudicons8-16-cloud"></i>';
+			};
+			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
+			$filename = '<span class="dropdown">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<a href='%s' id='att-$attid'  target='_blank'><span style='display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $icon, $attach->Filename);
+			$filename .= '<div class="dropdown-content">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 480 ) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
+			$filename .= '</div>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
+			$filename .= '</span>' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<span onclick='copyClipboard(\"att-%s\");'><img style='display:inline-block; float:right;' src='%s/%s' alt='Clip' /></span>",  $attid, RT->Config->Get('WebPath'), 'static/images/clip-24.png') if (index($attach->Content, 'file:')>=0);
+		} else {
+			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
+			$filename = '<span class="dropdown">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s'  target='_blank'><span style='display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s</span></a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
+
+			$filename .= '<div class="dropdown-content">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;'>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $comment, 480 ) if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
+			$filename .= '</div>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= '</span>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+
+		}
+		push ( @_json, { category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
+	}
+	return @_json;
+}
+
+</%INIT>
