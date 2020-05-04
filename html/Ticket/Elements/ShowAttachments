@@ -73,7 +73,8 @@ foreach my $ao ('category', 'filename', 'default', 'user', 'size', 'comment')  {
 $m->out("<tr align=center><td> ".join('</td><td>', @aob)."</td></tr>");
 
 foreach my $rev (@{$AttOrd2})  {
-  next if ( ($rev->{'category'} eq 'hidden') && !$showhidden );
+  next if ($rev->{'filename'} =~ /_rr\.(jpg|jpeg|png)/);
+  next if ( ($rev->{'category'} eq 'hidden' ) && !$showhidden );
 
   $m->out('<tr>'); 
 #  $m->out('<td align="center" style="'. $rev->{'style'}. '">'. $rev->{'category'}. '</td>'); 
@@ -99,8 +100,17 @@ $m->out('<span class="AttCat" style="font-weight:normal;">'.$href.'</span>');
 
 $m->out('</td>'); 
 
+my $rename = $rev->{'filename'};
+my $resize = 0;
+unless($rename =~ /_rr\.(jpg|jpeg|png)/){
+#    $rename =~ s/\./_rr\./;
+    my ($pre, $post) = $rename =~ /(.+)\.([^\.]+)$/;
+    $rename = $pre."_rr.".$post;
+    $resize = 1;
+}
 
-  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+my $filename_ = "https://".RT->Config->Get('WebDomain').(RT->Config->Get('WebPort')?":".RT->Config->Get('WebPort'):"").RT->Config->Get('WebPath')."/Ticket/Attachment/".$tr{$rename}."/".$att{$rename}."/".$rename;
+$m->out('<td align="center" style="'. $rev->{'style'}. '" class="text-hover-image" '.($resize?'onmouseover="resize(event, \''.$filename_.'\');" onmouseout="remuve();"':'').'>'); 
 </%perl>
  <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
 <% $rev->{'filename'} %>
@@ -117,6 +127,9 @@ $m->out('</td>');
 %  $m->out('<td id="commenttd-'.$commentId.'" align="center" style="'. $rev->{'style'}. ' width:250px;cursor:pointer;">');
 <div id="comment-<%$commentId%>">
 <&|/l, $rev->{'comment'} &>[_1]</&>
+<span>
+    <img src="<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png">
+</span>
 </div>
 <div id="modifyComment-<%$commentId%>" style="display:none">
 <input type="hidden" id="attachId-<%$commentId%>" value="<%$rev->{'attachment'}->id%>" >
@@ -141,13 +154,13 @@ $m->out('</td>');
     jQuery("#modifyComment-<%$i%>").focusout(function(){
         jQuery.ajax({
             type: 'POST',
-            url: '<%RT->Config->Get('WebPath')%>/Ticket/Elements/AjaxModifyComment',
+            url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyComment',
             data: {
                 'Value' : jQuery("#valueComment-<%$i%>").val(),
                 'attachId' : jQuery("#attachId-<%$i%>").val()
             },
             success:function(data){
-                jQuery("#comment-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Ticket/Elements/ShowCommentUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
+                jQuery("#comment-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Update/ShowCommentUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
             }
         });
         jQuery("#comment-<%$i%>").show();
@@ -157,31 +170,47 @@ $m->out('</td>');
 
 //document.getElementById("LoadFullHistory").style.display="";
 
-function hidetrail(){
-    document.onmousemove=""
-    document.getElementById('ttimg').src='/img/s.gif'
-    gettrailobj().visibility="hidden"
-    gettrailobj().left=-1000
-    gettrailobj().top=0
+var yOff = 25;
+var xOff = 10;
+var pathToImage; 
+
+function resize(e, fname){
+    pathToImage = fname;
+    jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
+    jQuery("#image-when-hovering-text").css("position", "absolute").css("top", (e.pageY - yOff) + "px")
+            .css("left", (e.pageX + xOff) + "px")
+            .fadeIn("fast");
+//    jQuery(".text-hover-image").css("background-color", "yellow");
+//    document.body.innerHTML = "<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>";
+//    document.getElementById("image-when-hovering-text").style.position = "absolute";
 }
 
-function showtrail(width,height,file){
-    if(navigator.userAgent.toLowerCase().indexOf('opera') == -1){
-	w=width
-	h=height
-	// followmouse()
-	document.getElementById('ttimg').src=file
-	document.onmousemove=followmouse
-	gettrailobj().visibility="visible"
-	gettrailobj().width=w+"px"
-	gettrailobj().height=h+"px"
-    }
+function remuve(){
+    jQuery("#image-when-hovering-text").remove();
 }
 
-function gettrailobj(){
-    if (document.getElementById) return document.getElementById("trailimageid").style
-    else if (document.all) return document.all.trailimagid.style
-}
+jQuery(".text-hover-image").mousemove(function (e) {
+        jQuery("#image-when-hovering-text")
+            .css("top", (e.pageY - yOff) + "px")
+            .css("left", (e.pageX + xOff) + "px");
+});
+    
+
+/*
+jQuery(".text-hover-image").hover(function (e) {
+        jQuery("body").append("<p id='image-when-hovering-text'><img src='" + pathToImage + "'/></p>");
+        jQuery("#image-when-hovering-text")
+            .css("position", "absolute")
+            .css("top", (e.pageY - yOff) + "px")
+            .css("left", (e.pageX + xOff) + "px")
+            .fadeIn("fast");
+},
+function () {
+        
+});
+
+
+*/
 </script>
 
 <%INIT>
@@ -248,6 +277,11 @@ $showhidden = $showhidden->Content if $showhidden;
 
 my $commentId = 0;
 
+my (%att, %tr);
+foreach my $rev (@{$AttOrd2}){
+    $tr{$rev->{'filename'}} = $rev->{'attachment'}->TransactionId;
+    $att{$rev->{'filename'}} = $rev->{'attachment'}->Id;
+}
 </%INIT>
 
 

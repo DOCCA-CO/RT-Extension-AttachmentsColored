@@ -1,0 +1,9 @@
+<%init>
+return unless ($ARGS{'attachId'});
+
+my $Att = RT::Attachment->new($session{'CurrentUser'});
+$Att->Load($ARGS{'attachId'});
+if ($Att && $Att->Id && ($Att->FirstAttribute('Comment') || $ARGS{'Value'})) {
+    $Att->SetAttribute(Name => 'Comment', Content => $ARGS{'Value'});
+}
+</%init>
