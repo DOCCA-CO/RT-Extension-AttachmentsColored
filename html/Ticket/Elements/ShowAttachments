@@ -1,0 +1,262 @@
+%# BEGIN BPS TAGGED BLOCK {{{
+%# 
+%# COPYRIGHT:
+%# 
+%# This software is Copyright (c) 1996-2009 Best Practical Solutions, LLC
+%#                                          <jesse@bestpractical.com>
+%# 
+%# (Except where explicitly superseded by other copyright notices)
+%# 
+%# 
+%# LICENSE:
+%# 
+%# This work is made available to you under the terms of Version 2 of
+%# the GNU General Public License. A copy of that license should have
+%# been provided with this software, but in any event can be snarfed
+%# from www.gnu.org.
+%# 
+%# This work is distributed in the hope that it will be useful, but
+%# WITHOUT ANY WARRANTY; without even the implied warranty of
+%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+%# General Public License for more details.
+%# 
+%# You should have received a copy of the GNU General Public License
+%# along with this program; if not, write to the Free Software
+%# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+%# 02110-1301 or visit their web page on the internet at
+%# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html.
+%# 
+%# 
+%# CONTRIBUTION SUBMISSION POLICY:
+%# 
+%# (The following paragraph is not intended to limit the rights granted
+%# to you to modify and distribute this software under the terms of
+%# the GNU General Public License and is only of importance to you if
+%# you choose to contribute your changes and enhancements to the
+%# community by submitting them to Best Practical Solutions, LLC.)
+%# 
+%# By intentionally submitting any modifications, corrections or
+%# derivatives to this work, or any other work intended for use with
+%# Request Tracker, to Best Practical Solutions, LLC, you confirm that
+%# you are the copyright holder for those contributions and you grant
+%# Best Practical Solutions,  LLC a nonexclusive, worldwide, irrevocable,
+%# royalty-free, perpetual, license to use, copy, create derivative
+%# works based on those contributions, and sublicense and distribute
+%# those contributions and any derivatives thereof.
+%# 
+%# END BPS TAGGED BLOCK }}}
+% if (scalar @{$AttOrd2}) {
+
+<div id="attachtoggle-<% $id %>" class="attachtoggle-<% $id %>">
+
+% my $url1 = RT->Config->Get('WebPath') ."/Helpers/Toggle/AttachmentsColored";
+% my $href1=$url1.'" onclick="toggleAttachmentsColored(\''.$id.'\', \'\', \'\', \'ToggleHidden\', \'\'); return false;';
+% my $changehidden = 'Show hidden files';
+% if ($showhidden) { $changehidden = 'Hide hidden files'; }
+<&| /Widgets/TitleBox, title => loc($changehidden), 
+        title_href => $href1,
+        title_class=> 'inverse',  
+        class => 'ticket-info-attachments',
+        color => "#336699" &>
+ <a name='attbox'></a>
+<table border=0 cellspacing=1 width=100% align=center>
+<%perl>
+my @aob;
+foreach my $ao ('category', 'filename', 'default', 'user', 'size', 'comment')  {
+
+  if($AttachmentOrder eq $ao)  {
+    push @aob, '<b>'. loc('~['. $ao. '~]'). '</b>';
+  } else  {
+    push @aob, '<span onclick="toggleAttachmentsColored(\''.$id.'\', \''.$ao.'\', \'\',\'AttachmentOrder\', \'\'); return false;" style="cursor:pointer;"><div class="AttachmentsColoredOrder">'. loc('~['. $ao. '~]'). '</div></span>';
+  }
+}
+$m->out("<tr align=center><td> ".join('</td><td>', @aob)."</td></tr>");
+
+foreach my $rev (@{$AttOrd2})  {
+  next if ( ($rev->{'category'} eq 'hidden') && !$showhidden );
+
+  $m->out('<tr>'); 
+#  $m->out('<td align="center" style="'. $rev->{'style'}. '">'. $rev->{'category'}. '</td>'); 
+
+
+  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+
+my %colormap = RT->Config->Get('AttachmentCategories');
+
+foreach my $shortcut (sort keys %colormap)  {
+ if($shortcut eq $rev->{'category'})  {
+   $m->out('<span class="AttCatSelected" style="font-weight:bold; '. $colormap{$shortcut}. ';"> '.loc($shortcut).'</span>');
+ } else {
+  my $href='<span align="right" onclick="toggleAttachmentsColored(\''.$id.'\', \'\', \''.$shortcut.'\', \'AttachmentCategory\', \''.$rev->{'attachment'}->id.'\'); return false;" style="cursor:pointer;">'. loc($shortcut). '</span>';
+  $m->out('&nbsp;');
+  $m->out('<span class="AttCat" style="font-weight:normal; '. $colormap{$shortcut}. ';">'.$href.'</span>');
+ }
+}
+
+my $href='<span align="right" onclick="toggleAttachmentsColored(\''.$id.'\', \'\', \'X\', \'AttachmentCategory\',\''.$rev->{'attachment'}->id.'\'); return false;" style="cursor:pointer;">X</span>';
+$m->out('&nbsp;');
+$m->out('<span class="AttCat" style="font-weight:normal;">'.$href.'</span>');
+
+$m->out('</td>'); 
+
+
+  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+</%perl>
+ <a href="<%RT->Config->Get('WebPath')%>/Ticket/Attachment/<%$rev->{'attachment'}->TransactionId%>/<%$rev->{'attachment'}->Id%>/<%$rev->{'filename'} | u%>" target="_blank">
+<% $rev->{'filename'} %>
+</a></td>
+%  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+<&|/l, $rev->{'date'}  &>[_1]</&>
+</td>
+%  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+<&|/l, $rev->{'creator'} &>[_1]</&>
+</td>
+%  $m->out('<td align="center" style="'. $rev->{'style'}. '">'); 
+<&|/l, $rev->{'size'} &>[_1]</&>
+</td>
+%  $m->out('<td id="commenttd-'.$commentId.'" align="center" style="'. $rev->{'style'}. ' width:250px;cursor:pointer;">');
+<div id="comment-<%$commentId%>">
+<&|/l, $rev->{'comment'} &>[_1]</&>
+</div>
+<div id="modifyComment-<%$commentId%>" style="display:none">
+<input type="hidden" id="attachId-<%$commentId%>" value="<%$rev->{'attachment'}->id%>" >
+<input type="text" id="valueComment-<%$commentId++%>" value="<%$rev->{'comment'}%>" >
+</div>
+</td></tr>
+% }
+</table>
+</&>
+</div>
+% }
+
+<script>
+
+% for (my $i = 0; $i < $commentId; $i++){
+    jQuery("#commenttd-<%$i%>").click(function(){
+        jQuery("#comment-<%$i%>").hide();
+        jQuery("#modifyComment-<%$i%>").show();
+        jQuery("#valueComment-<%$i%>").focus();
+    });
+
+    jQuery("#modifyComment-<%$i%>").focusout(function(){
+        jQuery.ajax({
+            type: 'POST',
+            url: '<%RT->Config->Get('WebPath')%>/Ticket/Elements/AjaxModifyComment',
+            data: {
+                'Value' : jQuery("#valueComment-<%$i%>").val(),
+                'attachId' : jQuery("#attachId-<%$i%>").val()
+            },
+            success:function(data){
+                jQuery("#comment-<%$i%>").load('<%RT->Config->Get('WebPath')%>/Ticket/Elements/ShowCommentUpdate',{'attachId':jQuery("#attachId-<%$i%>").val()});
+            }
+        });
+        jQuery("#comment-<%$i%>").show();
+        jQuery("#modifyComment-<%$i%>").hide();
+    });
+%}
+
+//document.getElementById("LoadFullHistory").style.display="";
+
+function hidetrail(){
+    document.onmousemove=""
+    document.getElementById('ttimg').src='/img/s.gif'
+    gettrailobj().visibility="hidden"
+    gettrailobj().left=-1000
+    gettrailobj().top=0
+}
+
+function showtrail(width,height,file){
+    if(navigator.userAgent.toLowerCase().indexOf('opera') == -1){
+	w=width
+	h=height
+	// followmouse()
+	document.getElementById('ttimg').src=file
+	document.onmousemove=followmouse
+	gettrailobj().visibility="visible"
+	gettrailobj().width=w+"px"
+	gettrailobj().height=h+"px"
+    }
+}
+
+function gettrailobj(){
+    if (document.getElementById) return document.getElementById("trailimageid").style
+    else if (document.all) return document.all.trailimagid.style
+}
+</script>
+
+<%INIT>
+if (!$Ticket){
+ if ($id){
+  $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+  $Ticket->Load( $id );
+ }else{
+  Abort('No ticket specified');
+  exit;
+ }
+}
+if (!$id) { $id = $Ticket->Id; }
+
+$Attachments ||= $Ticket->Attachments;
+
+# Avoid applying limits to this collection that may be used elsewhere
+# (e.g. transaction display)
+$Attachments = $Attachments->Clone;
+
+# Remember, each message in a transaction is an attachment; we only
+# want named attachments (real files)
+$Attachments->LimitHasFilename;
+
+# show newest first
+$Attachments->OrderByCols(
+    { FIELD => 'Created', ORDER => 'DESC' },
+    { FIELD => 'id',      ORDER => 'DESC' },
+);
+
+
+if($Ticket->CurrentUserHasRight('ModifyTicket'))  {
+  if($AttAction eq 'AttachmentCategory' && $AttId && ($AttCat || $AttCat eq '0'))  {
+    my $Att = RT::Attachment->new($session{'CurrentUser'});
+    $Att->Load($AttId);
+    if($Att && $Att->id)  {
+      if($AttCat eq 'X')  {
+        $Att->DeleteAttribute('Category');
+      } else  {
+        $Att->SetAttribute(Name => 'Category', Content => $AttCat);
+      }
+    }
+  } elsif($AttAction eq 'AttachmentOrder')  {
+    if($AttOrd =~ /^(filename|category|user|size|comment)$/)  {
+      $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-AttachmentOrder', Content => $AttOrd);
+    } else  {
+      $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder');
+    }
+  } elsif($AttAction eq 'ToggleHidden')  {
+      my $sha= $Ticket->FirstAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
+      $sha = $sha->Content if $sha;
+      if ($sha ne '1') {
+       $Ticket->SetAttribute(Name => 'User-'. $session{'CurrentUser'}->id. '-ShowHidden', Content => '1' );
+      }else{
+       $Ticket->DeleteAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
+      }
+  }
+}
+
+my $AttachmentOrder = ($Ticket->FirstAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder')?$Ticket->FirstAttribute('User-'. $session{'CurrentUser'}->id. '-AttachmentOrder')->Content:'default');
+my $AttOrd2 = $m->comp('FindAttachmentsOrdered', Ticket => $Ticket, Attachments => $Attachments);
+my $showhidden = $Ticket->FirstAttribute('User-'. $session{'CurrentUser'}->id. '-ShowHidden');
+$showhidden = $showhidden->Content if $showhidden;
+
+my $commentId = 0;
+
+</%INIT>
+
+
+<%ARGS>
+$Ticket => undef
+$Attachments => undef
+$id => undef
+$AttAction => undef
+$AttId => undef
+$AttCat => undef
+$AttOrd => undef
+</%ARGS>
