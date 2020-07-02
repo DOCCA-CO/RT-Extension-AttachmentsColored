@@ -147,7 +147,7 @@
 						},
 						pageLength: 100,
 						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
-						dom: 'Bl<"toolbar">frtip',
+						dom: 'l<"toolbar">frtip',
 						initComplete: function() {
 							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;"><&|/l&>Show hidden files</&></label>');
 							//$("div.toolbar").css( 'margin-top', '3px' );
