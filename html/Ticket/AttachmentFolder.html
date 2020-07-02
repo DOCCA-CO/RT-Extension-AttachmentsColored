@@ -239,7 +239,8 @@ sub LoadTicketsWithAttachments {
 ####	'CF.{Projekt kód}' LIKE 'LONDON'	
 ####   "('QueueCF.{Q-CRM kód}' = '$crm' OR 'QueueCF.{Q-Projekt kód}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm')"
 ####	('CF.{Sepland}' = '$crm' OR 'CF.{Munkaszám}' = '$crm')
-	my $SQL = "(id = $id OR 'QueueCF.{Q-CRM kód}' = '$q_crm_code' OR 'QueueCF.{Q-Projekt kód}' = '$q_project_code' OR 'CF.{CRM kód}' = '$crm_code' OR 'CF.{Projekt kód}' = '$project_code' ) AND (Status = '__Active__' OR Status = '__Inactive__')";
+	my $SQL = sprintf(RT->Config->Get('Scope'), $id, $Queue);
+####	my $SQL =   "(id = $id OR Queue = '$Queue') AND (Status = '__Active__' OR Status = '__Inactive__')";
 	RT::Logger->info("### \n LoadTicketsWithAttachments->SQL = $SQL \n ###");
 	$TicketSet->FromSQL( $SQL );
 	my $cnt = $TicketSet->Count;

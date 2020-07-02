@@ -10,4 +10,6 @@ Set($ConfigTicketID, 2);
 
 Set($DefaultFolderStructureTicketID, 2);
 
+Set($Scope, "(id = %d OR Queue = '%s') AND (Status = '__Active__' OR Status = '__Inactive__')");
+
 1;
