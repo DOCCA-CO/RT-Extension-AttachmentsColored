@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use utf8;
+
+our @CustomFields = ();
+push @CustomFields, {
+	LookupType  => 'RT::Queue-RT::Ticket',
+	Pattern  => '',
+	Disabled  => '0',
+	Name  => 'TextJegyzet',
+	MaxValues  => '1',
+	Description  => '',
+	EntryHint  => 'Egy szöveges mező kitöltése',
+	UniqueValues  => '0',
+	Type  => 'Text',
+	ApplyTo => [ 'Lista: Alapdokumentum' ] ,
+};
+our @Queues = ();
+push @Queues, {
+	Name  => 'Lista: Alapdokumentum',
+	Description  => '',
+	SubjectTag  => '',
+	SortOrder  => '0',
+	Disabled  => '0',
+};
+our @ACL = ();
+
+
+1;
