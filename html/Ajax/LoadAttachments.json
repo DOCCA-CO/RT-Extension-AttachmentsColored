@@ -8,7 +8,7 @@ my (@folder, @att);
 
 return unless ($ARGS{'ticketId'});
 
-$r->content_type('application/json');
+$r->content_type( q{application/json; charset=utf-8} );
 
 my $ticketId = $ARGS{'ticketId'};
 my $Ticket = RT::Ticket->new( RT::SystemUser );
@@ -28,12 +28,12 @@ unless ($ConfigTikcetSubject) {
 my %colormap = RT->Config->Get('AttachmentCategories');
 my $Tickets = RT::Tickets->new( RT::SystemUser );
 my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
-RT::Logger->info("LoadNodes.json = $SQL");
+RT::Logger->info("LoadAttachments.json = $SQL");
 $Tickets->FromSQL( $SQL ) ;
 my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
 
 unless ($First) {
-	RT::Logger->info("LoadNodes.json: No Config");
+	RT::Logger->info("LoadAttachments.json: No Config");
 	$m->abort();
 } else {
 	@folder = LoadListFromTransaction($First);

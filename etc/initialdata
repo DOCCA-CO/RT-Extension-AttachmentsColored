@@ -17,6 +17,17 @@ push @CustomFields, {
 	Type  => 'Text',
 	ApplyTo => [ 'Lista: Alapdokumentum' ] ,
 };
+push @CustomFields, {
+	EntryHint => 'Szabad értékmegadás (egy)',
+	Description => '',
+	UniqueValues => '0',
+	Name => 'Q-FolderStruktura',
+	Type => 'Freeform',
+	LookupType => 'RT::Queue',
+	MaxValues => '1',
+	Disabled => '0',
+	Pattern => '',
+};
 our @Queues = ();
 push @Queues, {
 	Name  => 'Lista: Alapdokumentum',
