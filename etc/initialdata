@@ -11,7 +11,7 @@ push @CustomFields, {
 	Disabled  => '0',
 	Name  => 'TextJegyzet',
 	MaxValues  => '1',
-	Description  => '',
+	Description  => ';BigBox',
 	EntryHint  => 'Egy szöveges mező kitöltése',
 	UniqueValues  => '0',
 	Type  => 'Text',
