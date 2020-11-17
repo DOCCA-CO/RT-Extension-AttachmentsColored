@@ -5,11 +5,10 @@
 <table class="display" width="100%" style="width: 100%;" cellspacing="10" cellpadding="10">
 	<tr>
 		<td width="40%" style="40%" valign="top">
-<&| /Widgets/TitleBox, title => 'Csatolmány típusok' &>
+<&| /Widgets/TitleBox, title => loc('Folders') &>
 <div style="width: 100%; padding: 3px; margin: 3px;">
-	<nobr><input type="checkbox" id="show-all"><label for="show-all" style="font-weight:bold;">Minden csatolmány mutatása ezen a munkaszámon</label></nobr>
-	<br />
-	<nobr><input type="checkbox" id="show-nofolder"><label for="show-nofolder" style="font-weight:bold;">Kategória nélküli csatolmányok mutatása ezen a munkaszámon</label></nobr>
+	<input type="checkbox" id="show-nofolder"><label for="show-nofolder"><&|/l&>Show attachments without folders</&></label>
+	<input type="checkbox" id="show-all"><label for="show-all"><&|/l&>Show all</&></label>
 	<input type="hidden" id="show-1" >
 	<input type="hidden" id="filter-node" >
 </div>
@@ -41,8 +40,8 @@
 				<th style="width: 175px;"><&|/l&>Created</&></th>
 				<th style="width: 100px;"><&|/l&>User</&></th>
 				<th style="width: 75px;"><&|/l&>Size</&></th>
-				<th style="width: 75px;">Csatolmány<br/>típus</th>
-				<th style="width: 100px;">Ügyszám</th>
+				<th style="width: 75px;"><&|/l&>Folder</&></th>
+				<th style="width: 100px;"><&|/l&>Project</&></th>
 				<th style="width: 450px;"><&|/l&>Queue</&></th>
 				<th style="width: 450px;"><&|/l&>Subject</&></th>
 				<th style="width: 600px;"><&|/l&>Comment</&></th>
@@ -55,8 +54,8 @@
 				<th style="width: 175px;"><&|/l&>Created</&></th>
 				<th style="width: 100px;"><&|/l&>User</&></th>
 				<th style="width: 75px;"><&|/l&>Size</&></th>
-				<th style="width: 75px;">Csatolmány<br/>típus</th>
-				<th style="width: 100px;">Ügyszám</th>
+				<th style="width: 75px;"><&|/l&>Folder</&></th>
+				<th style="width: 100px;"><&|/l&>Project</&></th>
 				<th style="width: 450px;"><&|/l&>Queue</&></th>
 				<th style="width: 450px;"><&|/l&>Subject</&></th>
 				<th style="width: 600px;"><&|/l&>Comment</&></th>
@@ -230,11 +229,10 @@ sub LoadTicketsWithAttachments {
 	my $TicketSet = RT::Tickets->new( RT::SystemUser );
 ## ( 'QueueCF.{Q-CRM kód}' = 'Teszt234' OR 'QueueCF.{Q-Projekt kód}' = 'Teszt234' OR 'CF.{Ajánlatszám/munkaszám}' = 'Teszt234' OR 'CF.{Ajánlatszám/munkaszám}' = 'Teszt234' ) AND (  Status = 'new' OR Status = 'open' OR Status = 'stalled' )
 ## ('QueueCF.{Q-Projekt kód}' = '$text_to_search' OR 'CF.{Ajánlatszám/munkaszám}' = '$text_to_search')
-##	my $q_crm_code = $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'CRM kód' );
-##	my $q_project_code = $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'CRM kód' );
-##	my $crm_code = $Ticket->FirstCustomFieldValue( 'CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' )  || $q_crm_code || $q_project_code;
-##	my $project_code = $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'CRM kód' )  || $q_project_code || $q_crm_code;
-	my $project_code = $Ticket->FirstCustomFieldValue( 'Munkaszám' );
+	my $q_crm_code = $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'CRM kód' );
+	my $q_project_code = $QueueObj->FirstCustomFieldValue( 'Q-Projekt kód' ) || $QueueObj->FirstCustomFieldValue( 'Q-CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'CRM kód' );
+	my $crm_code = $Ticket->FirstCustomFieldValue( 'CRM kód' ) || $Ticket->FirstCustomFieldValue( 'Projekt kód' )  || $q_crm_code || $q_project_code;
+	my $project_code = $Ticket->FirstCustomFieldValue( 'Projekt kód' ) || $Ticket->FirstCustomFieldValue( 'CRM kód' )  || $q_project_code || $q_crm_code;
 
 	my(%row, @json);
 
@@ -243,7 +241,7 @@ sub LoadTicketsWithAttachments {
 ####	'CF.{Projekt kód}' LIKE 'LONDON'	
 ####   "('QueueCF.{Q-CRM kód}' = '$crm' OR 'QueueCF.{Q-Projekt kód}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm' OR 'CF.{Ajánlatszám/munkaszám}' = '$crm')"
 ####	('CF.{Sepland}' = '$crm' OR 'CF.{Munkaszám}' = '$crm')
-	my $SQL = sprintf(Encode::decode_utf8(RT->Config->Get('Scope')), $id,  $Ticket->FirstCustomFieldValue( 'Munkaszám' ));
+	my $SQL = sprintf(RT->Config->Get('Scope'), $id, $Queue);
 ####	my $SQL =   "(id = $id OR Queue = '$Queue') AND (Status = '__Active__' OR Status = '__Inactive__')";
 	RT::Logger->info("### \n LoadTicketsWithAttachments->SQL = $SQL \n ###");
 	$TicketSet->FromSQL( $SQL );
@@ -294,8 +292,8 @@ sub LoadTicketsWithAttachments {
 				$row{ 'rem' } = $Attachment->FirstAttribute('Comment')?$Attachment->FirstAttribute('Comment')->Content:'';
 				$row{ 'queue' } = $T->QueueObj->Name;
 				my $link = RT->Config->Get('WebPath') . '/Ticket/Display.html?id=' . $T->id;
-				$row{ 'subj' } = "<a href='$link' target='_blank'>$subj</a>";
-				$row{ 'proj' } = "<a href='$link' target='_blank'>".$T->Id."</a>";
+				$row{ 'subj' } =  "<a href='$link' target='_blank'>$subj</a>"  ;
+				$row{ 'proj' } = $project_code;
 				push @json, {%row};
 			}
 		}
