@@ -183,6 +183,7 @@
 						},
 		                columns: [
 		                    { "data":"category",
+		                    	//"orderable": false,
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 									var rgroup = "";
 									for (var key in colors) {
@@ -201,6 +202,7 @@
 									rgroup += "";
 									$(nTd).css( 'width', '180px' );
 									$(nTd).html( rgroup );
+									return oData.attid;
 								}
 		                    },
 		                    { "data":"filename" },
@@ -250,6 +252,8 @@
 				jQuery(dt.row(row).node()).hide();	
 			}
 		};
+		//jQuery(dt.cell({row:row, column:0}).data(radio.replace("rad", "")).draw(false));
+		//jQuery(dt.fnUpdate( radio.replace("rad", ""), row, cell, false ));
 		jQuery.ajax({
 			type: 'POST',
 			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyCategory',
@@ -262,7 +266,6 @@
 
 	function delCategory( row, radio ) {
 		//dt.cell({row:row, column:0}).data(value);
-		
 		jQuery.ajax({
 			type: 'POST',
 			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxDeleteCategory',

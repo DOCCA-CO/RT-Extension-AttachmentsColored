@@ -84,10 +84,10 @@ var filter = filter_left + "|" + filter_right;
 
 jQuery(function ($) {
 
-    $(document).ready( function() {
-	    var table = $('#att-table')
-	    	.addClass( 'nowrap' )
-	    	.DataTable( {
+	$(document).ready( function() {
+		var table = $('#att-table')
+			.addClass( 'nowrap' )
+			.DataTable( {
 %print "\t\t\t\tdata:$json,\n";
 				responsive: true,
 				language: {
@@ -129,25 +129,25 @@ jQuery(function ($) {
 						}
 					}
 				},
-		        columns : [
+				columns : [
 					{ "data" : "cat" },
 					{ "data" : "file" },
 					{ "data" : "date" },
 					{ "data" : "user" },
 					{ "data" : "size" },
 					{ "data" : "node" ,
-                        "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                            if ( oData.node ) {
-                                $(nTd).html("<span>"+oData.nodenm+"</span>");
-                            }
-                        }
+						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+							if ( oData.node ) {
+								$(nTd).html("<span>"+oData.nodenm+"</span>");
+							}
+						}
 					},
 					{ "data" : "proj" },
 					{ "data" : "queue" },
 					{ "data" : "subj" },
 					{ "data" : "rem" }
-		        ]
-    		} ) ;
+				]
+			} ) ;
 
 		$( ".folder-item" ).click( function() {
 			$("#show-all").prop("checked", false);
@@ -159,40 +159,43 @@ jQuery(function ($) {
 
 		$("#show-nofolder").click ( function() {
 			$("#show-1").val( $("#show-nofolder").prop("checked") );
-			if($("#show-nofolder").prop("checked")) {   
+			if($("#show-nofolder").prop("checked")) {
 				table.columns(5).search("-1", true, false).draw();
+				$("#show-all").prop("checked", false);
 			} else {
-				//table.columns(5).search("^(?:(?!-1).)*$\r?\n?", true, false).draw();
 				table.columns(5).search("nothing", true, false).draw();
 			}
 		} );
 
 		$("#show-all").click ( function() {
-			table.columns().search('').draw(); 
+			if($("#show-all").prop("checked")) {
+				$("#show-nofolder").prop("checked", false);
+				table.columns().search('').draw();
+			} else {
+				table.columns(5).search("nothing", true, false).draw();
+			}
 		} );
-
 
 		table.columns(5).search("nothing", true, false).draw();
 
+	} );
 
-
-    } );
-
-
-
+	$(function(){
+		$("#show-all").click ();
+	});
 
 } );
 
 
 function countTypesForNode(resultArray, nodeVal) {
    var i,
-       types,
-       count = 0;
+	   types,
+	   count = 0;
    for (i=0, types = {}; i < resultArray.length; i++)
-      if (resultArray[i].bulan === nodeVal && !types[resultArray[i].type]) {
-         types[resultArray[i].type] = true;
-         count++;
-      }
+	  if (resultArray[i].bulan === nodeVal && !types[resultArray[i].type]) {
+		 types[resultArray[i].type] = true;
+		 count++;
+	  }
    return count;
 }
 

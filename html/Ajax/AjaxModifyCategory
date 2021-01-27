@@ -5,7 +5,7 @@ my $Att = RT::Attachment->new($session{'CurrentUser'});
 $Att->Load($ARGS{'attachId'});
 if ( $Att && $Att->Id ) {
     $Att->SetAttribute(Name => 'Category', Content => $ARGS{'Value'});
-    $m->out( sprintf( "Category Set %s => %s", $ARGS{'attachId'}, $ARGS{'Value'} ) );
+    $m->out( sprintf( "{ \"attid\": \"%s\", \"category\": \"%s\" }", $ARGS{'attachId'}, $ARGS{'Value'} ) );
 }
 
 $m->abort();

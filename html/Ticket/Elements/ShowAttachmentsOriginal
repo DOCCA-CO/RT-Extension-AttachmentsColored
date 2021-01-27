@@ -2,7 +2,7 @@
 %#
 %# COPYRIGHT:
 %#
-%# This software is Copyright (c) 1996-2016 Best Practical Solutions, LLC
+%# This software is Copyright (c) 1996-2019 Best Practical Solutions, LLC
 %#                                          <sales@bestpractical.com>
 %#
 %# (Except where explicitly superseded by other copyright notices)
@@ -46,51 +46,155 @@
 %#
 %# END BPS TAGGED BLOCK }}}
 <&| /Widgets/TitleBox, title => loc('Attachments'), 
-        title_class=> 'inverse',  
-        class => 'ticket-info-attachments',
-        color => "#336699",
-        hide_chrome => $HideTitleBox &>
+				title_class=> 'inverse',  
+				class => 'ticket-info-attachments',
+				color => "#336699",
+				hide_chrome => $HideTitleBox &>
+
+% $m->callback( %ARGS, CallbackName => 'BeforeList', TicketObj => $Ticket, Attachments => $Attachments, Documents => \%documents, IsChecked => \%is_checked, ShowMore => \$show_more );
 
 <div class="attachment-list">
-<table>
+	<table class="display" id="attachments" style="width: 100%;">
+		<thead>
+			<tr>
+				<th><&|/l&>Filename</&></th>
+				<th>&nbsp;</th>
+				<th>&nbsp;</th>
+				<th><&|/l&>Date</&></th>
+				<th><&|/l&>Size</&></th>
+				<th><&|/l&>User</&></th>
+			</tr>
+		</thead>
+		<tbody>
+
 % foreach my $key (sort { lc($a) cmp lc($b) } keys %documents) {
-% next if($key =~ /_rr\.(jpg|png|jpeg)/i);
-<tr><td>
-%# <%$key%><br />
-% my ($kiterjesztes) = $key =~ /\.([^\.]+)$/;
-<%length($key) > 35?(substr $key, 0, 30)."...".($kiterjesztes?$kiterjesztes:""): $key%>
-</td><td>
-<ul <% $Selectable ? 'class="selectable"' : '' |n %> >
+			<tr>
+				<td>
+% if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
+					<span class="dropdown">
+% }
+						<span style="display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;"><%$key%></span>
+% if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
+% my $url;
 % foreach my $rev (@{$documents{$key}}) {
 % if ($rev->ContentLength) {
-<li>
-
-% if ($Selectable) {
-    <label>
-    <input type="checkbox" class="checkbox" name="AttachExisting" value="<% $rev->Id %>" \
-             <% $is_checked{$rev->Id} ? 'checked' : '' %> />
+% unless(RT->System->ExternalStorageURLFor($rev)) {
+% $url = sprintf("%s/%s/Attachment/%u/%u/%s", RT->Config->Get('WebPath'), $DisplayPath, $rev->TransactionId, $rev->Id, $rev->Filename); 
+% } else { 
+% $url = RT->System->ExternalStorageURLFor($rev) if (RT->System->ExternalStorageURLFor($rev));
+% }
+% }
+% }
+						<div class="dropdown-content">
+							<img src="<%$url%>" alt="<%$key%>" style="width: 100%;" />
+							<div class="desc"><%$key%></div>
+						</div>
+					</span>
 % }
 
+				</td>
+
+				<td>
+% foreach my $rev (@{$documents{$key}}) {
+% if ($rev->ContentLength) {
+% if ($Selectable) {
+<!-- selectable -->  
+		<input type="checkbox" class="checkbox" name="AttachExisting" value="<% $rev->Id %>" <% $is_checked{$rev->Id} ? 'checked' : '' %> />
+		<br />
+% } } }
+				</td>
+				<td>
+% foreach my $rev (@{$documents{$key}}) {
+% if ($rev->ContentLength) {
 % if (my $url = RT->System->ExternalStorageURLFor($rev)) {
-<a href="<%$url%>">
+<a href="<%$url%>" target="_blank">
 % } else {
-<a href="<%RT->Config->Get('WebPath')%>/<% $DisplayPath %>/Attachment/<%$rev->TransactionId%>/<%$rev->Id%>/<%$rev->Filename | un %>">
-% }
-% my $desc = loc("[_1] ([_2]) by [_3]", $rev->CreatedAsString, $rev->FriendlyContentLength, $m->scomp('/Elements/ShowUser', User => $rev->CreatorObj));
-<% $desc |n%>
-</a>
-
+<a href="<%RT->Config->Get('WebPath')%>/<% $DisplayPath %>/Attachment/<%$rev->TransactionId%>/<%$rev->Id%>/<%$rev->Filename | un %>" target="_blank">
+% } 
+<&|/l&>Download</&>
+</a><br />
+% } }
+				</td>
+				<td> 
+% foreach my $rev (@{$documents{$key}}) {
+% if ($rev->ContentLength) {
+					<% loc("[_1]", $rev->CreatedAsString) |n%><br />
+% } }
+				</td>
+				<td>
+% foreach my $rev (@{$documents{$key}}) {
+% if ($rev->ContentLength) {
+					<% loc("[_1]", $rev->FriendlyContentLength) |n%><br /> 
+% } }
+				</td>
+				<td>
+% foreach my $rev (@{$documents{$key}}) {
+% if ($rev->ContentLength) {
+					<% loc("[_1]", $m->scomp('/Elements/ShowUser', User => $rev->CreatorObj)) |n%><br /> 
+% } }
+				</td>
 % if ($Selectable) {
-    </label>
+<!-- /selectable -->  
+% }
+			</tr>
 % }
 
-</li>
-% }
-% }
-</ul>
-</td></tr>
-% }
-</table>
+		</tbody>
+	</table>
+
+% $m->callback( %ARGS, CallbackName => 'AfterList', TicketObj => $Ticket, Attachments => $Attachments, Documents => \%documents, IsChecked => \%is_checked, ShowMore => \$show_more );
+
+<script src="<%$RT::WebPath%>/NoAuth/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+	jQuery(function ($) {
+		$(document).ready( function () {
+			$('#attachments').DataTable({
+					language: {
+						processing:     "Feldolgozás...",
+						search:         "Keresés:",
+						lengthMenu:    "_MENU_ találat oldalanként",
+						info:           "Találatok: _START_ - _END_ Összesen: _TOTAL_",
+						infoEmpty:      "Nulla találat",
+						infoFiltered:   "(_MAX_ összes rekord közül szűrve)",
+						infoPostFix:    "",
+						loadingRecords: "Betöltés....",
+						zeroRecords:    "Nincs a keresésnek megfelelő találat",
+						emptyTable:     "A táblázatban nem állnak rendelkezésre adatok",
+						paginate: {
+							first:      "Első",
+							previous:   "Előző",
+							next:       "Következő",
+							last:       "Utolsó"
+						},
+						aria: {
+							sortAscending:  ": aktiválja a növekvő rendezéshez",
+							sortDescending: ": aktiválja a csökkenő rendezéshez"
+						},
+						select: {
+							rows: {
+								"_": "%d sor kiválasztva",
+								"0": "",
+								"1": "1 sor kiválasztva"
+							}
+						},
+						buttons: {
+							print: "Nyomtatás",
+							colvis: "Oszlopok",
+							copy: "Másolás",
+							copyTitle: "Vágólapra másolás",
+							copySuccess: {
+								"_": "%d sor másolva",
+								"1": "1 sor másolva"
+							}
+						}
+					},
+					ordering: false,
+					info:     false
+				});
+		})
+	});
+</script>
+
 % if ($show_more) {
 <span class="show-more-link">
 % my %params = %ARGS;
@@ -100,20 +204,21 @@
 % my $query = $m->comp('/Elements/QueryString', %params, id => $Ticket->id );
 % my $url   = RT->Config->Get('WebPath')."/Helpers/TicketAttachments?$query";
 
+
 <script type="text/javascript">
-    function showAllAttachments(node) {
-        var container = node.closest('.attachment-list');
-        var params = node.closest('form').find('input[name=AttachExisting]').serialize();
+		function showAllAttachments(node) {
+				var container = node.closest('.attachment-list');
+				var params = node.closest('form').find('input[name=AttachExisting]').serialize();
 
-        node.parent().text(<% loc('Loading...') | n,j%>);
+				node.parent().text(<% loc('Loading...') | n,j%>);
 
-        var url = <% $url |n,j %>;
-        if (params) url += '&' + params;
-        container.load(url);
-    }
+				var url = <% $url |n,j %>;
+				if (params) url += '&' + params;
+				container.load(url);
+		}
 </script>
 
-<a href="#" onclick="showAllAttachments(jQuery(this)); return false;" ><% loc('Show all attachments') %></a>
+<a href="#" class="button" onclick="showAllAttachments(jQuery(this)); return false;" ><% loc('Show all') %></a>
 
 </span>
 % }
@@ -121,8 +226,10 @@
 </div>
 </&>
 
-<%INIT>
 
+
+<%INIT>
+use utf8;
 # If we haven't been passed in an Attachments object (through the precaching mechanism)
 # then we need to find one
 $Attachments ||= $Ticket->Attachments;
@@ -140,17 +247,17 @@ my %documents;
 
 # show newest first
 $Attachments->OrderByCols(
-    { FIELD => 'Created', ORDER => 'DESC' },
-    { FIELD => 'id',      ORDER => 'DESC' },
+		{ FIELD => 'Created', ORDER => 'DESC' },
+		{ FIELD => 'id',      ORDER => 'DESC' },
 );
 
 while ( my $attach = $Attachments->Next() ) {
-   # display "show more" only when there will be more attachments
-   if (defined($Count) && --$Count < 0) {
-       $show_more = 1;
-       last;
-   }
-   push @{ $documents{ $attach->Filename } }, $attach;
+	 # display "show more" only when there will be more attachments
+	 if (defined($Count) && --$Count < 0) {
+			 $show_more = 1;
+			 last;
+	 }
+	 push @{ $documents{ $attach->Filename } }, $attach;
 }
 
 my %is_checked = map { $_ => 1 } @Checked;
@@ -166,4 +273,3 @@ $Selectable => 0
 $Count => undef
 @Checked => ()
 </%ARGS>
-
