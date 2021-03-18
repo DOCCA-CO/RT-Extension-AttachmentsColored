@@ -324,7 +324,7 @@
 
 	function copyClipboard( aID ) {
 	/* Get the text field */
-		var copyText = document.getElementById(aID).getAttribute("href").replace('file:////','');
+		var copyText = document.getElementById(aID).getAttribute("href").replace('file:///','');
 		/* Select the text field */
 		document.addEventListener('copy', function(e) {
 			e.clipboardData.setData('text/plain', copyText);
@@ -336,6 +336,22 @@
 
 		/* Alert the copied text */
 		alert("Copied the text: " + copyText);
+	}
+
+	function sendOpenReqMQ( aID ) {
+	/* Get the text field */
+		var copyText = document.getElementById(aID).getAttribute("href").replace('file:///','');
+		jQuery.ajax({
+			type: 'POST',
+			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxSendMQOpen',
+			data: {
+				'queue' : '<% $session{'CurrentUser'}->Name %>',
+				'attachment' : copyText
+			}
+		}).done(function( data ) {
+			console.log( "Sent2MQ: " + data );
+		});
+		
 	}
 
 </script>
