@@ -4,6 +4,15 @@ use strict;
 use warnings;
 use utf8;
 
+our @Queues = ();
+push @Queues, {
+	Name  => 'Lista: Alapdokumentum',
+	Description  => 'Alapdokumentumok',
+	SubjectTag  => '',
+	SortOrder  => '0',
+	Disabled  => '0',
+};
+
 our @CustomFields = ();
 push @CustomFields, {
 	LookupType  => 'RT::Queue-RT::Ticket',
@@ -11,32 +20,31 @@ push @CustomFields, {
 	Disabled  => '0',
 	Name  => 'TextJegyzet',
 	MaxValues  => '1',
-	Description  => ';BigBox',
+	Description  => 'Text jegyzet;BigBox',
 	EntryHint  => 'Egy szöveges mező kitöltése',
 	UniqueValues  => '0',
 	Type  => 'Text',
 	ApplyTo => [ 'Lista: Alapdokumentum' ] ,
 };
-push @CustomFields, {
-	EntryHint => 'Szabad értékmegadás (egy)',
-	Description => '',
-	UniqueValues => '0',
-	Name => 'Q-FolderStruktura',
-	Type => 'Freeform',
-	LookupType => 'RT::Queue',
-	MaxValues => '1',
-	Disabled => '0',
-	Pattern => '',
-};
-our @Queues = ();
-push @Queues, {
-	Name  => 'Lista: Alapdokumentum',
-	Description  => '',
-	SubjectTag  => '',
-	SortOrder  => '0',
-	Disabled  => '0',
-};
-our @ACL = ();
 
+our @Final = (sub {
+	print "Create ticket...\n";
+	my $ticket = RT::Ticket->new( RT->SystemUser );
+	my %args = (
+		Queue=>"Lista: Alapdokumentum",
+		Subject=>"Általános kategóriák", 
+		Priority=>10,
+		InitialPriority=>0,
+		FinalPriority=>0,
+	);
+	my $cf = RT::CustomField->new( RT->SystemUser );
+	$cf->Load('TextJegyzet');
+	$args{ 'CustomField-' . $cf->id } = "1;9999;Általános";
+	my ($ret, $msg) = $ticket->Create( %args );
+	printf ("Ticket #%d created\n", $ret) if ($ret);
+	die $msg unless $ret;
+});
+
+our @ACL = ();
 
 1;
