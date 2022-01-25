@@ -4,7 +4,10 @@ our $VERSION = '0.1';
 
 RT->AddStyleSheets('AttachmentsColored.css');
 RT->AddStyleSheets('select2.min.css');
-RT->AddStyleSheets('jquery.dataTables.css');
+## RT->AddStyleSheets('jquery.dataTables.css');
+RT->AddStyleSheets('dataTables.bootstrap4.min.css');
+RT->AddStyleSheets('buttons.bootstrap4.min.css');
+## RT->AddStyleSheets('responsive.dataTables.min.css');
 
 
 1;

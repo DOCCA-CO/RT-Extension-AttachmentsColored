@@ -15,7 +15,7 @@ my $Ticket = RT::Ticket->new( RT::SystemUser );
 $Ticket->Load( $ticketId );
 my $Queue = $Ticket->QueueObj;
 
-my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if $Queue->FirstCustomFieldValue('Q-FolderStruktura');
+my $ConfigTikcetSubject; ## = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if $Queue->FirstCustomFieldValue('Q-FolderStruktura');
 
 unless ($ConfigTikcetSubject) {
 	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');

@@ -53,7 +53,8 @@
 
 % $m->callback( %ARGS, CallbackName => 'BeforeList', TicketObj => $Ticket, Attachments => $Attachments, Documents => \%documents, IsChecked => \%is_checked, ShowMore => \$show_more );
 
-<table id="attachments" class="display nowrap" width="100%">
+<!-- <table id="attachments" class="display nowrap" width="100%"> -->
+<table id="attachments" class="table table-striped table-bordered table-hover nowrap" width="100%">
 	<thead>
 		<tr>
 			<th><&|/l&>Category</&></th>
@@ -82,9 +83,10 @@
 
 
 <script src="<%$RT::WebPath%>/NoAuth/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="<%$RT::WebPath%>/NoAuth/js/dataTables.bootstrap4.min.js" type="text/javascript"></script>
 <script src="<%$RT::WebPath%>/NoAuth/js/file-size.js" type="text/javascript"></script>
 <!-- <script src="<%$RT::WebPath%>/NoAuth/js/datetime-moment.js" type="text/javascript"></script> -->
-<script src="<%RT->Config->Get('WebPath')%>/NoAuth/js/dataTables.responsive.min.js" type="text/javascript"></script>
+<!-- <script src="<%RT->Config->Get('WebPath')%>/NoAuth/js/dataTables.responsive.min.js" type="text/javascript"></script> -->
 
 <script type="text/javascript">
 
@@ -149,12 +151,12 @@
 						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
 						dom: 'l<"toolbar">frtip',
 						initComplete: function() {
-							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;"><&|/l&>Show hidden files</&></label>');
+							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
 							//$("div.toolbar").css( 'margin-top', '3px' );
-							$("div.toolbar").css( 'display', 'inline-block' );
-							$("div.toolbar").css( 'padding-left', '16px' );
+							//$("div.toolbar").css( 'display', 'inline-block' );
+							//$("div.toolbar").css( 'padding-left', '16px' );
 							//$("div.toolbar").css( 'line-height', '25px' );
-							$("div.toolbar").css( 'text-align', 'center' );
+							//$("div.toolbar").css( 'text-align', 'center' );
 						},
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
@@ -187,7 +189,7 @@
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 									var rgroup = "";
 									for (var key in colors) {
-										rgroup += "<label class='container'>";
+										rgroup += "<label class='__container'>";
 										rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
 										rgroup += (key == sData)?" checked":"";
 										rgroup += ">";
