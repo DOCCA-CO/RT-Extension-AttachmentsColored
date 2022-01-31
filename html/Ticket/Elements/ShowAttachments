@@ -149,14 +149,14 @@
 						},
 						pageLength: 100,
 						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
-						dom: 'l<"toolbar">frtip',
+						dom: 'l<"__toolbar">frtip',
 						initComplete: function() {
-							$("div.toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
-							//$("div.toolbar").css( 'margin-top', '3px' );
-							//$("div.toolbar").css( 'display', 'inline-block' );
-							//$("div.toolbar").css( 'padding-left', '16px' );
-							//$("div.toolbar").css( 'line-height', '25px' );
-							//$("div.toolbar").css( 'text-align', 'center' );
+							$("div.__toolbar").html('<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
+							//$("div.__toolbar").css( 'margin-top', '3px' );
+							//$("div.__toolbar").css( 'display', 'inline-block' );
+							//$("div.__toolbar").css( 'padding-left', '16px' );
+							//$("div.__toolbar").css( 'line-height', '25px' );
+							//$("div.__toolbar").css( 'text-align', 'center' );
 						},
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {

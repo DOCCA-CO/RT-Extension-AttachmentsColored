@@ -86,12 +86,12 @@ div.AttachmentsColoredOrder {
 }
 */
 
-.dropdown {
+.__dropdown {
     position: relative;
     display: inline-block;
 }
 
-.dropdown-content {
+.__dropdown-content {
     display: none;
     position: absolute;
     background-color: #f9f9f9;
@@ -100,7 +100,7 @@ div.AttachmentsColoredOrder {
     z-index: 1;
 }
 
-.dropdown:hover .dropdown-content {
+.__dropdown:hover .__dropdown-content {
     display: block;
 }
 
@@ -109,6 +109,6 @@ div.AttachmentsColoredOrder {
     text-align: center;
 }
 
-.toolbar {
+.__toolbar {
     float: left;
 }
