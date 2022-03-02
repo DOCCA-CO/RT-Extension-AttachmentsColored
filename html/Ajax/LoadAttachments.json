@@ -111,7 +111,7 @@ sub LoadTicketAttachments{
 		my $filename = '';
 		my $date_unix = $attach->CreatedObj->Unix;
 		my $date = $attach->CreatedAsString;
-		my $creator = $attach->CreatorObj->Name;
+		my $creator = '<span style="display:block; white-space: nowrap; max-width:170px; overflow:hidden; text-overflow:ellipsis;">' . $attach->CreatorObj->Name . '</span>';
 		my $comment = ($attach->FirstAttribute('Comment')?$attach->FirstAttribute('Comment')->Content:'');
 		my $content = $attach->Content if ($attach->ContentType eq 'text/uri-list');
 
