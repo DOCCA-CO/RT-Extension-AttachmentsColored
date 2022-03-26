@@ -99,3 +99,7 @@ msgstr "Mindent mutat"
 #:
 msgid "Select an option"
 msgstr "Válasszon"
+
+#:
+msgid "Download"
+msgstr "Letöltés"
