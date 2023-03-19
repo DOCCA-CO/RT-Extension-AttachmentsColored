@@ -36,6 +36,7 @@ our @Final = (sub {
 		Priority=>10,
 		InitialPriority=>0,
 		FinalPriority=>0,
+		Owner=>'robot',
 	);
 	my $cf = RT::CustomField->new( RT->SystemUser );
 	$cf->Load('TextJegyzet');

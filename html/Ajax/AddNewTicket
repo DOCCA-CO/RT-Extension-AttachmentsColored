@@ -1,0 +1,32 @@
+<%init>
+use strict;
+use warnings;
+use utf8;
+
+
+my ($submit, $subj, $queue, $owner, $message, $attlist) = ($DECODED_ARGS->{"submit"},$DECODED_ARGS->{"subj"},$DECODED_ARGS->{"queue"},
+    $DECODED_ARGS->{"owner"},$DECODED_ARGS->{"message"},$DECODED_ARGS->{"attlist"});
+return unless($submit);
+
+my @values = split (/[,|]/,$attlist);
+my @newAttacments = ();
+my $ticket = RT::Ticket->new($session{'CurrentUser'});
+### Create an entity:
+my $top = MIME::Entity->build( Subject => $subj, Type => "text/html", Encoding => "quoted-printable", Data => Encode::encode_utf8($message));
+
+for my $v (@values) {
+    my $attachment = RT::Attachment->new($RT::SystemUser);
+    $attachment->SetAttribute(Name => 'Category', Content => 'hidden');
+    push @newAttacments, $attachment;
+}
+
+for my $a (@newAttacments) {
+    $top->attach(Type => $a->ContentType, Encoding => $a->OriginalEncoding, Filename => Encode::encode_utf8($a->Filename), Disposition => "attachment", Data => $a->OriginalContent);
+}
+
+##$top->attach();
+my %args = ('Queue' => $queue, 'Subject' =>$subj, 'Owner' => $owner, 'CustomField-2'=>$message, 'MIMEObj'=>$top);
+my ($id, $trid, $msg) = $ticket->Create(%args);
+$m->out("$msg");
+$m->abort();
+</%init>

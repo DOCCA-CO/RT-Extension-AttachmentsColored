@@ -7,6 +7,7 @@ RT->AddStyleSheets('select2.min.css');
 ## RT->AddStyleSheets('jquery.dataTables.css');
 RT->AddStyleSheets('dataTables.bootstrap4.min.css');
 RT->AddStyleSheets('buttons.bootstrap4.min.css');
+RT->AddStyleSheets('select.dataTables.min.css');
 ## RT->AddStyleSheets('responsive.dataTables.min.css');
 
 
