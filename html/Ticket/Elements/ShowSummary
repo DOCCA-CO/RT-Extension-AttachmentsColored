@@ -192,6 +192,8 @@ my $links_titleright = join ' ',
 push @extra, (titleright_raw => $links_titleright) if $links_titleright;
 </%PERL>
 % $m->callback( %ARGS, CallbackName => 'LinksExtra', extra => \@extra );
+  </div>
+<div class="boxcontainer col-md-12" style="padding-left:15px;margin-top:7px;">
     <&| /Widgets/TitleBox, title => loc('Links'),
         ($can_modify ? (title_href => $links_url) : ()),
         class => (join " ", 'ticket-info-links', ($links_behavior eq 'always' ? 'editing' : ())),
