@@ -1,4 +1,4 @@
-# RT-Extension-AttachmentsColored
+# RT-Extension-AttachmentsColored // OLD-VERSION
 
 ## Funkciók
 - csatolmányok táblázatos megjelenítése
