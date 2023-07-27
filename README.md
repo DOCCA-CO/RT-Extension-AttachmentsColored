@@ -1,6 +1,6 @@
 # RT-Extension-AttachmentsColored
 
-## Version for Request Tracker 5.0.2
+## Version for Request Tracker 5.0.4
 
 ## Funkciók
 - csatolmányok táblázatos megjelenítése
