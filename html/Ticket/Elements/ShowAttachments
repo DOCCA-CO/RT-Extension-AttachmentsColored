@@ -75,7 +75,7 @@
           <div class="form-group">
             <label for="message-text" class="col-form-label"><&|/l&>Message</&>:</label>
             <textarea class="form-control" id="message-text1"></textarea>
-            <span><&|/l&>Attachments</&>:</span>
+%#            <span><&|/l&>Attachments</&>:</span>
             <span id="att_list"></span>
           </div>
         </form>
@@ -102,13 +102,13 @@
       <div class="modal-body">
         <form>
           <div class="form-group">
-            <label class="col-form-label"><%loc('Ticket')%>:</label>
+            <label class="col-form-label"><%loc('Ticket id')%>:</label>
             <input type="text" class="form-control" id="ticketid">
           </div>
           <div class="form-group">
             <label for="message-text" class="col-form-label"><&|/l&>Message</&>:</label>
             <textarea class="form-control" id="message-text2"></textarea>
-            <span><&|/l&>Attachments</&>:</span>
+%#            <span><&|/l&>Attachments</&>:</span>
             <span id="att_list2"></span>
           </div>
         </form>
@@ -231,7 +231,7 @@
 						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
 						dom: 'l<"__toolbar">frtip',
 						initComplete: function() {
-							$("div.__toolbar").html('&nbsp;&nbsp;<button type="button" class="btn btn-outline-primary" id="newTicket" onclick="newTicketClick();"><&|/l&>New ticket</&></button> <button type="button" class="btn btn-outline-dark" id="okTicket" onclick="okTicketClick();"><&|/l&>Comment</&></button>&nbsp;&nbsp;<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
+							$("div.__toolbar").html('&nbsp;&nbsp;<button type="button" class="btn btn-outline-primary" id="newTicket" onclick="newTicketClick();"><&|/l&>Add to new ticket</&></button> <button type="button" class="btn btn-outline-dark" id="okTicket" onclick="okTicketClick();"><&|/l&>Add to existing ticket</&></button>&nbsp;&nbsp;<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
 							//$("div.__toolbar").css( 'margin-top', '3px' );
 							//$("div.__toolbar").css( 'display', 'inline-block' );
 							//$("div.__toolbar").css( 'padding-left', '16px' );

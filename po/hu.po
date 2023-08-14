@@ -103,3 +103,15 @@ msgstr "Válasszon"
 #:
 msgid "Close"
 msgstr "Bezár"
+
+#:
+msgid "Add to existing ticket"
+msgstr "Másik ügybe küld"
+
+#:
+msgid "Add to new ticket"
+msgstr "Új ügybe küld"
+
+#:
+msgid "Ticket id"
+msgstr "Ügyszám"
