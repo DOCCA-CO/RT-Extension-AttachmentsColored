@@ -16,6 +16,7 @@ my $top = MIME::Entity->build( Subject => $subj, Type => "text/html", Encoding =
 
 for my $v (@values) {
     my $attachment = RT::Attachment->new($RT::SystemUser);
+    $attachment->Load($v);
     $attachment->SetAttribute(Name => 'Category', Content => 'hidden');
     push @newAttacments, $attachment;
 }
