@@ -6,8 +6,7 @@ use utf8;
 
 our @Queues = ();
 push @Queues, {
-	Name  => 'Lista: Alapdokumentum',
-	Description  => 'Alapdokumentumok',
+	Name  => 'List: General',
 	SubjectTag  => '',
 	SortOrder  => '0',
 	Disabled  => '0',
@@ -18,29 +17,27 @@ push @CustomFields, {
 	LookupType  => 'RT::Queue-RT::Ticket',
 	Pattern  => '',
 	Disabled  => '0',
-	Name  => 'TextJegyzet',
+	Name  => 'TextContnt',
 	MaxValues  => '1',
-	Description  => 'Text jegyzet;BigBox',
-	EntryHint  => 'Egy szöveges mező kitöltése',
 	UniqueValues  => '0',
 	Type  => 'Text',
-	ApplyTo => [ 'Lista: Alapdokumentum' ] ,
+	ApplyTo => [ 'List: General' ] ,
 };
 
 our @Final = (sub {
 	print "Create ticket...\n";
 	my $ticket = RT::Ticket->new( RT->SystemUser );
 	my %args = (
-		Queue=>"Lista: Alapdokumentum",
-		Subject=>"Általános kategóriák", 
+		Queue=>"List: General",
+		Subject=>"General categories" 
 		Priority=>10,
 		InitialPriority=>0,
 		FinalPriority=>0,
 		Owner=>'robot',
 	);
 	my $cf = RT::CustomField->new( RT->SystemUser );
-	$cf->Load('TextJegyzet');
-	$args{ 'CustomField-' . $cf->id } = "1;9999;Általános";
+	$cf->Load('TextContnt');
+	$args{ 'CustomField-' . $cf->id } = "1;9999;Common";
 	my ($ret, $msg) = $ticket->Create( %args );
 	printf ("Ticket #%d created\n", $ret) if ($ret);
 	die $msg unless $ret;

@@ -13,7 +13,6 @@
 - kép-csatolmányoknak miniatűr megjelenítése
 
 ## RT kompatibilitás
-- RT 4.4.x
 - RT 5.0.x
 
 ## Telepítés

@@ -15,7 +15,7 @@ my $Ticket = RT::Ticket->new( RT::SystemUser );
 $Ticket->Load( $ticketId );
 my $Queue = $Ticket->QueueObj;
 
-my $ConfigTikcetSubject; ## = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if $Queue->FirstCustomFieldValue('Q-FolderStruktura');
+my $ConfigTikcetSubject; 
 
 unless ($ConfigTikcetSubject) {
 	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
@@ -27,7 +27,7 @@ unless ($ConfigTikcetSubject) {
 
 my %colormap = RT->Config->Get('AttachmentCategories');
 my $Tickets = RT::Tickets->new( RT::SystemUser );
-my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
+my $SQL = "Queue = 'List: General' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
 RT::Logger->info("LoadAttachments.json = $SQL");
 $Tickets->FromSQL( $SQL ) ;
 my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
@@ -53,7 +53,7 @@ sub LoadListFromTransaction {
 ##
 #  Loaded ticket last comment => editor
 ##
-		my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+		my $message = $Ticket->FirstCustomFieldValue('TextContent');
 		my @csv_lines = split /^/m, $message;
 		my $json_text = '';
 		my @_json = ();
@@ -78,12 +78,12 @@ sub LoadLibFromTransaction {
 ##
 #  Loaded ticket CF => editor
 ##
-		my $message =  $Ticket->FirstCustomFieldValue('TextJegyzet');
+		my $message =  $Ticket->FirstCustomFieldValue('TextContent');
 		if ( $message ) {
 			$message =~ s/\R/&#013;/g;
 			return  Encode::encode_utf8( $message );
 		} else {
-			return "Jegyzet";
+			return "Content";
 		}
 	} else {
 		return "N/A";
@@ -128,12 +128,9 @@ sub LoadTicketAttachments{
 				$icon = '<i class="cloudicons8-16-cloud"></i>';
 			};
 			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
-			my %rabbitMQ = RT->Config->Get('RabbitMQ');
 			my $onclick = '';
-			$onclick = sprintf("onclick='sendOpenReqMQ(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==1));
-			$onclick = sprintf("onclick='copyClipboard(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==0));			
 			$filename = '<span class="__dropdown">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank' %s><span style='display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $onclick, $icon, $attach->Filename);
+			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank'><span style='display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $icon, $attach->Filename);
 			$filename .= '<div class="__dropdown-content">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 480 ) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );

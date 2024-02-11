@@ -15,18 +15,17 @@ my $Ticket = RT::Ticket->new( RT::SystemUser );
 $Ticket->Load( $ticketId );
 my $Queue = $Ticket->QueueObj;
 
-my $ConfigTikcetSubject = $Queue->FirstCustomFieldValue('Q-FolderStruktura') if $Queue->FirstCustomFieldValue('Q-FolderStruktura');
+my $ConfigTikcetSubject;
 
 unless ($ConfigTikcetSubject) {
 	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
 	my $FolderStructureTicket = RT::Ticket->new( RT::SystemUser );
-	##RT::Logger->info("ShowAttachments __id = $__id");
 	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
 	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
 }
 
 my $Tickets = RT::Tickets->new( RT::SystemUser );
-my $SQL = "Queue = 'Lista: Alapdokumentum' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
+my $SQL = "Queue = 'List: General' AND Status = '__Active__' AND Subject LIKE '$ConfigTikcetSubject'";
 RT::Logger->info("LoadNodes.json = $SQL");
 $Tickets->FromSQL( $SQL ) ;
 my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
@@ -51,7 +50,7 @@ sub LoadListFromTransaction {
 ##
 #  Loaded ticket last comment => editor
 ##
-		my $message = $Ticket->FirstCustomFieldValue('TextJegyzet');
+		my $message = $Ticket->FirstCustomFieldValue('TextContent');
 		my @csv_lines = split /^/m, $message;
 		my $json_text = '';
 		my @_json = ();
@@ -76,12 +75,12 @@ sub LoadLibFromTransaction {
 ##
 #  Loaded ticket CF => editor
 ##
-		my $message =  $Ticket->FirstCustomFieldValue('TextJegyzet');
+		my $message =  $Ticket->FirstCustomFieldValue('TextContent');
 		if ( $message ) {
 			$message =~ s/\R/&#013;/g;
 			return  Encode::encode_utf8( $message );
 		} else {
-			return "Jegyzet";
+			return "Content";
 		}
 	} else {
 		return "N/A";
