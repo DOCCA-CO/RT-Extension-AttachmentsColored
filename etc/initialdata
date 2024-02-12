@@ -17,7 +17,7 @@ push @CustomFields, {
 	LookupType  => 'RT::Queue-RT::Ticket',
 	Pattern  => '',
 	Disabled  => '0',
-	Name  => 'TextContnt',
+	Name  => 'TextContent',
 	MaxValues  => '1',
 	UniqueValues  => '0',
 	Type  => 'Text',
