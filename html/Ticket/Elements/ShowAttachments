@@ -69,7 +69,7 @@
           </div>
           <div class="form-group">
             <label class="col-form-label"><%loc('User')%>:</label>
-% my $user_selector = $m->scomp('/Elements/SelectOwnerQuick', Name => 'Owner1', DefaultValue => 0, Default => $session{'CurrentUser'}->id );
+% my $user_selector = $m->scomp('/Elements/SelectOwner', Name => 'Owner1', DefaultValue => 0, Default => $session{'CurrentUser'}->id );
 <% $user_selector |n %>
           </div>
           <div class="form-group">
