@@ -115,3 +115,7 @@ msgstr "Új ügybe küld"
 #:
 msgid "Ticket id"
 msgstr "Ügyszám"
+
+#: 
+msgid "Download"
+msgstr "Letöltés"
