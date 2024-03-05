@@ -28,7 +28,8 @@ for my $v (@values) {
 my $top = MIME::Entity->build(Type => "text/html", Encoding => "quoted-printable", Data => Encode::encode_utf8($message));
 
 for my $a (@newAttacments) {
-    $top->attach(Type => $a->ContentType, Encoding => $a->OriginalEncoding, Filename => Encode::encode_utf8($a->Filename), Disposition => "attachment", Data => $a->OriginalContent);
+    $top->attach(Type => $a->ContentType, Encoding => $a->OriginalEncoding, Subject => Encode::encode_utf8($a->Filename),
+            Filename => Encode::encode_utf8($a->Filename), Disposition => "attachment", Data => $a->OriginalContent);
 }
 
 ## $m->abort();
