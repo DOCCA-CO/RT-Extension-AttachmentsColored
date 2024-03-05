@@ -17,12 +17,13 @@ my $top = MIME::Entity->build( Subject => $subj, Type => "text/html", Encoding =
 for my $v (@values) {
     my $attachment = RT::Attachment->new($RT::SystemUser);
     $attachment->Load($v);
-    $attachment->SetAttribute(Name => 'Category', Content => 'hidden');
+##    $attachment->SetAttribute(Name => 'Category', Content => 'hidden');
     push @newAttacments, $attachment;
 }
 
 for my $a (@newAttacments) {
-    $top->attach(Type => $a->ContentType, Encoding => $a->OriginalEncoding, Filename => Encode::encode_utf8($a->Filename), Disposition => "attachment", Data => $a->OriginalContent);
+    $top->attach(Type => $a->ContentType, Encoding => $a->OriginalEncoding, Subject => Encode::encode_utf8($a->Filename),
+            Filename => Encode::encode_utf8($a->Filename), Disposition => "attachment", Data => $a->OriginalContent);
 }
 
 ##$top->attach();
