@@ -7,5 +7,17 @@ if ($Att && $Att->Id && ($Att->FirstAttribute('Comment') || $ARGS{'Value'})) {
     $Att->SetAttribute(Name => 'Comment', Content => $ARGS{'Value'});
     $m->out( sprintf( "Comment Set %s => %s", $ARGS{'attachId'}, $ARGS{'Value'} ) );
 }
+
+my $Ticket = RT::Ticket->new($session{'CurrentUser'});
+my $commentCF="";
+$Ticket->Load($ARGS{'ticketId'});
+my $attachments = $Ticket->Attachments;
+while(my $attach = $attachments->Next){
+    if($attach->FirstAttribute('Comment')){# && $attach->FirstAttribute('Comment')->Content ne $ARGS{'Value'}){
+    $commentCF.= $attach->FirstAttribute('Comment')->Content." ";
+    }
+}
+$Ticket->AddCustomFieldValue(Field => 'Comment', Value => $commentCF , RecordTransaction => 0);#"SantaMaria" ); # $ARGS{'Value'});
+
 $m->abort();
 </%init>
