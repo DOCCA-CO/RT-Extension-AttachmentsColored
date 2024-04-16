@@ -309,7 +309,7 @@
 							},
 		                    { "data":"comment",
 		                    	"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<span style='display:none'>"+sData+"</span><input style='border-style:none; padding: 5px; width: 150px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp;<img style='cursor:pointer; padding-left: 5px;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
+									$(nTd).html( "<span style='display:none'>"+sData+"</span><input style='border-style:none; padding: 5px; width: 150px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value, <%$Ticket->Id%>);' value='" + sData + "' disabled>&nbsp;<img style='cursor:pointer; padding-left: 5px;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
 								}
 		                    }
 		                ],
@@ -400,14 +400,15 @@
 		jQuery( "#"+editID ).prop( "disabled", false ).focus();
 	}
 
-	function saveComment ( editID, editVal ) {
+	function saveComment ( editID, editVal, editedTicketId ) {
 		jQuery( "#"+editID ).prop( "disabled", true );
 		jQuery.ajax({
 			type: 'POST',
 			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyComment',
 			data: {
 				'Value' : editVal,
-				'attachId' : editID.replace("comm-", "")
+				'attachId' : editID.replace("comm-", ""),
+				'ticketId' : editedTicketId
 			}
 		});
 	}
@@ -544,4 +545,3 @@ $Selectable => 0
 $Count => undef
 @Checked => ()
 </%ARGS>
-
