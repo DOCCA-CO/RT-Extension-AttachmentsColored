@@ -27,6 +27,17 @@ push @CustomFields, {
 	ApplyTo => [ 'Lista: Alapdokumentum' ] ,
 };
 
+push @CustomFields, {
+	LookupType  => 'RT::Queue-RT::Ticket',
+	Pattern  => '',
+	Disabled  => '0',
+	Name  => 'Comment',
+	MaxValues  => '1',
+	Description  => ';Hidden',
+	UniqueValues  => '0',
+	Type  => 'Text',
+};
+
 our @Final = (sub {
 	print "Create ticket...\n";
 	my $ticket = RT::Ticket->new( RT->SystemUser );
