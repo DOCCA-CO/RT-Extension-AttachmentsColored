@@ -257,10 +257,10 @@ while ( my $attach = $Attachments->Next() ) {
 ## [DOCCA #4601562] end
 
    # display "show more" only when there will be more attachments
-   if (defined($Count) && --$Count < 0) {
-       $show_more = 1;
-       last;
-   }
+##   if (defined($Count) && --$Count < 0) {
+##       $show_more = 1;
+##       last;
+##   }
    push @{ $documents{ $attach->Filename } }, $attach;
 }
 
