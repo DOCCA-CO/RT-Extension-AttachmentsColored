@@ -74,7 +74,7 @@
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
                     <span class="__dropdown">
 % }
-                        <span style="display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;"><%$key%></span>
+                        <span style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$key%></span>
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
 % my $url;
 % foreach my $rev (@{$documents{$key}}) {
@@ -102,7 +102,7 @@
 <!-- selectable -->  
         <input type="checkbox" class="checkbox" name="AttachExisting" value="<% $rev->Id %>" <% $is_checked{$rev->Id} ? 'checked' : '' %> />
         <br />
-% } } }
+% } else { print '&nbsp;'; } } }
                 </td>
                 <td>
 % foreach my $rev (@{$documents{$key}}) {
@@ -151,43 +151,7 @@
 		$(document).ready( function () {
 			$('#attachments').DataTable({
 					language: {
-						processing:     "Feldolgozás...",
-						search:         "Keresés:",
-						lengthMenu:    "_MENU_ találat oldalanként",
-						info:           "Találatok: _START_ - _END_ Összesen: _TOTAL_",
-						infoEmpty:      "Nulla találat",
-						infoFiltered:   "(_MAX_ összes rekord közül szűrve)",
-						infoPostFix:    "",
-						loadingRecords: "Betöltés....",
-						zeroRecords:    "Nincs a keresésnek megfelelő találat",
-						emptyTable:     "A táblázatban nem állnak rendelkezésre adatok",
-						paginate: {
-							first:      "Első",
-							previous:   "Előző",
-							next:       "Következő",
-							last:       "Utolsó"
-						},
-						aria: {
-							sortAscending:  ": aktiválja a növekvő rendezéshez",
-							sortDescending: ": aktiválja a csökkenő rendezéshez"
-						},
-						select: {
-							rows: {
-								"_": "%d sor kiválasztva",
-								"0": "",
-								"1": "1 sor kiválasztva"
-							}
-						},
-						buttons: {
-							print: "Nyomtatás",
-							colvis: "Oszlopok",
-							copy: "Másolás",
-							copyTitle: "Vágólapra másolás",
-							copySuccess: {
-								"_": "%d sor másolva",
-								"1": "1 sor másolva"
-							}
-						}
+						url: '<%$RT::WebPath%>/NoAuth/js/Hungarian.json'
 					},
 					ordering: false,
 					info:     false

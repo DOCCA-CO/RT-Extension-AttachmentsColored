@@ -20,7 +20,7 @@ my $ConfigTikcetSubject; ## = $Queue->FirstCustomFieldValue('Q-FolderStruktura')
 unless ($ConfigTikcetSubject) {
 	my $__id = RT->Config->Get('DefaultFolderStructureTicketID');
 	my $FolderStructureTicket = RT::Ticket->new( RT::SystemUser );
-	##RT::Logger->info("ShowAttachments __id = $__id");
+	##RT::Logger->info("ShowAttachmentsColored __id = $__id");
 	$FolderStructureTicket->Load(RT->Config->Get('DefaultFolderStructureTicketID'));
 	$ConfigTikcetSubject = $FolderStructureTicket->Subject;
 }
@@ -114,6 +114,7 @@ sub LoadTicketAttachments{
 		my $creator = '<span style="display:block; white-space: nowrap; max-width:170px; overflow:hidden; text-overflow:ellipsis;">' . $attach->CreatorObj->Name . '</span>';
 		my $comment = ($attach->FirstAttribute('Comment')?$attach->FirstAttribute('Comment')->Content:'');
 		my $content = $attach->Content if ($attach->ContentType eq 'text/uri-list');
+		my $checkbox = sprintf("%sTicket/Attachment/%d/%d/%s", RT->Config->Get('WebURL'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename);
 
 		if ($attach->ContentType eq 'text/uri-list') {
 			if ( index( lc( $attach->Content ), 'dropbox' ) > 0) {
@@ -131,9 +132,9 @@ sub LoadTicketAttachments{
 			my %rabbitMQ = RT->Config->Get('RabbitMQ');
 			my $onclick = '';
 			$onclick = sprintf("onclick='sendOpenReqMQ(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==1));
-			$onclick = sprintf("onclick='copyClipboard(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==0));			
+			$onclick = sprintf("onclick='copyClipboard(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==0));
 			$filename = '<span class="__dropdown">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank' %s><span style='display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $onclick, $icon, $attach->Filename);
+			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank' %s><span style='display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $onclick, $icon, $attach->Filename);
 			$filename .= '<div class="__dropdown-content">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 480 ) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
@@ -143,16 +144,27 @@ sub LoadTicketAttachments{
 		} else {
 			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
 			$filename = '<span class="__dropdown">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s'  target='_blank'><span style='display:block; white-space: nowrap; min-width:150px; max-width:170px; overflow:hidden; text-overflow:ellipsis;'>%s</span></a>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $attach->Filename);
+			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' %s target='_blank'><span style='display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;'>%s</span></a>", 
+				RT->Config->Get('WebPath'), 
+				$attach->TransactionId, 
+				$attid = $attach->Id, 
+				$attach->Filename, 
+				(lc($attach->Filename) =~ /\.(bmp|gif|jpe?g|pdf|png|txt|webp)$/ )?"":sprintf("download='%s'",$attach->Filename), 
+				$attach->Filename);
 
 			$filename .= '<div class="__dropdown-content">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;'>", RT->Config->Get('WebPath'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename, $comment, 480 ) if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;' download='%s'>", 
+				RT->Config->Get('WebPath'), 
+				$attach->TransactionId, 
+				$attid = $attach->Id, 
+				$attach->Filename, 
+				$comment, 480 ) if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
 			$filename .= '</div>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 			$filename .= '</span>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
 
 		}
-		push ( @_json, { category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
+		push ( @_json, { checkbox=>$checkbox, category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
 	}
 	return @_json;
 }

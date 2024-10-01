@@ -106,16 +106,16 @@ msgstr "Bezár"
 
 #:
 msgid "Add to existing ticket"
-msgstr "Másik ügybe küld"
+msgstr "Másik ügybe küldés"
 
 #:
 msgid "Add to new ticket"
-msgstr "Új ügybe küld"
+msgstr "Új ügybe küldés"
+
+#:
+msgid "Mass download"
+msgstr "Tömeges letöltés"
 
 #:
 msgid "Ticket id"
 msgstr "Ügyszám"
-
-#: 
-msgid "Download"
-msgstr "Letöltés"

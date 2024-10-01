@@ -108,7 +108,9 @@ div.AttachmentsColoredOrder {
     padding: 15px;
     text-align: center;
 }
-
+.dataTables_length,
 .__toolbar {
     float: left;
+    height: 32px;
+    line-height: 32px;
 }
