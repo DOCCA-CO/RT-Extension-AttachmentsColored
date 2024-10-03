@@ -262,34 +262,53 @@
 							{
 							    text: "<&|/l&>Mass download</&>",
 							    action: function( e, t, node, config ) {
-								var links = [];
-								var data = dt.rows({selected:  true}).data();
-								var zip = new JSZip();
-								var count = 0;
-								var zipFilename = "doxAttachments.zip";
-								$('input[name="att"]:checked').each(function() {
-									links.push($(this).data('link'));
-								});
-%#								for (i=0; i<data.length; i++) {
-%#								    links.push(data[i].checkbox);
-%#								}
-								console.log(links);
-								links.forEach(function(url, i) {
-								    var filename = url.split('/').pop();
-								    JSZipUtils.getBinaryContent(url, function (err, dat) {
-									if (err) {
-									    throw err; // or handle the error
+									var links = [];
+									var data = dt.rows({selected:  true}).data();
+									var zip = new JSZip();
+									var count = 0;
+									var zipFilename = "doxAttachments.zip";
+									$('input[name="att"]:checked').each(function() {
+										links.push($(this).data('link'));
+									});
+%#									for (i=0; i<data.length; i++) {
+%#									    links.push(data[i].checkbox);
+%#									}
+									console.log(links);
+									switch (true) {
+										case (2 <= links.length):
+											links.forEach(function(url, i) {
+												var filename = url.split('/').pop();
+												JSZipUtils.getBinaryContent(url, function (err, dat) {
+												if (err) {
+													throw err; // or handle the error
+												}
+												zip.file(filename, dat, { binary: true });
+												count++;
+												if (count == links.length) {
+													zip.generateAsync({ type: 'blob' }).then(function (content) {
+													saveAs(content, zipFilename);
+													});
+												}
+												});
+											});
+											break;
+										case (1 == links.length):
+											const filename = links[0].split('/').pop();
+											fetch(links[0])
+												.then(response => response.blob())
+												.then(blob => {
+													const url = window.URL.createObjectURL(blob);
+													const a = document.createElement('a');
+													a.href = url;
+													a.download = filename;
+													a.click();
+													window.URL.revokeObjectURL(url);
+												});
+											break;
+										default: 
+											console.log('No links selected');
 									}
-									zip.file(filename, dat, { binary: true });
-									count++;
-									if (count == links.length) {
-									    zip.generateAsync({ type: 'blob' }).then(function (content) {
-										saveAs(content, zipFilename);
-									    });
-									}
-								    });
-								});
-							    }
+								}
 							}],
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
