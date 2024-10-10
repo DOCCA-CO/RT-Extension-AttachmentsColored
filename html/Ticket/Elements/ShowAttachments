@@ -296,14 +296,14 @@
 											const filename = links[0].split('/').pop();
 											fetch(links[0])
 												.then(response => response.blob())
-												.then(blob => {
-													const url = window.URL.createObjectURL(blob);
-													const a = document.createElement('a');
-													a.href = url;
-													// a.download = filename;
-													a.click();
-													window.URL.revokeObjectURL(url);
-												});
+													.then(blob => {
+														const url = window.URL.createObjectURL(blob);
+														const a = document.createElement('a');
+														a.href = url;
+														a.download = filename;
+														a.click();
+														window.URL.revokeObjectURL(url);
+													});
 											break;
 										default: 
 											console.log('No links selected');

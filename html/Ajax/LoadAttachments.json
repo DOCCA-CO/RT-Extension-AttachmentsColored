@@ -100,7 +100,7 @@ sub LoadTicketAttachments{
 		{ FIELD => 'Created', ORDER => 'DESC' },
 		{ FIELD => 'id',      ORDER => 'DESC' },
 	);
-	my $extRe = qr/\.(bmp|gif|jpe?g|pdf|png|txt|webp)$/i;
+	my $extRe = qr/\.(bmp|gif|jpe?g|mp3|pdf|png|txt|webp)$/i;
 	
 	while ( my $attach = $Attachments->Next() ) {
 		next unless ($attach->Filename);
