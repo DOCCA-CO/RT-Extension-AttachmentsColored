@@ -100,11 +100,12 @@ sub LoadTicketAttachments{
 		{ FIELD => 'Created', ORDER => 'DESC' },
 		{ FIELD => 'id',      ORDER => 'DESC' },
 	);
+	my $extRe = qr/\.(bmp|gif|jpe?g|pdf|png|txt|webp)$/i;
+	
 	while ( my $attach = $Attachments->Next() ) {
 		next unless ($attach->Filename);
-		next if (lc($attach->Filename) =~ /_rr\.(jpg|jpeg|png)/i);
-		my $catt = ($attach->FirstAttribute('Category')?$attach->FirstAttribute('Category')->Content:'X');
-		my $node = ($attach->FirstAttribute('Folder')?$attach->FirstAttribute('Folder')->Content:'');
+		my $catt = ($attach->FirstAttribute('Category') ? $attach->FirstAttribute('Category')->Content : 'X');
+		my $node = ($attach->FirstAttribute('Folder') ? $attach->FirstAttribute('Folder')->Content : '');
 		my $size = $attach->FriendlyContentLength;
 		my $trid = $attach->TransactionId;
 		my $attid = $attach->Id;
@@ -112,8 +113,8 @@ sub LoadTicketAttachments{
 		my $date_unix = $attach->CreatedObj->Unix;
 		my $date = $attach->CreatedAsString;
 		my $creator = '<span style="display:block; white-space: nowrap; max-width:170px; overflow:hidden; text-overflow:ellipsis;">' . $attach->CreatorObj->Name . '</span>';
-		my $comment = ($attach->FirstAttribute('Comment')?$attach->FirstAttribute('Comment')->Content:'');
-		my $content = $attach->Content if ($attach->ContentType eq 'text/uri-list');
+		my $comment = ($attach->FirstAttribute('Comment') ? $attach->FirstAttribute('Comment')->Content : '');
+		my $content = $attach->Content if $attach->ContentType eq 'text/uri-list';
 		my $checkbox = sprintf("%sTicket/Attachment/%d/%d/%s", RT->Config->Get('WebURL'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename);
 
 		if ($attach->ContentType eq 'text/uri-list') {
@@ -128,41 +129,38 @@ sub LoadTicketAttachments{
 			} else {
 				$icon = '<i class="cloudicons8-16-cloud"></i>';
 			};
-			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
 			my %rabbitMQ = RT->Config->Get('RabbitMQ');
 			my $onclick = '';
 			$onclick = sprintf("onclick='sendOpenReqMQ(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==1));
 			$onclick = sprintf("onclick='copyClipboard(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==0));
-			$filename = '<span class="__dropdown">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename = '<span class="__dropdown">' if $content =~ $extRe; 
 			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank' %s><span style='display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $onclick, $icon, $attach->Filename);
-			$filename .= '<div class="__dropdown-content">' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 480 ) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
-			$filename .= '</div>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
-			$filename .= '</span>' if ($content =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= '<div class="__dropdown-content">' if $content =~ $extRe; 
+			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 480 ) if $content =~ $extRe; 
+			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if $content =~ $extRe;
+			$filename .= '</div>' if $attach->Filename =~ $extRe;
+			$filename .= '</span>' if $content =~ $extRe; 
 			## $filename .= sprintf("<span onclick='copyClipboard(\"att-%s\");'><img style='display:inline-block; float:right;' src='%s/%s' alt='Clip' /></span>",  $attid, RT->Config->Get('WebPath'), 'static/images/clip-24.png') if (index($attach->Content, 'file:')>=0);
 		} else {
-			## ([^\s]+(\.(?i)(jpg|png|gif|bmp))$)
-			$filename = '<span class="__dropdown">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename = '<span class="__dropdown">' if $attach->Filename =~ $extRe; 
 			$filename .= sprintf("<a href='%s/Ticket/Attachment/%d/%d/%s' %s target='_blank'><span style='display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;'>%s</span></a>", 
 				RT->Config->Get('WebPath'), 
 				$attach->TransactionId, 
 				$attid = $attach->Id, 
 				$attach->Filename, 
-				(lc($attach->Filename) =~ /\.(bmp|gif|jpe?g|pdf|png|txt|webp)$/ )?"":sprintf("download='%s'",$attach->Filename), 
+				($attach->Filename =~ $extRe) ? "" : sprintf("download='%s'", $attach->Filename), 
 				$attach->Filename);
 
-			$filename .= '<div class="__dropdown-content">' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
+			$filename .= '<div class="__dropdown-content">' if $attach->Filename =~ $extRe; 
 			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;' download='%s'>", 
 				RT->Config->Get('WebPath'), 
 				$attach->TransactionId, 
 				$attid = $attach->Id, 
 				$attach->Filename, 
-				$comment, 480 ) if (lc($attach->Filename) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ); 
-			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ );
-			$filename .= '</div>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-			$filename .= '</span>' if ($attach->Filename =~ /\.(png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|bmp|BMP)$/ ); 
-
+				$comment, 480 ) if $attach->Filename =~ $extRe;
+			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if $attach->Filename =~ $extRe;
+			$filename .= '</div>' if $attach->Filename =~ $extRe; 
+			$filename .= '</span>' if $attach->Filename =~ $extRe; 
 		}
 		push ( @_json, { checkbox=>$checkbox, category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
 	}
