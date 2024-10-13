@@ -260,7 +260,7 @@
 							    }
 							},
 							{
-							    text: "<&|/l&>Mass download</&>",
+							    text: "<&|/l&>Download</&>",
 							    action: function( e, t, node, config ) {
 									var links = [];
 									var data = dt.rows({selected:  true}).data();
