@@ -117,5 +117,9 @@ msgid "Mass download"
 msgstr "Tömeges letöltés"
 
 #:
+msgid "Download"
+msgstr "Letöltés"
+
+#:
 msgid "Ticket id"
 msgstr "Ügyszám"
