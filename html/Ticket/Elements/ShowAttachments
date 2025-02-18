@@ -350,7 +350,7 @@
 									rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
 									rgroup += (key == sData)?" checked":"";
 									rgroup += ">";
-									rgroup += "<span class='checkmark' style='background-color: " + colors[key] + "'></span>";
+									rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important;'></span>";
 									rgroup += "</label>";
 									// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
 								}
