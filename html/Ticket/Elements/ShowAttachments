@@ -188,7 +188,6 @@
 				var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
 				return $result;
 			};
-
 			result = $.ajax({
 				type: "POST",
 				url: "<%RT->Config->Get('WebPath')%>/Ajax/LoadAttachments.json",
@@ -350,7 +349,7 @@
 									rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
 									rgroup += (key == sData)?" checked":"";
 									rgroup += ">";
-									rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important;'></span>";
+									rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important'></span>";
 									rgroup += "</label>";
 									// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
 								}
@@ -397,37 +396,37 @@
 							$("#"+this.id).trigger('change');
 						}
 					}
-					console.log("result.ajax -> then");
+				});
+				console.log("result.ajax -> then");
 		    // Event delegation for dynamically created elements
-					$(document).on('mouseenter', '.__dropdown', function() {
-		    				const dropdownContent = $(this).find('.__dropdown-content');
-		    				const rect = $(this)[0].getBoundingClientRect();
-		    				const viewportHeight = $(window).height();
+		    $(document).on('mouseenter', '.__dropdown', function() {
+		        const dropdownContent = $(this).find('.__dropdown-content');
+		        const rect = $(this)[0].getBoundingClientRect();
+		        const viewportHeight = $(window).height();
 
 		        // Remove any existing positioning classes
-		    				dropdownContent.removeClass('above below');
+		        dropdownContent.removeClass('above below');
 
 		        // Check if the element is in the upper half of the screen
-		    				if (rect.top < viewportHeight / 2) {
-		        				dropdownContent.addClass('below'); // Position below
-		    				} else {
-		        				dropdownContent.addClass('above'); // Position above
-		    				}
+		        if (rect.top < viewportHeight / 2) {
+		            dropdownContent.addClass('below'); // Position below
+		        } else {
+		            dropdownContent.addClass('above'); // Position above
+		        }
 
 		        // Ensure the dropdown is visible
-		    				dropdownContent.css('display', 'block');
-					});
+		        dropdownContent.css('display', 'block');
+		    });
 
 		    // Hide dropdown when mouse leaves the dropdown area
-					$(document).on('mouseleave', '.__dropdown', function() {
-		    			    $(this).find('.__dropdown-content').css('display', 'none');
-					});
+		    $(document).on('mouseleave', '.__dropdown', function() {
+		        $(this).find('.__dropdown-content').css('display', 'none');
+		    });
 
 		    // Hide dropdown when mouse leaves the dropdown area
-					$('.__dropdown').on('mouseleave', function() {
-		    				$(this).find('.__dropdown-content').css('display', 'none');
-					});
-				});
+		    $('.__dropdown').on('mouseleave', function() {
+		        $(this).find('.__dropdown-content').css('display', 'none');
+		    });
 			});
 		});
     });
