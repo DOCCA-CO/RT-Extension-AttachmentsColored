@@ -92,12 +92,22 @@ div.AttachmentsColoredOrder {
 }
 
 .__dropdown-content {
-    display: none;
+    display: none; /* Hide by default */
     position: absolute;
     background-color: #f9f9f9;
     min-width: 480px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
+}
+
+.__dropdown-content.above {
+    top: auto;
+    bottom: 100%; /* Position above the hovered element */
+}
+
+.__dropdown-content.below {
+    top: 100%; /* Position below the hovered element */
+    bottom: auto;
 }
 
 .__dropdown:hover .__dropdown-content {
