@@ -6,9 +6,9 @@ Set(%AttachmentCategories, (
 	'hidden' => '#DCDCDC'
 ));
 
-Set($ConfigTicketID, 585);
+Set($ConfigTicketID, 2);
 
-Set($DefaultFolderStructureTicketID, 1513);
+Set($DefaultFolderStructureTicketID, 1);
 
 Set(%RabbitMQ, ('enabled' => 0, 'host' => '', 'port' => 5672, 'login' => '', 'passw' => ''));
 

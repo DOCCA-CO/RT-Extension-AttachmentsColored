@@ -152,12 +152,12 @@ sub LoadTicketAttachments{
 				$attach->Filename);
 
 			$filename .= '<div class="__dropdown-content">' if $attach->Filename =~ $extRe; 
-			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='width: %upx;' download='%s'>", 
+			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='max-width:%upx;max-height:%upx;' download='%s'>", 
 				RT->Config->Get('WebPath'), 
 				$attach->TransactionId, 
 				$attid = $attach->Id, 
 				$attach->Filename, 
-				$comment, 480 ) if $attach->Filename =~ $extRe;
+				$comment, 480,  640) if $attach->Filename =~ $extRe;
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if $attach->Filename =~ $extRe;
 			$filename .= '</div>' if $attach->Filename =~ $extRe; 
 			$filename .= '</span>' if $attach->Filename =~ $extRe; 
