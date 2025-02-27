@@ -201,13 +201,15 @@
 						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
 						dom: 'Bl<"__toolbar">frtip',
 						initComplete: function() {
-%#							$("div.__toolbar").html('&nbsp;&nbsp;<button type="button" class="btn btn-outline-primary" id="newTicket" onclick="newTicketClick();"><&|/l&>Add to new ticket</&></button> <button type="button" class="btn btn-outline-dark" id="okTicket" onclick="okTicketClick();"><&|/l&>Add to existing ticket</&></button>&nbsp;&nbsp;<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
 							$("div.__toolbar").html('&nbsp;&nbsp;&nbsp;&nbsp;<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
-							//$("div.__toolbar").css( 'margin-top', '3px' );
-							//$("div.__toolbar").css( 'display', 'inline-block' );
-							//$("div.__toolbar").css( 'padding-left', '16px' );
-							//$("div.__toolbar").css( 'line-height', '25px' );
-							//$("div.__toolbar").css( 'text-align', 'center' );
+							$('.selectnode').each(function() {
+								for (var i = 0; i < data.attachments.length; i++){
+									if ( this.id == "sel-" + data.attachments[i].attid ) {
+										$("#"+this.id).val(data.attachments[i].node);
+										$("#"+this.id).trigger('change');
+									}
+								}
+							});
 						},
 						buttons: [
 							{
@@ -261,6 +263,7 @@
 							{
 							    text: "<&|/l&>Download</&>",
 							    action: function( e, t, node, config ) {
+
 									var links = [];
 									var data = dt.rows({selected:  true}).data();
 									var zip = new JSZip();
@@ -335,33 +338,33 @@
 							};
 						},
 						columns: [
-%#							{ "data":"checkbox", visible:false, orderable: false },
 							{ "data": null, "defaultContent": "","orderable": false,
 							"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 								$(nTd).html( "<input type='checkbox' name='att' value='"+oData.attid+"' data-link='"+oData.checkbox+"' />" );
 							}},
 							{ "data":"category",
 		                    	//"orderable": false,
-							"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-								var rgroup = "";
-								for (var key in colors) {
-									rgroup += "<label class='__container'>";
-									rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
-									rgroup += (key == sData)?" checked":"";
-									rgroup += ">";
-									rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important'></span>";
-									rgroup += "</label>";
-									// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
-								}
+								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+									var rgroup = "";
+									for (var key in colors) {
+										rgroup += "<label class='__container'>";
+										rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
+										rgroup += (key == sData)?" checked":"";
+										rgroup += ">";
+										rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important'></span>";
+										rgroup += "</label>";
+										// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
+									}
 									//&#x2612;
-								rgroup += "<label style='display: inline-block;	position: relative; margin-bottom: 20px;'>";
-								rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
-								rgroup += "</label>";
-								rgroup += "";
-								$(nTd).css( 'width', '180px' );
-								$(nTd).html( rgroup );
-								return oData.attid;
-							}},
+									rgroup += "<label style='display: inline-block;	position: relative; margin-bottom: 20px;'>";
+									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
+									rgroup += "</label>";
+									rgroup += "";
+									$(nTd).css( 'width', '180px' );
+									$(nTd).html( rgroup );
+									return oData.attid;
+								}
+							},
 							{ "data":"filename" },
 							{ "data":"date_unix",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
@@ -381,22 +384,12 @@
 								}
 							}],
 						columnDefs: [
-%#								{ orderable: false, className: 'select-checkbox', targets: 0 },
 								{ type: 'file-size', targets: 5 }
 							],
-%#				select: { 'style': 'multi' },
 		                order: [ 3, 'asc' ],
 					});
 				}
 			}).then(function (data) {
-				const attachmentsMap = new Map(data.attachments.map(att => [`sel-${att.attid}`, att.node]));
-
-				$('.selectnode').each(function () {
-					const newValue = attachmentsMap.get(this.id);
-					if (newValue !== undefined) {
-						$(this).val(newValue).trigger('change');
-					}
-				});
 			    // Event delegation for dynamically created elements
 				$(document).on('mouseenter', '.__dropdown', function() {
 					const dropdownContent = $(this).find('.__dropdown-content');
@@ -587,7 +580,6 @@
             jQuery('#myModal2').appendTo("body").modal('hide');
         });
     }
-
 </script>
 
 </&>
