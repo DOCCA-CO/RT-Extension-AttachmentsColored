@@ -89,6 +89,7 @@ div.AttachmentsColoredOrder {
 .__dropdown {
     position: relative;
     display: inline-block;
+    background: transparent !important;
 }
 
 .__dropdown-content {
@@ -123,4 +124,18 @@ div.AttachmentsColoredOrder {
     float: left;
     height: 32px;
     line-height: 32px;
+}
+
+.__attachmentName {
+    display: block;
+    white-space: nowrap;
+    min-width:150px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    background: transparent !important;
+}
+
+.inverted-text {
+    mix-blend-mode: difference !important;
+    color: white !important; /* This acts as the base for the blend */
 }

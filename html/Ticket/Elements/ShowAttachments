@@ -331,6 +331,11 @@
 						},
 						createdRow: function( row, data, dataIndex ) {
 							if (data['category'] != 'X') {
+								if (!isClassDefined('darkmode')) {
+									$(row).css( 'background-color', colors[data['category']] );
+								} else {
+									$(row).find('td').attr('style', 'background:' + colors[data['category']] + ' !important');
+								}
 								$(row).css( 'background-color', colors[data['category']] );
 							};
 							if ( (data['category'] == "hidden" ) && ( $('#showhide').val() != '1') ) {
@@ -368,7 +373,7 @@
 							{ "data":"filename" },
 							{ "data":"date_unix",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).text( oData.date );
+									$(nTd).html( oData.date );
 								}
 							},
 							{ "data":"creator" },
@@ -380,7 +385,7 @@
 							},
 							{ "data":"comment",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<span style='display:none'>"+sData+"</span><input style='border-style:none; padding: 5px; width: 150px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp;<img style='cursor:pointer; padding-left: 5px;' onclick='editComment( \"comm-"+oData.attid+"\" );' src=\"<%RT->Config->Get('WebPath')%>/static/images/pencil-icon.png\">" );
+									$(nTd).html( "<span class='__attachmentName inverted-text' style='display:none'>"+sData+"</span><input style='border-style:none; padding: 5px; width: 150px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp; <span class='fas fa-pencil-alt icon-bordered fa-2x inverted-text' style='vertical-align: middle;' onclick='editComment( \"comm-"+oData.attid+"\" );'></span>" );
 								}
 							}],
 						columnDefs: [
@@ -423,42 +428,52 @@
 		});
     });
 
-	function setCategory( row, cell, radio, value ) {
-		//dt.cell({row:row, column:0}).data(value);
-		jQuery(dt.row(row).node()).css( 'background-color', colors[value] );
-		if (value == 'hidden') {
-			if (!jQuery("#showhide").is(":checked")) {
-				jQuery(dt.row(row).node()).hide();	
-			}
-		};
-		//jQuery(dt.cell({row:row, column:0}).data(radio.replace("rad", "")).draw(false));
-		//jQuery(dt.fnUpdate( radio.replace("rad", ""), row, cell, false ));
-		jQuery.ajax({
-			type: 'POST',
-			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyCategory',
-			data: {
-				'Value' : value,
-				'attachId' : radio.replace("rad", ""),
-			}
-		});
+    function setCategory( row, cell, radio, value ) {
+	//dt.cell({row:row, column:0}).data(value);
+	console.log(isClassDefined('darkmode'));
+	if (!isClassDefined('darkmode')) {
+	    jQuery(dt.row(row).node()).css( 'background', colors[value] );
+	} else {
+	    jQuery(dt.row(row).node()).find('td').attr('style', 'background:' + colors[value] + ' !important');
+	}
+	//jQuery(dt.row(row).node()).css( 'background', colors[value] );
+	if (value == 'hidden') {
+	    if (!jQuery("#showhide").is(":checked")) {
+		jQuery(dt.row(row).node()).hide();	
+	    }
 	};
+	//jQuery(dt.cell({row:row, column:0}).data(radio.replace("rad", "")).draw(false));
+	//jQuery(dt.fnUpdate( radio.replace("rad", ""), row, cell, false ));
+	jQuery.ajax({
+	    type: 'POST',
+	    url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyCategory',
+	    data: {
+		'Value' : value,
+		'attachId' : radio.replace("rad", ""),
+	    }
+	});
+    };
 
-	function delCategory( row, radio ) {
-		//dt.cell({row:row, column:0}).data(value);
-		jQuery.ajax({
-			type: 'POST',
-			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxDeleteCategory',
-			data: {
-				'attachId'	: radio.replace("del", ""),
-			},
-			success:function(){
-				var r = radio.replace("del", "rad-")
-				jQuery("[id^="+r+"]").attr('checked', false);
-				jQuery(dt.row(row).node()).css( 'background-color', '' );
-				console.log(row, r, radio);
-			}
-		});
-	};
+    function delCategory( row, radio ) {
+	//dt.cell({row:row, column:0}).data(value);
+	jQuery.ajax({
+	    type: 'POST',
+	    url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxDeleteCategory',
+	    data: {
+		'attachId'	: radio.replace("del", ""),
+	    },
+	    success:function(){
+		var r = radio.replace("del", "rad-")
+		jQuery("[id^="+r+"]").attr('checked', false);
+		if (!isClassDefined('darkmode')) {
+		    jQuery(dt.row(row).node()).removeAttr('style');
+		} else {
+		    jQuery(dt.row(row).node()).find('td').removeAttr('style');
+		}
+		console.log(row, r, radio);
+	    }
+	});
+    };
 
 	function setFolder( attID, node ) {
 		jQuery.ajax({
@@ -579,6 +594,21 @@
             });
             jQuery('#myModal2').appendTo("body").modal('hide');
         });
+    }
+
+    function isClassDefined(className) {
+	for (let sheet of document.styleSheets) {
+	    try {
+		for (let rule of sheet.cssRules || []) {
+		    if (rule.selectorText && rule.selectorText.includes('.' + className)) {
+			return true;
+		    }
+		}
+	    } catch (e) {
+	// Ignore cross-origin stylesheets
+	    }
+	}
+	return false;
     }
 </script>
 
