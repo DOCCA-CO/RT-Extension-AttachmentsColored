@@ -136,6 +136,9 @@ div.AttachmentsColoredOrder {
 }
 
 .inverted-text {
+}
+
+.darkmode .inverted-text {
     mix-blend-mode: difference !important;
     color: white !important; /* This acts as the base for the blend */
 }

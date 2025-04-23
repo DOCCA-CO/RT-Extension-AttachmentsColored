@@ -469,6 +469,7 @@
 		    jQuery(dt.row(row).node()).removeAttr('style');
 		} else {
 		    jQuery(dt.row(row).node()).find('td').removeAttr('style');
+		    jQuery(dt.row(row).node()).css( 'background', '' );
 		}
 		console.log(row, r, radio);
 	    }
