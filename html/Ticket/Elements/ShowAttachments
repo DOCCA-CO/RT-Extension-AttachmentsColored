@@ -136,24 +136,24 @@
 		<tr>
 %#			<th></th>
 			<th><input type='checkbox' id='checkAll' onclick='checkAllClick(this);' /></th>
-			<th><&|/l&>Category</&></th>
+			<th><&|/l&>Highlight</&></th>
 			<th><&|/l&>Filename</&></th>
 			<th><&|/l&>Date</&></th>
 			<th><&|/l&>User</&></th>
 			<th><&|/l&>Size</&></th>
-			<th><&|/l&>Node</&></th>
+			<th><&|/l&>Tagging</&></th>
 			<th><&|/l&>comment</&></th>
 		</tr>
 	</thead>
 <!--
 	<tfoot>
 		<tr>
-			<th><&|/l&>Category</&></th>
+			<th><&|/l&>Highlight</&></th>
 			<th><&|/l&>Filename</&></th>
 			<th><&|/l&>Date</&></th>
 			<th><&|/l&>User</&></th>
 			<th><&|/l&>Size</&></th>
-			<th><&|/l&>Node</&></th>
+			<th><&|/l&>Tagging</&></th>
 			<th><&|/l&>comment</&></th>
 		</tr>
 	</tfoot>
@@ -212,7 +212,7 @@
 							});
 						},
 						buttons: [
-% if (0) {
+% if (RT->Config->Get('AttacmentsTicketFeature', $session{'CurrentUser'})) {
 							{
 							    text: "<&|/l&>Add to new ticket</&>",
 							    action: function( e, t, node, config ) {

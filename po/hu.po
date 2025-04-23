@@ -123,3 +123,19 @@ msgstr "Letöltés"
 #:
 msgid "Ticket id"
 msgstr "Ügyszám"
+
+#:
+msgid "Highlight"
+msgstr "Kiemelés"
+
+#:
+msgid "Tagging"
+msgstr "Jelölés"
+
+#:
+msgid "Send selected attachments into other ticket"
+msgstr "Kiválasztott csatolmányokat küldése másik ügybe"
+
+#:
+msgid "By enabling this feature, you\'ll be able to send attacments into new or already existing ticket."
+msgstr "A funkció engedélyezésével új vagy már meglévő ügyekbe küldhetsz csatolmányokat."

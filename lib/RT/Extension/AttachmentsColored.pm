@@ -1,5 +1,9 @@
-package RT::Extension::AttachmentsColored;
+use 5.008003;
+use strict;
+use warnings;
 
+{   
+    package RT::Extension::AttachmentsColored;
     our $VERSION = '0.1';
 
     RT->AddStyleSheets('AttachmentsColored.css');
@@ -7,9 +11,25 @@ package RT::Extension::AttachmentsColored;
     RT->AddStyleSheets('dataTables.bootstrap4.min.css');
     RT->AddStyleSheets('buttons.bootstrap4.min.css');
     RT->AddStyleSheets('select.dataTables.min.css');
+}
 
+{
+    package RT::Config;
+    use strict;
+    no warnings qw(redefine);
+    our %META;
 
-
+    $META{'AttacmentsTicketFeature'} = {
+        Section         => 'Ticket display',
+        Overridable     => 1,
+        Default         => 0,
+        Widget          => '/Widgets/Form/Boolean',
+        WidgetArguments => {
+            Description => 'Send selected attachments into other ticket', # loc
+            Hints       => 'By enabling this feature, you\'ll be able to send attacments into new or already existing ticket.', # loc
+        }
+    };
+}
 1;
 __END__
 
