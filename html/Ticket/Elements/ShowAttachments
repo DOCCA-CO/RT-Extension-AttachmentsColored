@@ -212,6 +212,7 @@
 							});
 						},
 						buttons: [
+% if (0) {
 							{
 							    text: "<&|/l&>Add to new ticket</&>",
 							    action: function( e, t, node, config ) {
@@ -260,6 +261,7 @@
 								});
 							    }
 							},
+% }
 							{
 							    text: "<&|/l&>Download</&>",
 							    action: function( e, t, node, config ) {
@@ -312,6 +314,7 @@
 									}
 								}
 							}],
+
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
 							$('.selectnode').select2({
