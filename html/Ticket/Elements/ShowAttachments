@@ -342,6 +342,11 @@
 								$(row).css( 'background-color', colors[data['category']] );
 							};
 							if ( (data['category'] == "hidden" ) && ( $('#showhide').val() != '1') ) {
+								if (!isClassDefined('darkmode')) {
+									$(row).css( 'background-color', '#DCDCDC' );
+								} else {
+									$(row).find('td').attr('style', 'background:#DCDCDC !important');
+								}
 								$(row).hide();
 							};
 						},
@@ -358,10 +363,9 @@
 										rgroup += "<label class='__container'>";
 										rgroup += "<input type='radio' onchange='setCategory(" + iRow + ","  + iCol + ", this.name, this.value);' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-" + key + "' value='" + key +"'";
 										rgroup += (key == sData)?" checked":"";
-										rgroup += ">";
-										rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important'></span>";
+										rgroup += " />";
+										rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important' title='" + key + "'></span>";
 										rgroup += "</label>";
-										// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
 									}
 									//&#x2612;
 									rgroup += "<label class='__container'>";
@@ -371,15 +375,13 @@
 									rgroup += "<input type='hidden' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-hidden' value='";
 									rgroup += (sData == "hidden")?"hidden":"";
 									rgroup += "'>";
-
 									rgroup += "</label>";
-									rgroup += "";
-
-									rgroup += "<label style='display: inline-block;	position: relative; margin-bottom: 20px;'>";
+									rgroup += "<label class='__container'";
+									rgroup += "id='del-" + oData.attid + "-label'";
+									rgroup += (sData == 'X')?" style='display:none;'>":">";
 									// &#x21bb;
 									// &#x238C;
-//									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>&#x238C;</span>";
-									rgroup += "<span title='<%loc('Undo')%>' id='del" + oData.attid + "' class='checkmark' style='background:#FFF !important;text-align:center;color:#000 !important;' onclick='delCategory("+iRow+", this.id); return true;'>&#x21bb;</span>";
+									rgroup += "<span title='<%loc('Unhighlight')%>' id='del" + oData.attid + "' class='checkmark' style='background:#FFF !important;text-align:center;color:#000 !important;' onclick='delCategory("+iRow+", this.id); return true;'>&#x21bb;</span>";
 									rgroup += "</label>";
 									rgroup += "";
 									
@@ -468,6 +470,10 @@
 			data: {
 				'Value' : value,
 				'attachId' : radio.replace("rad", ""),
+			},
+			success:function(){
+				jQuery("#del-"+radio.replace("rad", "")+"-label").show();
+				console.log("Category set to: " + value);
 			}
 		});
     };
@@ -483,6 +489,7 @@
 			success:function(){
 				var r = radio.replace("del", "rad")
 				jQuery("[name="+r+"]").prop('checked', false);
+				jQuery("#del-"+radio.replace("del", "")+"-label").hide();
 				jQuery( dt.row(row).node() ).find("input[type='hidden'][name="+r+"]").removeAttr('value');
 				if (!isClassDefined('darkmode')) {
 					jQuery(dt.row(row).node()).removeAttr('style');

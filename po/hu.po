@@ -129,6 +129,10 @@ msgid "Highlight"
 msgstr "Kiemelés"
 
 #:
+msgid "Unhighlight"
+msgstr "Kiemelés megszüntetése"
+
+#:
 msgid "Tagging"
 msgstr "Jelölés"
 
