@@ -456,6 +456,11 @@
 		}
 		if (value == 'hidden') {
 			jQuery( dt.row(row).node() ).find("input[type='hidden'][name^='rad']").val('hidden');
+			if (!isClassDefined('darkmode')) {
+				jQuery(dt.row(row).node()).css( 'background', '#DCDCDC' );
+			} else {
+				jQuery(dt.row(row).node()).find('td').attr('style', 'background:#DCDCDC !important');
+			}
 			if (!jQuery("#showhide").is(":checked")) {
 				jQuery(dt.row(row).node()).hide();	
 			}
