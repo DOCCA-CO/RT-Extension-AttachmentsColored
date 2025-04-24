@@ -3,12 +3,12 @@ Set(%AttachmentCategories, (
 	'B' => '#90EE90',
 	'C' => '#87CEFA',
 	'D' => '#fCDC8C',
-	'hidden' => '#DCDCDC'
+##	'hidden' => '#DCDCDC'
 ));
 
 Set($ConfigTicketID, 2);
 
-Set($DefaultFolderStructureTicketID, 1);
+Set($DefaultFolderStructureTicketID, 166);
 
 Set(%RabbitMQ, ('enabled' => 0, 'host' => '', 'port' => 5672, 'login' => '', 'passw' => ''));
 

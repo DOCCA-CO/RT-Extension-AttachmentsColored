@@ -364,10 +364,25 @@
 										// rgroup += "<div style='width:15px; height:15px; padding-right:3px; " + colors[key] + "'></div>";
 									}
 									//&#x2612;
-									rgroup += "<label style='display: inline-block;	position: relative; margin-bottom: 20px;'>";
-									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>X</span>";
+									rgroup += "<label class='__container'>";
+									rgroup += "<span title='<%loc('Hide')%>' id='hidden-" + oData.attid + "' onclick='setCategory(" + iRow + ","  + iCol + ", \"rad" + oData.attid + "\", \"hidden\");' class='checkmark' style='background:#DCDCDC !important;text-align:center;";
+									rgroup += (sData == "hidden")?"color:#000 !important;":"color:#000 !important;";
+									rgroup += "'>&#x2715;</span>";
+									rgroup += "<input type='hidden' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-hidden' value='";
+									rgroup += (sData == "hidden")?"hidden":"";
+									rgroup += "'>";
+
 									rgroup += "</label>";
 									rgroup += "";
+
+									rgroup += "<label style='display: inline-block;	position: relative; margin-bottom: 20px;'>";
+									// &#x21bb;
+									// &#x238C;
+//									rgroup += "<span id='del" + oData.attid + "' style='position:absolute; width:21px; height:20px; border:1px solid; border-radius:3px; background-color:#eee; text-align:center; line-height:20px; cursor:pointer;' onclick='delCategory("+iRow+", this.id); return true;'>&#x238C;</span>";
+									rgroup += "<span title='<%loc('Undo')%>' id='del" + oData.attid + "' class='checkmark' style='background:#FFF !important;text-align:center;color:#000 !important;' onclick='delCategory("+iRow+", this.id); return true;'>&#x21bb;</span>";
+									rgroup += "</label>";
+									rgroup += "";
+									
 									$(nTd).css( 'width', '180px' );
 									$(nTd).html( rgroup );
 									return oData.attid;
@@ -432,51 +447,52 @@
     });
 
     function setCategory( row, cell, radio, value ) {
-	//dt.cell({row:row, column:0}).data(value);
-	console.log(isClassDefined('darkmode'));
-	if (!isClassDefined('darkmode')) {
-	    jQuery(dt.row(row).node()).css( 'background', colors[value] );
-	} else {
-	    jQuery(dt.row(row).node()).find('td').attr('style', 'background:' + colors[value] + ' !important');
-	}
-	//jQuery(dt.row(row).node()).css( 'background', colors[value] );
-	if (value == 'hidden') {
-	    if (!jQuery("#showhide").is(":checked")) {
-		jQuery(dt.row(row).node()).hide();	
-	    }
-	};
-	//jQuery(dt.cell({row:row, column:0}).data(radio.replace("rad", "")).draw(false));
-	//jQuery(dt.fnUpdate( radio.replace("rad", ""), row, cell, false ));
-	jQuery.ajax({
-	    type: 'POST',
-	    url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyCategory',
-	    data: {
-		'Value' : value,
-		'attachId' : radio.replace("rad", ""),
-	    }
-	});
+		console.log(row, cell, radio, value);
+		if (!isClassDefined('darkmode')) {
+			jQuery(dt.row(row).node()).css( 'background', colors[value] );
+		} else {
+			jQuery(dt.row(row).node()).find('td').attr('style', 'background:' + colors[value] + ' !important');
+		}
+		//jQuery(dt.row(row).node()).css( 'background', colors[value] );
+		if (value == 'hidden') {
+			jQuery( dt.row(row).node() ).find("input[type='hidden'][name^='rad']").val('hidden');
+			if (!jQuery("#showhide").is(":checked")) {
+				jQuery(dt.row(row).node()).hide();	
+			}
+		};
+		//jQuery(dt.cell({row:row, column:0}).data(radio.replace("rad", "")).draw(false));
+		//jQuery(dt.fnUpdate( radio.replace("rad", ""), row, cell, false ));
+		jQuery.ajax({
+			type: 'POST',
+			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyCategory',
+			data: {
+				'Value' : value,
+				'attachId' : radio.replace("rad", ""),
+			}
+		});
     };
 
     function delCategory( row, radio ) {
 	//dt.cell({row:row, column:0}).data(value);
-	jQuery.ajax({
-	    type: 'POST',
-	    url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxDeleteCategory',
-	    data: {
-		'attachId'	: radio.replace("del", ""),
-	    },
-	    success:function(){
-		var r = radio.replace("del", "rad-")
-		jQuery("[id^="+r+"]").attr('checked', false);
-		if (!isClassDefined('darkmode')) {
-		    jQuery(dt.row(row).node()).removeAttr('style');
-		} else {
-		    jQuery(dt.row(row).node()).find('td').removeAttr('style');
-		    jQuery(dt.row(row).node()).css( 'background', '' );
-		}
-		console.log(row, r, radio);
-	    }
-	});
+		jQuery.ajax({
+			type: 'POST',
+			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxDeleteCategory',
+			data: {
+				'attachId'	: radio.replace("del", ""),
+			},
+			success:function(){
+				var r = radio.replace("del", "rad")
+				jQuery("[name="+r+"]").prop('checked', false);
+				jQuery( dt.row(row).node() ).find("input[type='hidden'][name="+r+"]").removeAttr('value');
+				if (!isClassDefined('darkmode')) {
+					jQuery(dt.row(row).node()).removeAttr('style');
+				} else {
+					jQuery(dt.row(row).node()).find('td').removeAttr('style');
+					jQuery(dt.row(row).node()).css( 'background', '' );
+				}
+				console.log(row, r, radio);
+			}
+		});
     };
 
 	function setFolder( attID, node ) {
@@ -497,7 +513,11 @@
 					jQuery(dt.row(index).node()).show();
 				}
 			} else {
-				if (jQuery( dt.row(index).node() ).find("input[name^='rad']:checked").val() == 'hidden') {
+				//$('input[type="hidden"][value="hidden"][name^="rad"]')
+
+//				if (jQuery( dt.row(index).node() ).find("input[name^='rad']:checked").val() == 'hidden') {
+//				if (jQuery( dt.row(index).node() ).find("input[name^='rad'").val() == 'hidden') {
+				if (jQuery( dt.row(index).node() ).find("input[type='hidden'][name^='rad']").val() == 'hidden') {
 					jQuery(dt.row(index).node()).hide();
 				}
 			}
