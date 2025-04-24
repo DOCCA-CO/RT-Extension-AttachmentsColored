@@ -423,7 +423,6 @@
 
 					// Remove any existing positioning classes
 					dropdownContent.removeClass('above below');
-
 					// Check if the element is in the upper half of the screen
 					if (rect.top < viewportHeight / 2) {
 						dropdownContent.addClass('below'); // Position below
@@ -455,15 +454,12 @@
 		} else {
 			jQuery(dt.row(row).node()).find('td').attr('style', 'background:' + colors[value] + ' !important');
 		}
-		//jQuery(dt.row(row).node()).css( 'background', colors[value] );
 		if (value == 'hidden') {
 			jQuery( dt.row(row).node() ).find("input[type='hidden'][name^='rad']").val('hidden');
 			if (!jQuery("#showhide").is(":checked")) {
 				jQuery(dt.row(row).node()).hide();	
 			}
 		};
-		//jQuery(dt.cell({row:row, column:0}).data(radio.replace("rad", "")).draw(false));
-		//jQuery(dt.fnUpdate( radio.replace("rad", ""), row, cell, false ));
 		jQuery.ajax({
 			type: 'POST',
 			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxModifyCategory',
@@ -479,7 +475,6 @@
     };
 
     function delCategory( row, radio ) {
-	//dt.cell({row:row, column:0}).data(value);
 		jQuery.ajax({
 			type: 'POST',
 			url: '<%RT->Config->Get('WebPath')%>/Ajax/AjaxDeleteCategory',
@@ -520,10 +515,6 @@
 					jQuery(dt.row(index).node()).show();
 				}
 			} else {
-				//$('input[type="hidden"][value="hidden"][name^="rad"]')
-
-//				if (jQuery( dt.row(index).node() ).find("input[name^='rad']:checked").val() == 'hidden') {
-//				if (jQuery( dt.row(index).node() ).find("input[name^='rad'").val() == 'hidden') {
 				if (jQuery( dt.row(index).node() ).find("input[type='hidden'][name^='rad']").val() == 'hidden') {
 					jQuery(dt.row(index).node()).hide();
 				}
