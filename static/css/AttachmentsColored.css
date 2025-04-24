@@ -40,7 +40,7 @@ div.AttachmentsColoredOrder {
     width: 20px;
 /*  background-color: #eee;*/
     border-radius: 50%;
-    border: 1px solid #ccc;
+    border: 1px solid #ccc !important;
 }
 
 /* On mouse-over, add a grey background color */
