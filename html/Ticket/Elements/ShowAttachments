@@ -367,6 +367,16 @@
 										rgroup += "<span class='checkmark' style='background-color: " + colors[key] + " !important' title='" + key + "'></span>";
 										rgroup += "</label>";
 									}
+
+									rgroup += "</label>";
+									rgroup += "<label class='__container'>";
+//									rgroup += "id='del-" + oData.attid + "-label'";
+//									rgroup += (sData == 'X')?" style='display:none;'>":">";
+									// &#x21bb;
+									// &#x238C;
+									rgroup += "<span title='<%loc('Unhighlight')%>' id='del" + oData.attid + "' class='checkmark' style='background:#FFF !important;text-align:center;color:#000 !important;' onclick='delCategory("+iRow+", this.id); return true;'>&nbsp;</span>";
+									rgroup += "</label>";
+
 									//&#x2612;
 									rgroup += "<label class='__container'>";
 									rgroup += "<span title='<%loc('Hide')%>' id='hidden-" + oData.attid + "' onclick='setCategory(" + iRow + ","  + iCol + ", \"rad" + oData.attid + "\", \"hidden\");' class='checkmark' style='background:#DCDCDC !important;text-align:center;";
@@ -375,16 +385,6 @@
 									rgroup += "<input type='hidden' name='rad" + oData.attid + "' id='rad-" + oData.attid + "-hidden' value='";
 									rgroup += (sData == "hidden")?"hidden":"";
 									rgroup += "'>";
-									rgroup += "</label>";
-									rgroup += "<label class='__container'";
-									rgroup += "id='del-" + oData.attid + "-label'";
-									rgroup += (sData == 'X')?" style='display:none;'>":">";
-									// &#x21bb;
-									// &#x238C;
-									rgroup += "<span title='<%loc('Unhighlight')%>' id='del" + oData.attid + "' class='checkmark' style='background:#FFF !important;text-align:center;color:#000 !important;' onclick='delCategory("+iRow+", this.id); return true;'>&#x21bb;</span>";
-									rgroup += "</label>";
-									rgroup += "";
-									
 									$(nTd).css( 'width', '180px' );
 									$(nTd).html( rgroup );
 									return oData.attid;
