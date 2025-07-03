@@ -119,7 +119,7 @@ sub LoadTicketAttachments{
 
 		if ($attach->ContentType eq 'text/uri-list') {
 			if ( index( lc( $attach->Content ), 'dropbox' ) > 0) {
-				$icon = '<i class="cloudicons8-16-dropdox"></i>' ;
+				$icon = '<i class="cloudicons8-16-dropbox"></i>' ;
 			} elsif ( index( lc( $attach->Content ), 'google' ) > 0 ) {
 				$icon = '<i class="cloudicons8-16-gdrive"></i>';
 			} elsif ( index( lc( $attach->Content ), 'youtu' ) > 0 ) {

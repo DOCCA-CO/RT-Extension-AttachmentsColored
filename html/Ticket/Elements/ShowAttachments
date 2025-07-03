@@ -202,14 +202,14 @@
 						dom: 'Bl<"__toolbar">frtip',
 						initComplete: function() {
 							$("div.__toolbar").html('&nbsp;&nbsp;&nbsp;&nbsp;<label><input id="showhide" name="showhide" type="checkbox" value="1" onclick="hiddenShowHide( this.checked ); console.log( \'check box \' + this.checked); return true;">&nbsp;<&|/l&>Show hidden files</&></label>');
-							$('.selectnode').each(function() {
-								for (var i = 0; i < data.attachments.length; i++){
-									if ( this.id == "sel-" + data.attachments[i].attid ) {
-										$("#"+this.id).val(data.attachments[i].node);
-										$("#"+this.id).trigger('change');
-									}
-								}
-							});
+%#							$('.selectnode').each(function() {
+%#								for (var i = 0; i < data.attachments.length; i++){
+%#									if ( this.id == "sel-" + data.attachments[i].attid ) {
+%#										$("#"+this.id).val(data.attachments[i].node);
+%#										$("#"+this.id).trigger('change');
+%#									}
+%#								}
+%#							});
 						},
 						buttons: [
 % if (RT->Config->Get('AttacmentsTicketFeature', $session{'CurrentUser'})) {
@@ -313,7 +313,68 @@
 											console.log('No links selected');
 									}
 								}
-							}],
+							},
+							{
+%if ($SimpleUpload && $SimpleUpload->{'enabled'}) {
+							    text: "<&|/l&>Upload</&>",
+								action: function( e, t, node, config ) {
+									var uploadUrl = '<%RT->Config->Get('WebPath')%>/Ajax/AjaxUploadAttachment?TicketId=<%$Ticket->Id%>';
+									var uploadInput = $('<input type="file" multiple />');
+									uploadInput.on('change', function() {
+										var files = this.files;
+										if (files.length > 0) {
+											var formData = new FormData();
+											for (var i = 0; i < files.length; i++) {
+												formData.append('attachments[]', files[i]);
+											}
+											$.ajax({
+												url: uploadUrl,
+												type: 'POST',
+												data: formData,
+												contentType: false,
+												processData: false,
+												success: function(response) {
+													$.jGrowl(response.message, { themeState: 'success' });
+													location.reload();
+												},
+												error: function(xhr) {
+													$.jGrowl(xhr.responseText, { themeState: 'error' });
+												}
+											});
+										}
+									});
+									uploadInput.click();
+								}
+% } elsif ($GoogleDrive && $GoogleDrive->{'enabled'}) {
+	// Google Drive upload logic here
+								text: "<&|/l&>Upload</&> GDrive",
+								action: function( e, t, node, config ) {
+									var uploadUrl = '<%RT->Config->Get('WebPath')%>/Ajax/AjaxUploadGDrive?TicketId=<%$Ticket->Id%>';
+									var atts = [];
+									$('input[name="att"]:checked').each(function() {
+										atts.push($(this).val());
+									});
+									console.log(JSON.stringify(atts));
+									$.ajax({
+										url: uploadUrl,
+										type: 'POST',
+										data: {'attachments': JSON.stringify(atts)},
+										success: function(response) {
+											$.jGrowl(response.message, { themeState: 'success' });
+											location.reload();
+										},
+										error: function(xhr) {
+											$.jGrowl(xhr.responseText, { themeState: 'error' });
+										}
+									});
+								}
+
+% } elsif ($OneDrive && $OneDrive->{'enabled'}) {
+	// OneDrive upload logic here
+
+%}
+							}
+						],
 
 						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
@@ -400,7 +461,16 @@
 							{ "data":"size" },
 							{ "data":"node" ,
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<select class='selectnode' style='width:200px;' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option></select>" );
+									nselect = "<select class='selectnode' style='width:200px;' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option>";
+									data.folders.forEach((element) => {
+%#										console.log(element);
+										nselect += "<option value='" + element.id + "'" + (element.id == oData.node ? " selected" : "") + ">" + element.text + "</option>";
+									});
+									nselect += "</select>";
+%#									console.log("Folder: " + nselect);
+									$(nTd).html( nselect );
+%#									$(nTd).html( "<select class='selectnode' style='width:200px;' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option></select>" );
+
 								}
 							},
 							{ "data":"comment",
@@ -644,6 +714,10 @@
 <%INIT>
 use utf8;
 use JSON;
+
+my $SimpleUpload = RT->Config->Get('SimpleUpload');
+my $GoogleDrive = RT->Config->Get('GoogleDrive');
+my $OneDrive = RT->Config->Get('OneDrive');
 
 # If we haven't been passed in an Attachments object (through the precaching mechanism)
 # then we need to find one
