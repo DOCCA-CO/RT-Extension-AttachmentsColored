@@ -8,7 +8,7 @@ Set(%AttachmentCategories, (
 
 Set($ConfigTicketID, 2);
 
-Set($DefaultFolderStructureTicketID, 166);
+Set($DefaultFolderStructureTicketID, 1);
 
 Set(%RabbitMQ, ('enabled' => 0, 'host' => '', 'port' => 5672, 'login' => '', 'passw' => ''));
 
