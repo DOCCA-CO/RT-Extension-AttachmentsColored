@@ -1,3 +1,6 @@
 AttachmentsColored_Config.pm
 *_Config.pm
 *.pm
+*.json
+*.sh
+oauth2.sh
