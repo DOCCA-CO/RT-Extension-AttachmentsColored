@@ -94,7 +94,7 @@ sub upload_file {
     $mime_type ||= 'application/octet-stream';
 
     my $metadata = {
-        name => decode_utf8( $filename ),
+        name => encode_utf8( $filename ),
         mimeType => $mime_type,
     };
     $metadata->{parents} = [$parent_id] if $parent_id;
