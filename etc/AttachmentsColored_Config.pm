@@ -8,12 +8,12 @@ Set(%AttachmentCategories, (
 
 Set($ConfigTicketID, 2);
 
-Set($DefaultFolderStructureTicketID, 166);
+Set($DefaultFolderStructureTicketID, 1);
 
 Set(%RabbitMQ, ('enabled' => 0, 'host' => '', 'port' => 5672, 'login' => '', 'passw' => ''));
 
 Set($GoogleDrive, {
-	'enabled' => 1,
+	'enabled' => 0,
 	'client_id' => '',
 	'client_secret' => '',
 	'authorize_url' => 'https://accounts.google.com/o/oauth2/auth',
