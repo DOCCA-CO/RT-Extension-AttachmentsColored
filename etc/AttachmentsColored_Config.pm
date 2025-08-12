@@ -34,8 +34,8 @@ Set($OneDrive, {
 	'api_url' => 'https://graph.microsoft.com/v1.0',
 	'client_id' => '',
 	'client_secret' => '',
-	'redirect_uri' => 'http://localhost',
-	'scope' => 'https://graph.microsoft.com/Files.ReadWrite.All',
+	'redirect_uri' => 'http://localhost:8080',
+	'scope' => 'https://graph.microsoft.com/.default',
 	'refresh_token' => ''
 });
 
