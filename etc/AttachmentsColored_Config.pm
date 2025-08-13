@@ -35,7 +35,7 @@ Set($OneDrive, {
 	'client_id' => '',
 	'client_secret' => '',
 	'redirect_uri' => 'http://localhost:8080',
-	'scope' => 'https://graph.microsoft.com/.default',
+	'scope' => 'https://graph.microsoft.com/.default',  ## Files.ReadWrite.All and/or Sites.ReadWrite.All
 	'refresh_token' => ''
 });
 
