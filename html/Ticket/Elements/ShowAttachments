@@ -371,7 +371,30 @@
 
 % } elsif ($OneDrive && $OneDrive->{'enabled'}) {
 	// OneDrive upload logic here
+								text: "<&|/l&>Upload</&> OneDrive",
+								action: function( e, t, node, config ) {
+									var uploadUrl = '<%RT->Config->Get('WebPath')%>/Ajax/AjaxUploadOneDrive?TicketId=<%$Ticket->Id%>';
+									var atts = []; 
+									$('input[name="att"]:checked').each(function() {
+										atts.push($(this).val());
+									});
+									console.log(JSON.stringify(atts));
+									console.log(uploadUrl);
 
+ 									$.ajax({
+										url: uploadUrl,
+										type: 'POST',
+										data: {'attachments': JSON.stringify(atts)},
+										success: function(response) {
+											$.jGrowl(response.message, { themeState: 'success' });
+											location.reload();
+										},
+										error: function(xhr) {
+											$.jGrowl(xhr.responseText, { themeState: 'error' });
+										}
+									});
+
+								}
 %}
 							}
 						],

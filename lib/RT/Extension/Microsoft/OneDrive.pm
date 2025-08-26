@@ -4,6 +4,7 @@ use base qw(RT::Extension::Microsoft);
 use strict;
 use warnings;
 use LWP::UserAgent;
+use HTTP::Request;
 use JSON qw(encode_json decode_json);
 use Carp;
 
@@ -18,6 +19,7 @@ sub new {
         tenant_id     => $args{tenant_id},
         client_id     => $args{client_id},
         client_secret => $args{client_secret},
+        refresh_token => $args{refresh_token},
         access_token  => undef,
         token_expiry  => 0,
         ua            => LWP::UserAgent->new(timeout => 30),
@@ -27,19 +29,41 @@ sub new {
 }
 
 sub access_token {
-    my ($self) = @_;
+    my ($self, $grant_type) = @_;
+    $grant_type ||= 'client_credentials'; # Default to client_credentials
+    
     # Return cached token if still valid
     if ($self->{access_token} && time() < $self->{token_expiry}) {
         return $self->{access_token};
     }
 
     my $url = "https://login.microsoftonline.com/$self->{tenant_id}/oauth2/v2.0/token";
-    my $res = $self->{ua}->post($url, {
-        client_id     => $self->{client_id},
-        scope         => 'https://graph.microsoft.com/.default',
-        client_secret => $self->{client_secret},
-        grant_type    => 'client_credentials',
-    });
+    my $post_data;
+    
+    if ($grant_type eq 'refresh_token') {
+        unless ($self->{refresh_token}) {
+            croak "Refresh token required for refresh_token grant type";
+        }
+        $post_data = {
+            client_id     => $self->{client_id},
+            client_secret => $self->{client_secret},
+            refresh_token => $self->{refresh_token},
+            tenant_id     => $self->{tenant_id},
+            grant_type    => 'refresh_token',
+        };
+    } elsif ($grant_type eq 'client_credentials') {
+        $post_data = {
+            client_id     => $self->{client_id},
+            tenant_id     => $self->{tenant_id},
+            scope         => 'https://graph.microsoft.com/.default',
+            client_secret => $self->{client_secret},
+            grant_type    => 'client_credentials',
+        };
+    } else {
+        croak "Unsupported grant type: $grant_type. Supported types: client_credentials, refresh_token";
+    }
+
+    my $res = $self->{ua}->post($url, $post_data);
 
     unless ($res->is_success) {
         croak "Failed to get access token: " . $res->status_line . " - " . $res->decoded_content;
@@ -48,6 +72,11 @@ sub access_token {
     my $data = decode_json($res->decoded_content);
     $self->{access_token} = $data->{access_token};
     $self->{token_expiry} = time() + $data->{expires_in} - 60; # safety margin
+
+    # Update refresh token if provided in response
+    if ($data->{refresh_token}) {
+        $self->{refresh_token} = $data->{refresh_token};
+    }
 
     return $self->{access_token};
 }
@@ -67,17 +96,26 @@ sub upload_file {
         $base_url = "https://graph.microsoft.com/v1.0/me/drive";
     }
 
-    my $url = "$base_url/root:/$args{file_name}:/content";
-    my $res = $self->{ua}->put(
-        $url,
-        'Authorization' => "Bearer " . $self->access_token,
+    my $url;
+    if ($args{folder_id}) {
+        $url = "$base_url/items/$args{folder_id}:/$args{file_name}:/content";
+    } else {
+        $url = "$base_url/root:/$args{file_name}:/content";
+    }
+
+    my $req = HTTP::Request->new(PUT => $url);
+    $req->header(
+        'Authorization' => "Bearer " . $self->access_token('refresh_token'),
         'Content-Type'  => 'application/octet-stream',
-        Content         => $args{content},
     );
+    $req->content($args{content});
+
+    my $res = $self->{ua}->request($req);
 
     unless ($res->is_success) {
         croak "Upload failed: " . $res->status_line . " - " . $res->decoded_content;
     }
+
     return decode_json($res->decoded_content);
 }
 
@@ -97,13 +135,23 @@ sub upload_file_big {
     }
 
     # Step 1: Create upload session
-    my $session_url = "$base_url/root:/$args{file_name}:/createUploadSession";
-    my $session_res = $self->{ua}->post(
-        $session_url,
-        'Authorization' => "Bearer " . $self->access_token,
+    my $session_url;
+    if ($args{folder_id}) {
+        # Upload to specific folder by ID
+        $session_url = "$base_url/items/$args{folder_id}:/$args{file_name}:/createUploadSession";
+    } else {
+        # Upload to root folder
+        $session_url = "$base_url/root:/$args{file_name}:/createUploadSession";
+    }
+    
+    my $session_req = HTTP::Request->new(POST => $session_url);
+    $session_req->header(
+        'Authorization' => "Bearer " . $self->access_token('refresh_token'),
         'Content-Type'  => 'application/json',
-        Content         => encode_json({}),
     );
+    $session_req->content(encode_json({}));
+
+    my $session_res = $self->{ua}->request($session_req);
 
     unless ($session_res->is_success) {
         croak "Failed to create upload session: " . $session_res->status_line . " - " . $session_res->decoded_content;
@@ -121,12 +169,14 @@ sub upload_file_big {
         $end = $size - 1 if $end >= $size;
         my $chunk = substr($args{content}, $start, $end - $start + 1);
 
-        my $res = $self->{ua}->put(
-            $upload_url,
+        my $chunk_req = HTTP::Request->new(PUT => $upload_url);
+        $chunk_req->header(
             'Content-Length' => length($chunk),
             'Content-Range'  => "bytes $start-$end/$size",
-            Content          => $chunk,
         );
+        $chunk_req->content($chunk);
+
+        my $res = $self->{ua}->request($chunk_req);
 
         unless ($res->is_success || $res->code == 202) {
             croak "Chunk upload failed: " . $res->status_line . " - " . $res->decoded_content;
