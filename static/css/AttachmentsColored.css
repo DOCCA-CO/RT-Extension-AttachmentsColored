@@ -130,6 +130,7 @@ div.AttachmentsColoredOrder {
     display: block;
     white-space: nowrap;
     min-width:150px;
+    max-width: 600px;
     overflow:hidden;
     text-overflow:ellipsis;
     background: transparent !important;
