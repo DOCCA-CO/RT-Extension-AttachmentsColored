@@ -1,0 +1,12 @@
+<%init>
+use utf8;
+use strict;
+use warnings;
+if ( Menu->child('admin') && $RT::NextCloud->{enabled} ) {
+    my $ncfilesadmin = Menu->child('admin')->child(
+        ncfilesadmin => title => loc('NextCloud Files Settings'),
+        path      => '/Admin/NextCloudFiles/',
+        sort_order => 100,
+    );
+}
+</%init>

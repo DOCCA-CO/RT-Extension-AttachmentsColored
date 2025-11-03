@@ -118,7 +118,9 @@ sub LoadTicketAttachments{
 		my $checkbox = sprintf("%sTicket/Attachment/%d/%d/%s", RT->Config->Get('WebURL'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename);
 
 		if ($attach->ContentType eq 'text/uri-list') {
-			if ( index( lc( $attach->Content ), 'dropbox' ) > 0) {
+			if ( index( lc( $attach->Content ), 'onedrive' ) > 0 || index( lc( $attach->Content ), 'sharepoint' ) > 0) {
+				$icon = '<i class="cloudicons8-onedrive-16"></i>' ;
+			} elsif ( index( lc( $attach->Content ), 'dropbox' ) > 0) {
 				$icon = '<i class="cloudicons8-16-dropbox"></i>' ;
 			} elsif ( index( lc( $attach->Content ), 'google' ) > 0 ) {
 				$icon = '<i class="cloudicons8-16-gdrive"></i>';

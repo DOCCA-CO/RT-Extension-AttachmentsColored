@@ -39,6 +39,20 @@ Set($OneDrive, {
 	'refresh_token' => ''
 });
 
+Set($NextCloud, {
+	'enabled' => 0,
+	'base_url' => 'http://nextcloud.local',
+	'authorize_url' => 'http://nextcloud.local/index.php/apps/oauth2/authorize',
+	'token_url' => 'http://nextcloud.local/index.php/apps/oauth2/api/v1/token',
+	'api_url' => 'http://nextcloud.local/remote.php/dav/files/',
+	'client_id' => '',
+	'client_secret' => '',
+	'redirect_uri' => 'http://localhost:8080/Admin/NextCloudFiles/',
+	'default_folder' => 'Storage', ## default folder for NextCloud
+	'user' => 'robot',
+});
+
+
 Set($SimpleUpload, {
 	'enabled' => 0,
 });
