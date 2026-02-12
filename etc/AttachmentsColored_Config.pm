@@ -57,4 +57,7 @@ Set($SimpleUpload, {
 	'enabled' => 0,
 });
 
+# Set to 0 to display the full filename.
+Set($FileNameMaxLength, 20);
+
 1;

@@ -101,9 +101,20 @@ sub LoadTicketAttachments{
 		{ FIELD => 'id',      ORDER => 'DESC' },
 	);
 	my $extRe = qr/\.(bmp|gif|jpe?g|mp3|pdf|png|txt|webp)$/i;
+	my $max_length = RT->Config->Get('FileNameMaxLength') || 0;
 	
 	while ( my $attach = $Attachments->Next() ) {
 		next unless ($attach->Filename);
+		my $display_filename = $attach->Filename;
+		if ($max_length > 0 && length($display_filename) > $max_length) {
+			my ($name, $ext) = $display_filename =~ /^(.*)(\.[^.]+)$/ ? ($1, $2) : ($display_filename, '');
+			if ($ext && length($ext) < $max_length - 3) {
+			my $chars_to_keep = $max_length - length($ext) - 3;
+			$display_filename = substr($name, 0, $chars_to_keep) . '...' . $ext if $chars_to_keep > 0;
+		    } else {
+			$display_filename = substr($display_filename, 0, $max_length) . '...';
+		    }
+		}
 		my $catt = ($attach->FirstAttribute('Category') ? $attach->FirstAttribute('Category')->Content : 'X');
 		my $node = ($attach->FirstAttribute('Folder') ? $attach->FirstAttribute('Folder')->Content : '');
 		my $size = '<span class="__attachmentName ">' . $attach->FriendlyContentLength . '</span>';
@@ -136,8 +147,8 @@ sub LoadTicketAttachments{
 			$onclick = sprintf("onclick='sendOpenReqMQ(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==1));
 			$onclick = sprintf("onclick='copyClipboard(\"att-%s\"); return false;'", $attid) if((index($attach->Content, 'file:')>=0) and ($rabbitMQ{'enabled'}==0));
 			$filename = '<span class="__dropdown">' if $content =~ $extRe; 
-			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank' %s><span  class='__attachmentName inverted-text'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $onclick, $icon, $attach->Filename);
-			$filename .= '<div class="__dropdown-content">' if $content =~ $extRe; 
+			$filename .= sprintf("<a href='%s' id='att-$attid' target='_blank' %s><span  class='__attachmentName inverted-text'>%s %s</span></a>", Encode::decode_utf8($attach->Content), $onclick, $icon, $display_filename);
+			$filename .= '<div class="__dropdown-content">' if $content =~ $extRe;
 			$filename .= sprintf("<img src='%s' alt='%s' style='width: %upx;'>", $content, $comment, 480 ) if $content =~ $extRe; 
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if $content =~ $extRe;
 			$filename .= '</div>' if $attach->Filename =~ $extRe;
@@ -151,7 +162,7 @@ sub LoadTicketAttachments{
 				$attid = $attach->Id, 
 				$attach->Filename, 
 				($attach->Filename =~ $extRe) ? "" : sprintf("download='%s'", $attach->Filename), 
-				$attach->Filename);
+				$display_filename);
 
 			$filename .= '<div class="__dropdown-content">' if $attach->Filename =~ $extRe; 
 			$filename .= sprintf("<img src='%s/Ticket/Attachment/%d/%d/%s' alt='%s' style='max-width:%upx;max-height:%upx;' download='%s'>", 
