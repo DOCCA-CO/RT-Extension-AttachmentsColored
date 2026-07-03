@@ -29,6 +29,17 @@ use warnings;
             Hints       => 'By enabling this feature, you\'ll be able to send attacments into new or already existing ticket.', # loc
         }
     };
+
+    $META{'ShowFullFilename'} = {
+        Section         => 'Ticket display',
+        Overridable     => 1,
+        Default         => 0,
+        Widget          => '/Widgets/Form/Boolean',
+        WidgetArguments => {
+            Description => 'Show full filename in attachments list', # loc
+            Hints       => 'When enabled, the full filename will be displayed with word-wrap instead of truncating.', # loc
+        }
+    };
 }
 1;
 __END__
