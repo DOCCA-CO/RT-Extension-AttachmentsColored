@@ -142,7 +142,7 @@
 			<th style="width:100px;"><&|/l&>User</&></th>
 			<th style="width:70px;"><&|/l&>Size</&></th>
 			<th style="width:180px;"><&|/l&>Tagging</&></th>
-			<th><&|/l&>comment</&></th>
+			<th style="width:150px;"><&|/l&>comment</&></th>
 		</tr>
 	</thead>
 <!--
@@ -560,7 +560,9 @@
 								{ width: '140px', targets: 1 },
 								{ width: '90px', targets: 3 },
 								{ width: '100px', targets: 4 },
-								{ width: '70px', targets: 5 }
+								{ width: '70px', targets: 5 },
+								{ width: '180px', targets: 6 },
+								{ width: '150px', targets: 7 }
 							],
 		                order: [ 3, 'asc' ],
 					});
