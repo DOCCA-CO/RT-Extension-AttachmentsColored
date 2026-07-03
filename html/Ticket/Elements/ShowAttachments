@@ -135,13 +135,13 @@
 	<thead>
 		<tr>
 %#			<th></th>
-			<th><input type='checkbox' id='checkAll' onclick='checkAllClick(this);' /></th>
-			<th><&|/l&>Highlight</&></th>
+			<th style="width:30px;"><input type='checkbox' id='checkAll' onclick='checkAllClick(this);' /></th>
+			<th style="width:140px;"><&|/l&>Highlight</&></th>
 			<th><&|/l&>Filename</&></th>
-			<th><&|/l&>Date</&></th>
-			<th><&|/l&>User</&></th>
-			<th><&|/l&>Size</&></th>
-			<th><&|/l&>Tagging</&></th>
+			<th style="width:90px;"><&|/l&>Date</&></th>
+			<th style="width:100px;"><&|/l&>User</&></th>
+			<th style="width:70px;"><&|/l&>Size</&></th>
+			<th style="width:180px;"><&|/l&>Tagging</&></th>
 			<th><&|/l&>comment</&></th>
 		</tr>
 	</thead>
@@ -198,7 +198,7 @@
 						language: {
 							url: '<%$RT::WebPath%>/NoAuth/js/Hungarian.json'
 						},
-						pageLength: 100,
+						pageLength: 50,
 						lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "<&|/l&>All</&>"] ],
 						dom: 'Bl<"__toolbar">frtip',
 						initComplete: function() {
@@ -516,7 +516,18 @@
 									return oData.attid;
 								}
 							},
-							{ "data":"filename" },
+							{ "data":"filename",
+							"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+								var showFull = <% RT->Config->Get('ShowFullFilename', $session{'CurrentUser'}) ? 'true' : 'false' %>;
+								if (showFull) {
+									$(nTd).css({'white-space': 'normal', 'word-break': 'break-word', 'max-width': '300px'});
+									$(nTd).html(sData);
+								} else {
+									$(nTd).css({'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis', 'max-width': '200px'});
+									$(nTd).attr('title', sData);
+								}
+							}
+						},
 							{ "data":"date_unix",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 									$(nTd).html( oData.date );
@@ -544,7 +555,12 @@
 								}
 							}],
 						columnDefs: [
-								{ type: 'file-size', targets: 5 }
+								{ type: 'file-size', targets: 5 },
+								{ width: '30px', targets: 0 },
+								{ width: '140px', targets: 1 },
+								{ width: '90px', targets: 3 },
+								{ width: '100px', targets: 4 },
+								{ width: '70px', targets: 5 }
 							],
 		                order: [ 3, 'asc' ],
 					});
