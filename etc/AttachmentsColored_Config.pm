@@ -57,7 +57,12 @@ Set($SimpleUpload, {
 	'enabled' => 0,
 });
 
-# Set to 0 to display the full filename.
-Set($FileNameMaxLength, 20);
+# Set the maximum length of the filename to display in the attachment list.
+# If the filename is longer than this value, it will be truncated with "...".
+# This setting also affects the column width (approx. maxLength * 8 pixels).
+# Set to 0 to disable truncation.
+# Note: If the user has "ShowFullFilename" preference enabled, 
+# full filenames will always be displayed regardless of this setting.
+Set($FileNameMaxLength, 50);
 
 1;
