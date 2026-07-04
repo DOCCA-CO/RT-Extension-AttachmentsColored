@@ -76,8 +76,10 @@
 
 % foreach my $key (sort { lc($a) cmp lc($b) } keys %documents) {
 %   my $max_length = RT->Config->Get('FileNameMaxLength') || 0;
+%   my $show_full = RT->Config->Get('ShowFullFilename', $session{'CurrentUser'}) ? 1 : 0;
 %   my $display_key = $key;
-%   if ($max_length > 0 && length($display_key) > $max_length) {
+%   # Only truncate if ShowFullFilename is not enabled
+%   if (!$show_full && $max_length > 0 && length($display_key) > $max_length) {
 %       my ($name, $ext) = $display_key =~ /^(.*)(\.[^.]+)$/ ? ($1, $2) : ($display_key, '');
 %       if ($ext && length($ext) < $max_length - 3) {
 %           my $chars_to_keep = $max_length - length($ext) - 3;
@@ -86,12 +88,13 @@
 %           $display_key = substr($display_key, 0, $max_length) . '...';
 %       }
 %   }
+%   my $cell_style = $show_full ? "display:block; white-space: normal; word-break: break-word; min-width:150px;" : "display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;";
             <tr>
                 <td>
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
                     <span class="__dropdown">
 % }
-                        <span title="<%$key%>" style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$display_key%></span>
+                        <span title="<%$key%>" style="<%$cell_style%>"><%$display_key%></span>
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
 % my $url;
 % foreach my $rev (@{$documents{$key}}) {
