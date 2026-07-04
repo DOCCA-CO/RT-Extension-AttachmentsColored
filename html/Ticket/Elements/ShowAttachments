@@ -519,14 +519,12 @@
 							{ "data":"filename",
 							"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 								var showFull = <% RT->Config->Get('ShowFullFilename', $session{'CurrentUser'}) ? 'true' : 'false' %>;
-								var maxLength = <% RT->Config->Get('FileNameMaxLength') || 50 %>;
-								var maxWidthPx = Math.max(150, maxLength * 8) + 'px';
 								if (showFull) {
-									$(nTd).css({'white-space': 'normal', 'word-break': 'break-word'});
+									$(nTd).css({'white-space': 'normal', 'word-break': 'break-word', 'max-width': '300px'});
 									$(nTd).html(sData);
 								} else {
-									$(nTd).css({'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis', 'max-width': maxWidthPx});
-									$(nTd).attr('title', oData.filename_full || sData);
+									$(nTd).css({'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis', 'max-width': '200px'});
+									$(nTd).attr('title', sData);
 								}
 							}
 						},
