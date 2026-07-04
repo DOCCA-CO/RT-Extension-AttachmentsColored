@@ -59,13 +59,7 @@
         <thead>
             <tr>
                 <th><&|/l&>Filename</&></th>
-                <th>
-% if ($Selectable) {
-                    <input type="checkbox" id="SelectAllAttachments" />
-% } else {
-                    &nbsp;
-% }
-                </th>
+                <th>&nbsp;</th>
                 <th>&nbsp;</th>
                 <th><&|/l&>Date</&></th>
                 <th><&|/l&>Size</&></th>
@@ -91,7 +85,8 @@
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
                     <span class="__dropdown">
 % }
-                        <span title="<%$key%>" style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$display_key%></span>
+%#                        <span style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$key%></span>
+<span title="<%$key%>" style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$display_key%></span>
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
 % my $url;
 % foreach my $rev (@{$documents{$key}}) {
@@ -170,14 +165,10 @@
 					language: {
 						url: '<%$RT::WebPath%>/NoAuth/js/Hungarian.json'
 					},
+					pageLength: 25,
 					ordering: false,
 					info:     false
 				});
-
-			$('#SelectAllAttachments').on('change', function() {
-				var isChecked = $(this).prop('checked');
-				$('#attachments').find('input[name="AttachExisting"]').prop('checked', isChecked);
-			});
 		})
 	});
 </script>

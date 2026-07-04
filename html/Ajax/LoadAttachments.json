@@ -109,11 +109,11 @@ sub LoadTicketAttachments{
 		if ($max_length > 0 && length($display_filename) > $max_length) {
 			my ($name, $ext) = $display_filename =~ /^(.*)(\.[^.]+)$/ ? ($1, $2) : ($display_filename, '');
 			if ($ext && length($ext) < $max_length - 3) {
-				my $chars_to_keep = $max_length - length($ext) - 3;
-				$display_filename = substr($name, 0, $chars_to_keep) . '...' . $ext if $chars_to_keep > 0;
-			} else {
-				$display_filename = substr($display_filename, 0, $max_length) . '...';
-			}
+			my $chars_to_keep = $max_length - length($ext) - 3;
+			$display_filename = substr($name, 0, $chars_to_keep) . '...' . $ext if $chars_to_keep > 0;
+		    } else {
+			$display_filename = substr($display_filename, 0, $max_length) . '...';
+		    }
 		}
 		my $catt = ($attach->FirstAttribute('Category') ? $attach->FirstAttribute('Category')->Content : 'X');
 		my $node = ($attach->FirstAttribute('Folder') ? $attach->FirstAttribute('Folder')->Content : '');
