@@ -102,18 +102,21 @@ sub LoadTicketAttachments{
 	);
 	my $extRe = qr/\.(bmp|gif|jpe?g|mp3|pdf|png|txt|webp)$/i;
 	my $max_length = RT->Config->Get('FileNameMaxLength') || 0;
+	my $show_full = RT->Config->Get('ShowFullFilename', $session{'CurrentUser'}) ? 1 : 0;
 	
 	while ( my $attach = $Attachments->Next() ) {
 		next unless ($attach->Filename);
-		my $display_filename = $attach->Filename;
-		if ($max_length > 0 && length($display_filename) > $max_length) {
+		my $full_filename = $attach->Filename;
+		my $display_filename = $full_filename;
+		# Only truncate if ShowFullFilename is not enabled
+		if (!$show_full && $max_length > 0 && length($display_filename) > $max_length) {
 			my ($name, $ext) = $display_filename =~ /^(.*)(\.[^.]+)$/ ? ($1, $2) : ($display_filename, '');
 			if ($ext && length($ext) < $max_length - 3) {
-			my $chars_to_keep = $max_length - length($ext) - 3;
-			$display_filename = substr($name, 0, $chars_to_keep) . '...' . $ext if $chars_to_keep > 0;
-		    } else {
-			$display_filename = substr($display_filename, 0, $max_length) . '...';
-		    }
+				my $chars_to_keep = $max_length - length($ext) - 3;
+				$display_filename = substr($name, 0, $chars_to_keep) . '...' . $ext if $chars_to_keep > 0;
+			} else {
+				$display_filename = substr($display_filename, 0, $max_length) . '...';
+			}
 		}
 		my $catt = ($attach->FirstAttribute('Category') ? $attach->FirstAttribute('Category')->Content : 'X');
 		my $node = ($attach->FirstAttribute('Folder') ? $attach->FirstAttribute('Folder')->Content : '');
@@ -175,7 +178,7 @@ sub LoadTicketAttachments{
 			$filename .= '</div>' if $attach->Filename =~ $extRe; 
 			$filename .= '</span>' if $attach->Filename =~ $extRe; 
 		}
-		push ( @_json, { checkbox=>$checkbox, category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
+		push ( @_json, { checkbox=>$checkbox, category=>$catt, trid=>$trid, attid=>$attid, filename=>$filename, filename_full=>$full_filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
 	}
 	return @_json;
 }
