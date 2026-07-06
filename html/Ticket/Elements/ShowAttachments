@@ -520,7 +520,7 @@
 							"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 								var showFull = <% RT->Config->Get('ShowFullFilename', $session{'CurrentUser'}) ? 'true' : 'false' %>;
 								if (showFull) {
-									$(nTd).css({'white-space': 'normal', 'word-break': 'break-word', 'max-width': '300px'});
+									$(nTd).addClass('__fullFilename');
 									$(nTd).html(sData);
 								} else {
 									$(nTd).css({'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis', 'max-width': '200px'});
