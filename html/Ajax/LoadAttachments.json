@@ -101,7 +101,9 @@ sub LoadTicketAttachments{
 		{ FIELD => 'id',      ORDER => 'DESC' },
 	);
 	my $extRe = qr/\.(bmp|gif|jpe?g|mp3|pdf|png|txt|webp)$/i;
-	my $max_length = RT->Config->Get('FileNameMaxLength') || 0;
+#	my $max_length = RT->Config->Get('FileNameMaxLength') || 0;
+	my $show_full = RT->Config->Get('ShowFullFilename', $session{'CurrentUser'}) || 0;
+        my $max_length = $show_full ? 0 : (RT->Config->Get('FileNameMaxLength') || 0);
 	
 	while ( my $attach = $Attachments->Next() ) {
 		next unless ($attach->Filename);
