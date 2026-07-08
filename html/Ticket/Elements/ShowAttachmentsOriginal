@@ -59,7 +59,13 @@
         <thead>
             <tr>
                 <th><&|/l&>Filename</&></th>
-                <th>&nbsp;</th>
+                <th>
+% if ($Selectable) {
+                    <input type="checkbox" id="SelectAllAttachments" />
+% } else {
+                    &nbsp;
+% }
+                </th>
                 <th>&nbsp;</th>
                 <th><&|/l&>Date</&></th>
                 <th><&|/l&>Size</&></th>
@@ -85,8 +91,7 @@
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
                     <span class="__dropdown">
 % }
-%#                        <span style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$key%></span>
-<span title="<%$key%>" style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$display_key%></span>
+                        <span title="<%$key%>" style="display:block; white-space: nowrap; min-width:150px; overflow:hidden; text-overflow:ellipsis;"><%$display_key%></span>
 % if (lc($key) =~ /\.(png|jpg|jpeg|gif|bmp)$/ ) {
 % my $url;
 % foreach my $rev (@{$documents{$key}}) {
@@ -161,14 +166,21 @@
 <script type="text/javascript">
 	jQuery(function ($) {
 		$(document).ready( function () {
-			$('#attachments').DataTable({
+			var attachmentsTable = $('#attachments').DataTable({
 					language: {
 						url: '<%$RT::WebPath%>/NoAuth/js/Hungarian.json'
 					},
-					pageLength: 25,
 					ordering: false,
 					info:     false
 				});
+
+			$('#SelectAllAttachments').on('change', function() {
+				var isChecked = $(this).prop('checked');
+				// Select all checkboxes across ALL pages using DataTables API
+				attachmentsTable.rows().every(function() {
+					$(this.node()).find('input[name="AttachExisting"]').prop('checked', isChecked);
+				});
+			});
 		})
 	});
 </script>
