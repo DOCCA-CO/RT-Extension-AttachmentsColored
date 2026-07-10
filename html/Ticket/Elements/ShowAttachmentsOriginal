@@ -161,11 +161,22 @@
 
 % $m->callback( %ARGS, CallbackName => 'AfterList', TicketObj => $Ticket, Attachments => $Attachments, Documents => \%documents, IsChecked => \%is_checked, ShowMore => \$show_more );
 
+<!-- Hidden container for selected attachments across all pages -->
+<div id="selectedAttachmentsContainer" style="display:none;"></div>
+
 <script src="<%$RT::WebPath%>/NoAuth/js/jquery.dataTables.min.js" type="text/javascript"></script>
 <script src="<%$RT::WebPath%>/NoAuth/js/dataTables.bootstrap4.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 	jQuery(function ($) {
 		$(document).ready( function () {
+			var selectedAttachments = {}; // Track selected attachments across all pages
+
+			// Initialize selectedAttachments with pre-checked values
+			$('input[name="AttachExisting"]:checked').each(function() {
+				selectedAttachments[$(this).val()] = true;
+			});
+			updateHiddenInputs();
+
 			var attachmentsTable = $('#attachments').DataTable({
 					language: {
 						url: '<%$RT::WebPath%>/NoAuth/js/Hungarian.json'
@@ -174,13 +185,84 @@
 					info:     false
 				});
 
+			// When page changes, restore checkbox states for the visible page
+			attachmentsTable.on('draw', function() {
+				$('input[name="AttachExisting"]').each(function() {
+					var val = $(this).val();
+					$(this).prop('checked', !!selectedAttachments[val]);
+				});
+				updateSelectAllCheckbox();
+			});
+
+			// Track individual checkbox changes
+			$('#attachments').on('change', 'input[name="AttachExisting"]', function() {
+				var val = $(this).val();
+				if ($(this).prop('checked')) {
+					selectedAttachments[val] = true;
+				} else {
+					delete selectedAttachments[val];
+				}
+				updateHiddenInputs();
+				updateSelectAllCheckbox();
+			});
+
+			// Select/deselect all across ALL pages
 			$('#SelectAllAttachments').on('change', function() {
 				var isChecked = $(this).prop('checked');
-				// Select all checkboxes across ALL pages using DataTables API
-				attachmentsTable.rows().every(function() {
-					$(this.node()).find('input[name="AttachExisting"]').prop('checked', isChecked);
-				});
+				
+				if (isChecked) {
+					// Select all rows across ALL pages
+					attachmentsTable.rows().every(function() {
+						var $checkbox = $(this.node()).find('input[name="AttachExisting"]');
+						if ($checkbox.length) {
+							selectedAttachments[$checkbox.val()] = true;
+							$checkbox.prop('checked', true);
+						}
+					});
+				} else {
+					// Deselect all
+					selectedAttachments = {};
+					attachmentsTable.rows().every(function() {
+						$(this.node()).find('input[name="AttachExisting"]').prop('checked', false);
+					});
+				}
+				updateHiddenInputs();
 			});
+
+			// Update hidden inputs that will be submitted with the form
+			function updateHiddenInputs() {
+				var container = $('#selectedAttachmentsContainer');
+				container.empty();
+				for (var attId in selectedAttachments) {
+					container.append('<input type="hidden" name="AttachExisting" value="' + attId + '" />');
+				}
+			}
+
+			// Update "select all" checkbox state based on selections
+			function updateSelectAllCheckbox() {
+				var totalCount = 0;
+				var selectedCount = 0;
+				attachmentsTable.rows().every(function() {
+					var $checkbox = $(this.node()).find('input[name="AttachExisting"]');
+					if ($checkbox.length) {
+						totalCount++;
+						if (selectedAttachments[$checkbox.val()]) {
+							selectedCount++;
+						}
+					}
+				});
+				var $selectAll = $('#SelectAllAttachments');
+				if (selectedCount === 0) {
+					$selectAll.prop('checked', false);
+					$selectAll.prop('indeterminate', false);
+				} else if (selectedCount === totalCount) {
+					$selectAll.prop('checked', true);
+					$selectAll.prop('indeterminate', false);
+				} else {
+					$selectAll.prop('checked', false);
+					$selectAll.prop('indeterminate', true);
+				}
+			}
 		})
 	});
 </script>
