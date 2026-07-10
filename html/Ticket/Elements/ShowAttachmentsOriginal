@@ -117,7 +117,7 @@
 % if ($rev->ContentLength) {
 % if ($Selectable) {
 <!-- selectable -->  
-        <input type="checkbox" class="checkbox" name="AttachExisting" value="<% $rev->Id %>" <% $is_checked{$rev->Id} ? 'checked' : '' %> />
+        <input type="checkbox" class="checkbox att-checkbox" data-attid="<% $rev->Id %>" <% $is_checked{$rev->Id} ? 'checked' : '' %> />
         <br />
 % } else { print '&nbsp;'; } } }
                 </td>
@@ -172,8 +172,8 @@
 			var selectedAttachments = {}; // Track selected attachments across all pages
 
 			// Initialize selectedAttachments with pre-checked values
-			$('input[name="AttachExisting"]:checked').each(function() {
-				selectedAttachments[$(this).val()] = true;
+			$('.att-checkbox:checked').each(function() {
+				selectedAttachments[$(this).data('attid')] = true;
 			});
 			updateHiddenInputs();
 
@@ -187,16 +187,16 @@
 
 			// When page changes, restore checkbox states for the visible page
 			attachmentsTable.on('draw', function() {
-				$('input[name="AttachExisting"]').each(function() {
-					var val = $(this).val();
+				$('.att-checkbox').each(function() {
+					var val = $(this).data('attid');
 					$(this).prop('checked', !!selectedAttachments[val]);
 				});
 				updateSelectAllCheckbox();
 			});
 
 			// Track individual checkbox changes
-			$('#attachments').on('change', 'input[name="AttachExisting"]', function() {
-				var val = $(this).val();
+			$('#attachments').on('change', '.att-checkbox', function() {
+				var val = $(this).data('attid');
 				if ($(this).prop('checked')) {
 					selectedAttachments[val] = true;
 				} else {
@@ -213,9 +213,9 @@
 				if (isChecked) {
 					// Select all rows across ALL pages
 					attachmentsTable.rows().every(function() {
-						var $checkbox = $(this.node()).find('input[name="AttachExisting"]');
+						var $checkbox = $(this.node()).find('.att-checkbox');
 						if ($checkbox.length) {
-							selectedAttachments[$checkbox.val()] = true;
+							selectedAttachments[$checkbox.data('attid')] = true;
 							$checkbox.prop('checked', true);
 						}
 					});
@@ -223,7 +223,7 @@
 					// Deselect all
 					selectedAttachments = {};
 					attachmentsTable.rows().every(function() {
-						$(this.node()).find('input[name="AttachExisting"]').prop('checked', false);
+						$(this.node()).find('.att-checkbox').prop('checked', false);
 					});
 				}
 				updateHiddenInputs();
@@ -243,10 +243,10 @@
 				var totalCount = 0;
 				var selectedCount = 0;
 				attachmentsTable.rows().every(function() {
-					var $checkbox = $(this.node()).find('input[name="AttachExisting"]');
+					var $checkbox = $(this.node()).find('.att-checkbox');
 					if ($checkbox.length) {
 						totalCount++;
-						if (selectedAttachments[$checkbox.val()]) {
+						if (selectedAttachments[$checkbox.data('attid')]) {
 							selectedCount++;
 						}
 					}
