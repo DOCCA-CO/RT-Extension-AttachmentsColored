@@ -538,7 +538,7 @@
 							{ "data":"size" },
 							{ "data":"node" ,
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									nselect = "<select class='selectnode' style='width:100%; max-width:150px;' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option>";
+									nselect = "<select class='selectnode' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option>";
 									data.folders.forEach((element) => {
 %#										console.log(element);
 										nselect += "<option value='" + element.id + "'" + (element.id == oData.node ? " selected" : "") + ">" + element.text + "</option>";
@@ -552,7 +552,7 @@
 							},
 							{ "data":"comment",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									$(nTd).html( "<span class='__attachmentName inverted-text' style='display:none'>"+sData+"</span><input style='border-style:none; padding: 5px; width: 100%; max-width: 120px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp; <span class='fas fa-pencil-alt icon-bordered fa-2x inverted-text' style='vertical-align: middle;' onclick='editComment( \"comm-"+oData.attid+"\" );'></span>" );
+									$(nTd).html( "<span class='__attachmentName inverted-text' style='display:none'>"+sData+"</span><input class='comment-input' style='border-style:none; padding: 5px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp; <span class='fas fa-pencil-alt icon-bordered fa-2x inverted-text' style='vertical-align: middle;' onclick='editComment( \"comm-"+oData.attid+"\" );'></span>" );
 								}
 							}],
 						autoWidth: false,
