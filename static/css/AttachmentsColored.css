@@ -126,6 +126,20 @@ div.AttachmentsColoredOrder {
     line-height: 32px;
 }
 
+.selectnode {
+    width: 100%;
+    max-width: 150px;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.comment-input {
+    width: 100%;
+    max-width: 100px;
+    box-sizing: border-box;
+}
+
 .__attachmentName {
     display: block;
     white-space: nowrap;
@@ -185,6 +199,16 @@ div.AttachmentsColoredOrder {
     word-break: break-word;
 }
 
+/* Tagging column - prevent overflow */
+#attachments td:nth-child(7) {
+    overflow: hidden;
+}
+
+/* Comment column - prevent overflow */
+#attachments td:nth-child(8) {
+    overflow: hidden;
+}
+
 /* Medium screens */
 @media screen and (max-width: 1400px) {
     #attachments th:nth-child(2),
@@ -195,8 +219,8 @@ div.AttachmentsColoredOrder {
     
     #attachments th:nth-child(7),
     #attachments td:nth-child(7) {
-        min-width: 120px !important;
-        max-width: 150px !important;
+        min-width: 100px !important;
+        max-width: 130px !important;
     }
     
     #attachments th:nth-child(8),
@@ -208,6 +232,15 @@ div.AttachmentsColoredOrder {
     .__attachmentName {
         min-width: 100px;
         max-width: 300px;
+    }
+    
+    .selectnode {
+        width: 100% !important;
+        max-width: 130px !important;
+    }
+    
+    .comment-input {
+        max-width: 90px !important;
     }
 }
 
@@ -235,8 +268,8 @@ div.AttachmentsColoredOrder {
     
     #attachments th:nth-child(7),
     #attachments td:nth-child(7) {
-        min-width: 100px !important;
-        max-width: 120px !important;
+        min-width: 80px !important;
+        max-width: 100px !important;
     }
     
     #attachments th:nth-child(8),
@@ -251,7 +284,12 @@ div.AttachmentsColoredOrder {
     }
     
     .selectnode {
-        width: 120px !important;
+        width: 100% !important;
+        max-width: 100px !important;
+    }
+    
+    .comment-input {
+        max-width: 70px !important;
     }
 }
 
@@ -269,5 +307,14 @@ div.AttachmentsColoredOrder {
     .__attachmentName {
         min-width: 60px;
         max-width: 150px;
+    }
+    
+    .selectnode {
+        width: 100% !important;
+        max-width: 80px !important;
+    }
+    
+    .comment-input {
+        max-width: 60px !important;
     }
 }
