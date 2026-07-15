@@ -160,3 +160,114 @@ div.AttachmentsColoredOrder {
     mix-blend-mode: difference !important;
     color: white !important; /* This acts as the base for the blend */
 }
+
+/* Responsive table wrapper */
+.attachments-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive table styles */
+#attachments {
+    width: 100% !important;
+    table-layout: auto;
+}
+
+#attachments th,
+#attachments td {
+    white-space: nowrap;
+}
+
+#attachments td:nth-child(3),
+#attachments th:nth-child(3) {
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Medium screens */
+@media screen and (max-width: 1400px) {
+    #attachments th:nth-child(2),
+    #attachments td:nth-child(2) {
+        min-width: 100px !important;
+        max-width: 120px !important;
+    }
+    
+    #attachments th:nth-child(7),
+    #attachments td:nth-child(7) {
+        min-width: 120px !important;
+        max-width: 150px !important;
+    }
+    
+    #attachments th:nth-child(8),
+    #attachments td:nth-child(8) {
+        min-width: 100px !important;
+        max-width: 120px !important;
+    }
+    
+    .__attachmentName {
+        min-width: 100px;
+        max-width: 300px;
+    }
+}
+
+/* Small screens */
+@media screen and (max-width: 1200px) {
+    #attachments th:nth-child(2),
+    #attachments td:nth-child(2) {
+        min-width: 80px !important;
+        max-width: 100px !important;
+    }
+    
+    #attachments th:nth-child(4),
+    #attachments td:nth-child(4),
+    #attachments th:nth-child(5),
+    #attachments td:nth-child(5) {
+        min-width: 70px !important;
+        max-width: 80px !important;
+    }
+    
+    #attachments th:nth-child(6),
+    #attachments td:nth-child(6) {
+        min-width: 50px !important;
+        max-width: 60px !important;
+    }
+    
+    #attachments th:nth-child(7),
+    #attachments td:nth-child(7) {
+        min-width: 100px !important;
+        max-width: 120px !important;
+    }
+    
+    #attachments th:nth-child(8),
+    #attachments td:nth-child(8) {
+        min-width: 80px !important;
+        max-width: 100px !important;
+    }
+    
+    .__attachmentName {
+        min-width: 80px;
+        max-width: 200px;
+    }
+    
+    .selectnode {
+        width: 120px !important;
+    }
+}
+
+/* Extra small screens */
+@media screen and (max-width: 992px) {
+    .attachments-table-wrapper {
+        margin: 0 -15px;
+        padding: 0 15px;
+    }
+    
+    #attachments {
+        min-width: 900px;
+    }
+    
+    .__attachmentName {
+        min-width: 60px;
+        max-width: 150px;
+    }
+}
