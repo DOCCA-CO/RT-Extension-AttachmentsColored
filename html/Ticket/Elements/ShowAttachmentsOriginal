@@ -66,8 +66,8 @@
                     &nbsp;
 % }
                 </th>
-                <th style="width:70px;min-width:60px;">&nbsp;</th>
-                <th style="width:12%;min-width:90px;"><&|/l&>Date</&></th>
+                <th style="width:55px;min-width:45px;">&nbsp;</th>
+                <th style="width:15%;min-width:120px;"><&|/l&>Date</&></th>
                 <th style="width:55px;min-width:50px;"><&|/l&>Size</&></th>
                 <th style="width:10%;min-width:70px;"><&|/l&>User</&></th>
             </tr>
@@ -125,9 +125,9 @@
 % foreach my $rev (@{$documents{$key}}) {
 % if ($rev->ContentLength) {
 % if (my $url = RT->System->ExternalStorageURLFor($rev)) {
-<a href="<%$url%>" target="_blank">
+<a href="<%$url%>" target="_blank" style="font-size:0.85em;">
 % } else {
-<a href="<%RT->Config->Get('WebPath')%>/<% $DisplayPath %>/Attachment/<%$rev->TransactionId%>/<%$rev->Id%>/<%$rev->Filename | un %>" target="_blank">
+<a href="<%RT->Config->Get('WebPath')%>/<% $DisplayPath %>/Attachment/<%$rev->TransactionId%>/<%$rev->Id%>/<%$rev->Filename | un %>" target="_blank" style="font-size:0.85em;">
 % } 
 <&|/l&>Download</&>
 </a><br />
