@@ -58,7 +58,7 @@
     <table class="table table-striped table-bordered table-hover" id="attachments" style="width: 100%;">
         <thead>
             <tr>
-                <th style="width:35%;min-width:120px;max-width:250px;"><&|/l&>Filename</&></th>
+                <th style="width:45%;min-width:150px;max-width:350px;"><&|/l&>Filename</&></th>
                 <th style="width:40px;text-align:center;">
 % if ($Selectable) {
                     <input type="checkbox" id="SelectAllAttachments" />
@@ -66,10 +66,10 @@
                     &nbsp;
 % }
                 </th>
-                <th style="width:80px;min-width:70px;">&nbsp;</th>
-                <th style="width:15%;min-width:100px;"><&|/l&>Date</&></th>
-                <th style="width:70px;min-width:60px;"><&|/l&>Size</&></th>
-                <th style="width:15%;min-width:80px;"><&|/l&>User</&></th>
+                <th style="width:70px;min-width:60px;">&nbsp;</th>
+                <th style="width:12%;min-width:90px;"><&|/l&>Date</&></th>
+                <th style="width:55px;min-width:50px;"><&|/l&>Size</&></th>
+                <th style="width:10%;min-width:70px;"><&|/l&>User</&></th>
             </tr>
         </thead>
         <tbody>
