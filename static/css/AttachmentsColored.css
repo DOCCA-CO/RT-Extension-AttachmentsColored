@@ -132,6 +132,8 @@ div.AttachmentsColoredOrder {
     box-sizing: border-box;
     overflow: hidden;
     text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
 }
 
 .comment-input {
@@ -316,5 +318,107 @@ div.AttachmentsColoredOrder {
     
     .comment-input {
         max-width: 60px !important;
+    }
+}
+
+/* ========================================
+   ShowAttachmentsOriginal (Update page) styles
+   ======================================== */
+
+.attachment-list {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.attachment-list table#attachments {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+/* Filename column - constrained width with ellipsis */
+.attachment-list table#attachments th:nth-child(1),
+.attachment-list table#attachments td:nth-child(1) {
+    width: 35%;
+    min-width: 120px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Checkbox column */
+.attachment-list table#attachments th:nth-child(2),
+.attachment-list table#attachments td:nth-child(2) {
+    width: 40px;
+    min-width: 40px;
+    max-width: 50px;
+    text-align: center;
+}
+
+/* Download column */
+.attachment-list table#attachments th:nth-child(3),
+.attachment-list table#attachments td:nth-child(3) {
+    width: 80px;
+    min-width: 70px;
+    max-width: 100px;
+    white-space: nowrap;
+}
+
+/* Date column */
+.attachment-list table#attachments th:nth-child(4),
+.attachment-list table#attachments td:nth-child(4) {
+    width: 15%;
+    min-width: 100px;
+    max-width: 150px;
+    white-space: nowrap;
+}
+
+/* Size column */
+.attachment-list table#attachments th:nth-child(5),
+.attachment-list table#attachments td:nth-child(5) {
+    width: 70px;
+    min-width: 60px;
+    max-width: 90px;
+    white-space: nowrap;
+}
+
+/* User column */
+.attachment-list table#attachments th:nth-child(6),
+.attachment-list table#attachments td:nth-child(6) {
+    width: 15%;
+    min-width: 80px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive styles for Update page attachment list */
+@media screen and (max-width: 1200px) {
+    .attachment-list table#attachments th:nth-child(1),
+    .attachment-list table#attachments td:nth-child(1) {
+        max-width: 180px;
+    }
+    
+    .attachment-list table#attachments th:nth-child(4),
+    .attachment-list table#attachments td:nth-child(4) {
+        max-width: 120px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .attachment-list {
+        margin: 0 -10px;
+        padding: 0 10px;
+    }
+    
+    .attachment-list table#attachments {
+        min-width: 600px;
+    }
+    
+    .attachment-list table#attachments th:nth-child(1),
+    .attachment-list table#attachments td:nth-child(1) {
+        max-width: 150px;
     }
 }
