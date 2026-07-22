@@ -66,8 +66,8 @@
                     &nbsp;
 % }
                 </th>
-                <th style="width:45px;min-width:40px;">&nbsp;</th>
-                <th style="width:16%;min-width:130px;"><&|/l&>Date</&></th>
+                <th style="width:40px;min-width:35px;">&nbsp;</th>
+                <th style="width:16%;min-width:135px;"><&|/l&>Date</&></th>
                 <th style="width:45px;min-width:40px;"><&|/l&>Size</&></th>
                 <th style="width:10%;min-width:70px;"><&|/l&>User</&></th>
             </tr>
