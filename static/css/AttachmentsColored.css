@@ -339,9 +339,9 @@ div.AttachmentsColoredOrder {
 /* Filename column - constrained width with ellipsis */
 .attachment-list table#attachments th:nth-child(1),
 .attachment-list table#attachments td:nth-child(1) {
-    width: 35%;
-    min-width: 120px;
-    max-width: 250px;
+    width: 45%;
+    min-width: 150px;
+    max-width: 350px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -359,36 +359,36 @@ div.AttachmentsColoredOrder {
 /* Download column */
 .attachment-list table#attachments th:nth-child(3),
 .attachment-list table#attachments td:nth-child(3) {
-    width: 80px;
-    min-width: 70px;
-    max-width: 100px;
-    white-space: nowrap;
-}
-
-/* Date column */
-.attachment-list table#attachments th:nth-child(4),
-.attachment-list table#attachments td:nth-child(4) {
-    width: 15%;
-    min-width: 100px;
-    max-width: 150px;
-    white-space: nowrap;
-}
-
-/* Size column */
-.attachment-list table#attachments th:nth-child(5),
-.attachment-list table#attachments td:nth-child(5) {
     width: 70px;
     min-width: 60px;
     max-width: 90px;
     white-space: nowrap;
 }
 
+/* Date column */
+.attachment-list table#attachments th:nth-child(4),
+.attachment-list table#attachments td:nth-child(4) {
+    width: 12%;
+    min-width: 90px;
+    max-width: 130px;
+    white-space: nowrap;
+}
+
+/* Size column */
+.attachment-list table#attachments th:nth-child(5),
+.attachment-list table#attachments td:nth-child(5) {
+    width: 55px;
+    min-width: 50px;
+    max-width: 70px;
+    white-space: nowrap;
+}
+
 /* User column */
 .attachment-list table#attachments th:nth-child(6),
 .attachment-list table#attachments td:nth-child(6) {
-    width: 15%;
-    min-width: 80px;
-    max-width: 150px;
+    width: 10%;
+    min-width: 70px;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
