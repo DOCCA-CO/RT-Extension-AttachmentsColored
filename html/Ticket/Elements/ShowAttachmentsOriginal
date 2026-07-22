@@ -58,7 +58,7 @@
     <table class="table table-striped table-bordered table-hover" id="attachments" style="width: 100%;">
         <thead>
             <tr>
-                <th style="width:45%;min-width:150px;max-width:350px;"><&|/l&>Filename</&></th>
+                <th style="width:48%;min-width:150px;max-width:400px;"><&|/l&>Filename</&></th>
                 <th style="width:40px;text-align:center;">
 % if ($Selectable) {
                     <input type="checkbox" id="SelectAllAttachments" />
@@ -66,9 +66,9 @@
                     &nbsp;
 % }
                 </th>
-                <th style="width:55px;min-width:45px;">&nbsp;</th>
-                <th style="width:15%;min-width:120px;"><&|/l&>Date</&></th>
-                <th style="width:55px;min-width:50px;"><&|/l&>Size</&></th>
+                <th style="width:45px;min-width:40px;">&nbsp;</th>
+                <th style="width:16%;min-width:130px;"><&|/l&>Date</&></th>
+                <th style="width:45px;min-width:40px;"><&|/l&>Size</&></th>
                 <th style="width:10%;min-width:70px;"><&|/l&>User</&></th>
             </tr>
         </thead>
@@ -125,9 +125,9 @@
 % foreach my $rev (@{$documents{$key}}) {
 % if ($rev->ContentLength) {
 % if (my $url = RT->System->ExternalStorageURLFor($rev)) {
-<a href="<%$url%>" target="_blank" style="font-size:0.85em;">
+<a href="<%$url%>" target="_blank">
 % } else {
-<a href="<%RT->Config->Get('WebPath')%>/<% $DisplayPath %>/Attachment/<%$rev->TransactionId%>/<%$rev->Id%>/<%$rev->Filename | un %>" target="_blank" style="font-size:0.85em;">
+<a href="<%RT->Config->Get('WebPath')%>/<% $DisplayPath %>/Attachment/<%$rev->TransactionId%>/<%$rev->Id%>/<%$rev->Filename | un %>" target="_blank">
 % } 
 <&|/l&>Download</&>
 </a><br />
