@@ -263,6 +263,51 @@
 					$selectAll.prop('indeterminate', true);
 				}
 			}
+
+			// Image preview dropdown positioning
+			$(document).on('mouseenter', '.__dropdown', function() {
+				const dropdownContent = $(this).find('.__dropdown-content');
+				const rect = $(this)[0].getBoundingClientRect();
+				const viewportHeight = $(window).height();
+				const viewportWidth = $(window).width();
+
+				// Remove any existing positioning classes
+				dropdownContent.removeClass('above below');
+
+				// Calculate horizontal position - align left edge with element, but don't overflow right side
+				let leftPos = rect.left;
+				const dropdownWidth = 480; // max-width from CSS
+				if (leftPos + dropdownWidth > viewportWidth) {
+					leftPos = Math.max(10, viewportWidth - dropdownWidth - 10);
+				}
+
+				// Check if the element is in the upper half of the screen
+				if (rect.top < viewportHeight / 2) {
+					// Position below the element
+					dropdownContent.addClass('below');
+					dropdownContent.css({
+						'top': rect.bottom + 'px',
+						'bottom': 'auto',
+						'left': leftPos + 'px'
+					});
+				} else {
+					// Position above the element
+					dropdownContent.addClass('above');
+					dropdownContent.css({
+						'top': 'auto',
+						'bottom': (viewportHeight - rect.top) + 'px',
+						'left': leftPos + 'px'
+					});
+				}
+
+				// Ensure the dropdown is visible
+				dropdownContent.css('display', 'block');
+			});
+
+			// Hide dropdown when mouse leaves the dropdown area
+			$(document).on('mouseleave', '.__dropdown', function() {
+				$(this).find('.__dropdown-content').css('display', 'none');
+			});
 		})
 	});
 </script>
