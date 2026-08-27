@@ -31,15 +31,17 @@ RT::Logger->info("LoadNodes.json = $SQL");
 $Tickets->FromSQL( $SQL ) ;
 my $First = $Tickets->First->Id if($Tickets && $Tickets->First);
 
-unless ($First) {
-	RT::Logger->info("LoadNodes.json: No Config");
-	$m->abort();
-} else {
+if ($First) {
 	@json = LoadListFromTransaction($First);
-	my $json_text = to_json(\@json, {utf8 => 1, pretty => 1});
-	$m->print($json_text);
-	$m->abort();
+} else {
+	RT::Logger->info("LoadNodes.json: No Config - using default folder structure");
+	# Default folder structure if no config ticket found
+	@json = ( { id => '9999', text => 'Általános', level => 1, lib => 'Alapértelmezett mappa' } );
 }
+
+my $json_text = to_json(\@json, {utf8 => 1, pretty => 1});
+$m->print($json_text);
+$m->abort();
 
 sub LoadListFromTransaction {
 	my $ticketID = shift;

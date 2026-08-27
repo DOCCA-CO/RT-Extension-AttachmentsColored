@@ -1,0 +1,138 @@
+<%init>
+use strict;
+use warnings;
+use RT::Extension::Microsoft::OneDrive;
+use JSON;
+use Data::Dumper;
+use MIME::Entity;
+use URI::Escape qw(uri_escape);
+use Encode qw(decode_utf8 encode_utf8);
+
+
+my $atts = $ARGS{'attachments'} || "";
+my $Ticket = RT::Ticket->new(RT->SystemUser);
+$Ticket->Load($TicketId);
+$m->abort(404) unless ($Ticket && $Ticket->id);
+
+my @attachments = @{decode_json($atts)};
+
+# Initialize OneDrive client
+my $onedrive;
+eval {
+    $onedrive = RT::Extension::Microsoft::OneDrive->new(
+        tenant_id     => $RT::OneDrive->{'tenant_id'},
+        client_id     => $RT::OneDrive->{'client_id'},
+        client_secret => $RT::OneDrive->{'client_secret'},
+        refresh_token => $RT::OneDrive->{'refresh_token'},
+    );
+};
+if ($@) {
+    $m->out("Error initializing OneDrive client: $@\n");
+    $m->abort();
+}
+
+# Test authentication first
+my $access_token;
+eval {
+    $access_token = $onedrive->access_token('refresh_token');
+};
+if ($@ || !$access_token) {
+    $m->out("Error authenticating with OneDrive: " . ($@ || "No access token received") . "\n");
+    $m->abort();
+}
+
+my $folder_id = $RT::OneDrive->{'default_folder'};
+
+### callback to enable folder_id modification
+$m->callback( CallbackName => "ModifyFolderId", ARGSRef => \%ARGS, TicketObj => $Ticket, FolderId => \$folder_id );
+
+my $upload_count = 0;
+my $error_count = 0;
+
+foreach my $attachment (@attachments) {
+    eval {
+        # Load attachment
+        my $Att = RT::Attachment->new($RT::SystemUser);
+        $Att->Load($attachment);
+        
+        unless ($Att && $Att->id) {
+            die "Could not load attachment with ID: $attachment";
+        }
+        my $content = $Att->OriginalContent;
+        my $filename = $Att->Filename || "attachment_$attachment";
+        
+        # Create a ticket-prefixed filename
+        my $onedrive_filename = "#" . $TicketId . " " . $filename;
+
+        # Choose upload method based on file size (4MB threshold for resumable upload)
+        my $file_size = $Att->ContentLength;
+        my $file_info;
+        
+        if ($file_size > 4 * 1024 * 1024) { # 4MB
+            $m->out("Uploading large file ($file_size bytes): $onedrive_filename\n");
+            $file_info = $onedrive->upload_file_big(
+                file_name => uri_escape($onedrive_filename),
+                content   => $content,
+                ($folder_id ? (folder_id => $folder_id) : ()),
+            );
+        } else {
+            $m->out("Uploading file ($file_size bytes): $onedrive_filename\n");
+            $file_info = $onedrive->upload_file(
+                file_name => uri_escape($onedrive_filename),
+                content   => $content,
+                ($folder_id ? (folder_id => $folder_id) : ()),
+            );
+        }
+        
+        # Extract file information
+        my $file_id = $file_info->{id} || 'unknown';
+        my $link = $file_info->{webUrl} || $file_info->{'@microsoft.graph.downloadUrl'} || 'No link available';
+        RT::Logger->info("Successfully uploaded: $onedrive_filename");
+        RT::Logger->info("OneDrive link: $link");
+
+        # Create MIME entity for the uploaded file reference
+        my $mime = MIME::Entity->build( 
+            Subject => Encode::encode_utf8("OneDrive: " . $filename),
+            Encoding => "quoted-printable",
+            Type => 'text/plain',
+            Data => [Encode::encode_utf8("OneDrive file: " . $filename . "\nLink: " . $link)]
+        );    
+        $mime->attach( 
+            Type => "text/uri-list",
+            Filename => Encode::encode_utf8($onedrive_filename),
+            Data => [$link]
+        );
+        
+        # Add transaction
+        my ($TransactionID, $ErrorMessage, $TransactionObject) = $Ticket->Comment(
+            MIMEObj => $mime,
+            Silent => 1,
+            TimeTaken => 1
+        );
+        if ($ErrorMessage) {
+            RT::Logger->error("Could not create transaction: $ErrorMessage");
+        }
+
+        # Mark attachment as uploaded to OneDrive
+        $Att->SetAttribute(Name => 'Comment', Content => 'OneDrive');
+        $upload_count++;
+    } or do {
+        my $error = $@;
+        if ($error) {
+            RT::Logger->error("Error uploading attachment $attachment: $error");
+            $error_count++;
+        }
+    };
+}
+
+# Summary
+$m->out("\nUpload Summary:\n");
+$m->out("Successfully uploaded: $upload_count files\n");
+$m->out("Errors: $error_count files\n");
+
+$m->abort();
+
+</%init>
+<%args>
+$TicketId => undef
+</%args>
