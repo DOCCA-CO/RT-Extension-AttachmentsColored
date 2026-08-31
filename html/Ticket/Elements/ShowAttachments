@@ -327,6 +327,9 @@
 									}
 								}
 							},
+% my $showUploadBtn = RT->Config->Get('ShowUploadButton');
+% my $anyUploadEnabled = ($SimpleUpload && $SimpleUpload->{'enabled'}) || ($GoogleDrive && $GoogleDrive->{'enabled'}) || ($OneDrive && $OneDrive->{'enabled'}) || ($NextCloud && $NextCloud->{'enabled'});
+% if ($showUploadBtn && $anyUploadEnabled) {
 							{
 %if ($SimpleUpload && $SimpleUpload->{'enabled'}) {
 							    text: "<&|/l&>Upload</&>",
@@ -439,6 +442,7 @@
 								}
 %}
 							}
+% }
 						],
 
 						data: data.attachments,
