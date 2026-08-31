@@ -62,4 +62,8 @@ Set($SimpleUpload, {
 # Set to 0 to display the full filename.
 Set($FileNameMaxLength, 50);
 
+# Show the upload button in the attachments table
+# Set to 1 to show the upload button, 0 to hide it
+Set($ShowUploadButton, 0);
+
 1;
