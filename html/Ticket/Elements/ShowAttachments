@@ -531,6 +531,11 @@
 									$(nTd).css({'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis', 'max-width': '200px'});
 									$(nTd).attr('title', sData);
 								}
+								if (!oData.is_uri_list) {
+									var attachmentUrl = '<%RT->Config->Get('WebPath')%>/Ticket/Attachment/' + oData.trid + '/' + oData.attid + '/' + encodeURIComponent(oData.raw_filename);
+									$(nTd).find('a').attr('href', attachmentUrl);
+									$(nTd).find('img').attr('src', attachmentUrl);
+								}
 							}
 						},
 							{ "data":"date_unix",
