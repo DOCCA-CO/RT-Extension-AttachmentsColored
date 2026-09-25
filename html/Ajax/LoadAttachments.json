@@ -180,7 +180,7 @@ sub LoadTicketAttachments{
 			$filename .= '</div>' if $attach->Filename =~ $extRe; 
 			$filename .= '</span>' if $attach->Filename =~ $extRe; 
 		}
-		push ( @_json, { checkbox=>$checkbox, category=>$catt, trid=>$trid, attid=>$attid,  filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
+		push ( @_json, { checkbox=>$checkbox, category=>$catt, trid=>$trid, attid=>$attid, raw_filename=>$attach->Filename, is_uri_list=>($attach->ContentType eq 'text/uri-list' ? 1 : 0), filename=>$filename, content=>$content, date=>$date, date_unix=>$date_unix, size=>$size, creator=>$creator, node=>$node, comment=>$comment} ); 
 	}
 	return @_json;
 }
