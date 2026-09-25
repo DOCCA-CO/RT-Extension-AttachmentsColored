@@ -3,6 +3,7 @@
 use utf8;
 use JSON;
 use Encode;
+use URI::Escape qw(uri_escape_utf8);
 
 my (@folder, @att);
 
@@ -129,7 +130,8 @@ sub LoadTicketAttachments{
 		my $creator = '<span class="__attachmentName inverted-text">' . $attach->CreatorObj->Name . '</span>';
 		my $comment = ($attach->FirstAttribute('Comment') ? $attach->FirstAttribute('Comment')->Content : '');
 		my $content = $attach->Content if $attach->ContentType eq 'text/uri-list';
-		my $checkbox = sprintf("%sTicket/Attachment/%d/%d/%s", RT->Config->Get('WebURL'), $attach->TransactionId, $attid = $attach->Id, $attach->Filename);
+		my $encoded_filename = uri_escape_utf8($attach->Filename);
+		my $checkbox = sprintf("%sTicket/Attachment/%d/%d/%s", RT->Config->Get('WebURL'), $attach->TransactionId, $attid = $attach->Id, $encoded_filename);
 
 		if ($attach->ContentType eq 'text/uri-list') {
 			if ( index( lc( $attach->Content ), 'onedrive' ) > 0 || index( lc( $attach->Content ), 'sharepoint' ) > 0) {
@@ -163,7 +165,7 @@ sub LoadTicketAttachments{
 				RT->Config->Get('WebPath'), 
 				$attach->TransactionId, 
 				$attid = $attach->Id, 
-				$attach->Filename, 
+				$encoded_filename, 
 				($attach->Filename =~ $extRe) ? "" : sprintf("download='%s'", $attach->Filename), 
 				$display_filename);
 
@@ -172,7 +174,7 @@ sub LoadTicketAttachments{
 				RT->Config->Get('WebPath'), 
 				$attach->TransactionId, 
 				$attid = $attach->Id, 
-				$attach->Filename, 
+				$encoded_filename, 
 				$comment, 480,  640) if $attach->Filename =~ $extRe;
 			$filename .= sprintf("<div class='desc'>%s</div>", $comment) if $attach->Filename =~ $extRe;
 			$filename .= '</div>' if $attach->Filename =~ $extRe; 
