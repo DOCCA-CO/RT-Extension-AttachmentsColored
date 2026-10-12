@@ -162,9 +162,6 @@
 
 </table>
 </div>
-% if ($Selectable) {
-<div id="attachment-existing-selected" hidden></div>
-% }
 
 <script src="<%$RT::WebPath%>/NoAuth/js/jquery.dataTables.min.js" type="text/javascript"></script>
 <script src="<%$RT::WebPath%>/NoAuth/js/dataTables.bootstrap4.min.js" type="text/javascript"></script>
@@ -185,18 +182,12 @@
 	var dt, result;
 	var bShowHide = false;
 	var selectedRows = {}; // Track selected rows across all pages
-	var selectableAttachments = <% $Selectable ? 'true' : 'false' %>;
-	var checkedAttachmentIds = <% to_json([keys %is_checked]) |n %>;
-	var initialAttachmentIds = <% to_json([map { $_->Id } map { @$_ } values %documents]) |n %>;
-	var limitAttachments = <% defined($Count) ? 'true' : 'false' %>;
 
 	jQuery(function ($) {
 		$(document).ready( function () {
 
 			function formatResult(node) {
-				var $result = $('<span>').attr('title', node.lib || '').css('padding-left', (20 * (node.level - 1)) + 'px');
-				$result.append($('<img>').attr('src', <% RT->Config->Get('WebPath') . '/static/images/icons8-folder-16.png' |n,j %>));
-				$result.append(document.createTextNode(' ' + (node.text || '')));
+				var $result = $('<span title="' + node.lib  + '" style="padding-left:' + (20 * (node.level-1)) + 'px;">' + '<img src="<%RT->Config->Get('WebPath')%>/static/images/icons8-folder-16.png"> ' + node.text + '</span>');
 				return $result;
 			};
 			result = $.ajax({
@@ -204,17 +195,6 @@
 				url: "<%RT->Config->Get('WebPath')%>/Ajax/LoadAttachments.json",
 				data: { 'ticketId': '<%$Ticket->Id%>' },
 				success: function(data) {
-					var allAttachments = data.attachments;
-					var checkedIds = checkedAttachmentIds.map(String);
-					var initialIds = initialAttachmentIds.map(String);
-					allAttachments.forEach(function(attachment) {
-						if (checkedIds.indexOf(String(attachment.attid)) !== -1) {
-							selectedRows[attachment.attid] = { attid: attachment.attid, link: attachment.checkbox };
-						}
-					});
-					var displayedAttachments = limitAttachments ? allAttachments.filter(function(attachment) {
-						return initialIds.indexOf(String(attachment.attid)) !== -1;
-					}) : allAttachments;
 					dt = $('#attachments').DataTable({
 						language: {
 							url: '<%$RT::WebPath%>/NoAuth/js/Hungarian.json'
@@ -246,7 +226,7 @@
 									if (links.length === 0) return;
 									console.log(links.join(','));
 									$('#myModal').appendTo("body").modal('show');
-									$('#send1').off('click.attachmentsColored').on('click.attachmentsColored', function() {
+									$('#send1').click(function() {
 										$.ajax({
 										url: '<%$RT::WebPath%>/Ajax/AddNewTicket',
 										type: 'POST',
@@ -271,7 +251,7 @@
 									if (links.length === 0) return;
 									console.log(links.join(','));
 									$('#myModal2').appendTo("body").modal('show');
-									$('#send2').off('click.attachmentsColored').on('click.attachmentsColored', function() {
+									$('#send2').click(function() {
 										$.ajax({
 										url: '<%$RT::WebPath%>/Ajax/AddToTicket',
 										type: 'POST',
@@ -347,9 +327,6 @@
 									}
 								}
 							},
-% my $showUploadBtn = RT->Config->Get('ShowUploadButton');
-% my $anyUploadEnabled = ($SimpleUpload && $SimpleUpload->{'enabled'}) || ($GoogleDrive && $GoogleDrive->{'enabled'}) || ($OneDrive && $OneDrive->{'enabled'}) || ($NextCloud && $NextCloud->{'enabled'});
-% if ($showUploadBtn && $anyUploadEnabled) {
 							{
 %if ($SimpleUpload && $SimpleUpload->{'enabled'}) {
 							    text: "<&|/l&>Upload</&>",
@@ -462,15 +439,10 @@
 								}
 %}
 							}
-% }
 						],
 
-						data: displayedAttachments,
+						data: data.attachments,
 						drawCallback: function( row, dataIndex ) {
-							$('#attachments input[name="att"]').each(function() {
-								$(this).prop('checked', !!selectedRows[this.value]);
-							});
-							if (dt) syncAttachmentSelection();
 							$('.selectnode').select2({
 								placeholder: '<&|/l&>Select an option</&>',
 								width: "230px",
@@ -507,10 +479,8 @@
 					columns: [
 						{ "data": null, "defaultContent": "","orderable": false,
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-							var checkbox = $('<input>').attr({ type: 'checkbox', name: 'att', 'data-link': oData.checkbox }).val(oData.attid);
-							checkbox.prop('checked', !!selectedRows[oData.attid]);
-							checkbox.on('change', function() { handleCheckboxChange(this); });
-							$(nTd).empty().append(checkbox);
+							var isChecked = selectedRows[oData.attid] ? 'checked' : '';
+							$(nTd).html( "<input type='checkbox' name='att' value='"+oData.attid+"' data-link='"+oData.checkbox+"' "+isChecked+" onchange='handleCheckboxChange(this)' />" );
 						}},
 							{ "data":"category",
 		                    	//"orderable": false,
@@ -557,11 +527,6 @@
 									$(nTd).css({'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis', 'max-width': '200px'});
 									$(nTd).attr('title', sData);
 								}
-								if (!oData.is_uri_list) {
-									var attachmentUrl = <% RT->Config->Get('WebPath') . '/' . $DisplayPath . '/Attachment/' |n,j %> + oData.trid + '/' + oData.attid + '/' + encodeURIComponent(oData.raw_filename);
-									$(nTd).find('a').attr('href', attachmentUrl);
-									$(nTd).find('img').attr('src', attachmentUrl);
-								}
 							}
 						},
 							{ "data":"date_unix",
@@ -573,19 +538,21 @@
 							{ "data":"size" },
 							{ "data":"node" ,
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									var folderSelect = $('<select>').addClass('selectnode').attr('id', 'sel-' + oData.attid);
-									folderSelect.append($('<option>'));
-									folderSelect.on('change', function() { setFolder(this.id, this.value); });
+									nselect = "<select class='selectnode' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option>";
 									data.folders.forEach((element) => {
-										folderSelect.append($('<option>').val(element.id).text(element.text).prop('selected', element.id == oData.node));
+%#										console.log(element);
+										nselect += "<option value='" + element.id + "'" + (element.id == oData.node ? " selected" : "") + ">" + element.text + "</option>";
 									});
-									$(nTd).empty().append(folderSelect);
+									nselect += "</select>";
+%#									console.log("Folder: " + nselect);
+									$(nTd).html( nselect );
+%#									$(nTd).html( "<select class='selectnode' style='width:200px;' id='sel-" + oData.attid + "' onchange='setFolder(this.id, this.value);'><option></option></select>" );
 
 								}
 							},
-							{ "data":"comment", "render": $.fn.dataTable.render.text(),
+							{ "data":"comment",
 								"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-									renderAttachmentComment(nTd, sData, oData.attid);
+									$(nTd).html( "<span class='__attachmentName inverted-text' style='display:none'>"+sData+"</span><input class='comment-input' style='border-style:none; padding: 5px;' id=comm-" + oData.attid + " type='text' onfocusout='saveComment(this.id, this.value);' value='" + sData + "' disabled>&nbsp; <span class='fas fa-pencil-alt icon-bordered fa-2x inverted-text' style='vertical-align: middle;' onclick='editComment( \"comm-"+oData.attid+"\" );'></span>" );
 								}
 							}],
 						autoWidth: false,
@@ -602,15 +569,6 @@
 							],
 		                order: [ 3, 'asc' ],
 					});
-					syncAttachmentSelection();
-					if (displayedAttachments.length < allAttachments.length) {
-						var showAllButton = $('<button>').attr('type', 'button').addClass('button btn btn-primary').text(<% loc('Show all') |n,j %>);
-						showAllButton.on('click', function() {
-							dt.clear().rows.add(allAttachments).draw(false);
-							showAllButton.remove();
-						});
-						$('.attachments-table-wrapper').append(showAllButton);
-					}
 				}
 			}).then(function (data) {
 			    // Event delegation for dynamically created elements
@@ -741,38 +699,9 @@
 			} else {
 				if (jQuery( dt.row(index).node() ).find("input[type='hidden'][name^='rad']").val() == 'hidden') {
 					jQuery(dt.row(index).node()).hide();
-								}
-								}
+				}
+			}
 		});
-	}
-
-	function renderAttachmentComment(cell, value, attachmentId) {
-		var commentText = value == null ? '' : String(value);
-		var label = document.createElement('span');
-		label.className = '__attachmentName inverted-text';
-		label.style.display = 'none';
-		label.textContent = commentText;
-
-		var input = document.createElement('input');
-		input.className = 'comment-input';
-		input.style.borderStyle = 'none';
-		input.style.padding = '5px';
-		input.id = 'comm-' + attachmentId;
-		input.type = 'text';
-		input.value = commentText;
-		input.disabled = true;
-		input.addEventListener('focusout', function() { saveComment(this.id, this.value); });
-
-		var editIcon = document.createElement('span');
-		editIcon.className = 'fas fa-pencil-alt icon-bordered fa-2x inverted-text';
-		editIcon.style.verticalAlign = 'middle';
-		editIcon.addEventListener('click', function() { editComment(input.id); });
-
-		cell.textContent = '';
-		cell.appendChild(label);
-		cell.appendChild(input);
-		cell.appendChild(document.createTextNode('\u00a0 '));
-		cell.appendChild(editIcon);
 	}
 
 	function editComment( editID ) {
@@ -836,26 +765,9 @@
             delete selectedRows[attid];
         }
         
-		syncAttachmentSelection();
-	}
-
-	function syncAttachmentSelection() {
-		if (selectableAttachments) {
-			var container = document.getElementById('attachment-existing-selected');
-			container.textContent = '';
-			Object.keys(selectedRows).forEach(function(attachmentId) {
-				var input = document.createElement('input');
-				input.type = 'hidden';
-				input.name = 'AttachExisting';
-				input.value = attachmentId;
-				container.appendChild(input);
-			});
-		}
-		var totalRows = dt.rows().count();
-		var selectedCount = 0;
-		dt.rows().every(function() {
-			if (selectedRows[this.data().attid]) selectedCount++;
-		});
+        // Update "select all" checkbox state
+        var totalRows = dt.rows().count();
+        var selectedCount = Object.keys(selectedRows).length;
         var selectAllCheckbox = document.getElementById('checkAll');
         
         if (selectedCount === 0) {
@@ -887,8 +799,7 @@
         }
         
         // Update visible checkboxes
-		jQuery('#attachments input[name="att"]:checkbox').not(cb).prop('checked', cb.checked);
-		syncAttachmentSelection();
+        jQuery('input[name="att"]:checkbox').not(cb).prop('checked', cb.checked);
     }
 
     function newTicketClick() {
@@ -900,7 +811,7 @@
         if (links.length === 0) return;
         console.log(links.join(','));
         jQuery('#myModal').appendTo("body").modal('show');
-		jQuery('#send1').off('click.attachmentsColored').on('click.attachmentsColored', function() {
+        jQuery('#send1').click(function() {
             jQuery.ajax({
                 url: '<%$RT::WebPath%>/Ajax/AddNewTicket',
                 type: 'POST',
@@ -923,7 +834,7 @@
         if (links.length === 0) return;
         console.log(links.join(','));
         jQuery('#myModal2').appendTo("body").modal('show');
-		jQuery('#send2').off('click.attachmentsColored').on('click.attachmentsColored', function() {
+        jQuery('#send2').click(function() {
             jQuery.ajax({
                 url: '<%$RT::WebPath%>/Ajax/AddToTicket',
                 type: 'POST',
