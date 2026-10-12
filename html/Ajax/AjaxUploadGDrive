@@ -1,0 +1,68 @@
+<%init>
+use strict;
+use warnings;
+use RT::Extension::Google::Drive;
+use JSON;
+use Data::Dumper;
+
+my $atts = $ARGS{'attachments'} || "";
+my $Ticket = RT::Ticket->new(RT->SystemUser);
+$Ticket->Load($TicketId);
+$m->abort(404) unless ($Ticket && $Ticket->id);
+
+my @attachments = @{decode_json($atts)};
+my $access_token = RT::Extension::Google::Drive::access_token({
+    'client_id'     => $RT::GoogleDrive->{'client_id'},
+    'client_secret' => $RT::GoogleDrive->{'client_secret'},
+    'refresh_token' => $RT::GoogleDrive->{'refresh_token'},
+    'grant_type'    => $RT::GoogleDrive->{'grant_type'},
+});
+
+my $folder_id = $RT::GoogleDrive->{'default_folder'};
+
+### callback to enable #folder_id modification
+$m->callback( CallbackName => "ModifyFolderId", ARGSRef => \%ARGS, TicketObj => $Ticket, FolderId => \$folder_id );
+
+foreach my $attachment (@attachments) {
+    # Upload the file to Google Drive
+    my $Att = RT::Attachment->new($RT::SystemUser);
+    $Att->Load($attachment);
+    my $content = $Att->Content;
+    my $content_ref = \$content;
+    my $drive = RT::Extension::Google::Drive->new( access_token => $access_token );
+
+    my $file_info = $drive->upload_file(
+        "#" . $TicketId . " " . $Att->Filename,
+        $content_ref,
+        $folder_id,
+        $Att->ContentType
+    );
+
+    my $file_id = $file_info->{id};
+    my $link = "https://drive.google.com/file/d/$file_id/view";
+    $m->out("Uploaded to: $link\n");
+    
+    my $mime = MIME::Entity->build( 
+        Subject => Encode::encode_utf8($file_info->{name}),
+        Encoding => "quoted-printable",
+        Type => 'text/plain',
+        Data => [Encode::encode_utf8($file_info->{name})]
+    );
+    $mime->attach( 
+        Type => "text/uri-list",
+        Filename => Encode::encode_utf8($file_info->{name}),
+        Data => ["$link"]
+    );
+    my ($TransactionID, $ErrorMessage, $TransactionObject) = $Ticket->Comment(
+        MIMEObj => $mime,
+        Silent => 1,
+        TimeTaken => 1
+    );
+    $Att->SetAttribute(Name => 'Comment', Content => "GDrive");
+}
+
+$m->abort();
+</%init>
+<%args>
+$TicketId => undef
+</%args>

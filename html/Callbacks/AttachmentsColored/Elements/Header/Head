@@ -4,7 +4,11 @@
 <!-- <link rel="stylesheet" href="<%$RT::WebPath%>/static/css/dataTables.bootstrap4.min.css" type="text/css" media="all" /> -->
 <!-- link rel="stylesheet" href="<%$RT::WebPath%>/NoAuth/css/responsive.dataTables.min.css" type="text/css" media="all" /-->
 <link rel="stylesheet" href="<%$RT::WebPath%>/NoAuth/css/cloud.css" type="text/css" media="all" />
-
+<style type="text/css">
+    .darkmode table.dataTable tbody tr {
+        background-color: transparent;
+    }
+</style>
 <script src="<%$RT::WebPath%>/NoAuth/js/util_AttachmentsColored.js" type="text/javascript"></script>
 
 <!-- /AttachmentsColored Head -->

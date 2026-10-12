@@ -57,6 +57,7 @@ a plugin működéséhez szükséges paraméterek:
 |---|---|---|---|
 | `AttachmentCategories` | hash | | Csatolmányok színei, RGB formátumban |
 | `DefaultFolderStructureTicketID` | integer | | Az ügyszám, ahol az alapértelmezett kategóriák vannak |
+| `AttachmentsColoredShowArticle` | boolean | `0` / `1` | A gyári cikkpanel megjelenítése a jegy összefoglalójában. Alapértelmezés: `0` (kikapcsolva). |
 
 #### Példa
 ````perl

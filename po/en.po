@@ -23,3 +23,11 @@ msgstr "[size]"
 #: NOT FOUND IN SOURCE
 msgid "[user]"
 msgstr "[user]"
+
+#:
+msgid "Show full filename in attachments list"
+msgstr "Show full filename in attachments list"
+
+#:
+msgid "When enabled, the full filename will be displayed with word-wrap instead of truncating."
+msgstr "When enabled, the full filename will be displayed with word-wrap instead of truncating."

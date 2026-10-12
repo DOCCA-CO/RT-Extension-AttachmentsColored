@@ -40,7 +40,7 @@ div.AttachmentsColoredOrder {
     width: 20px;
 /*  background-color: #eee;*/
     border-radius: 50%;
-    border: 1px solid;
+    border: 1px solid #ccc !important;
 }
 
 /* On mouse-over, add a grey background color */
@@ -89,19 +89,30 @@ div.AttachmentsColoredOrder {
 .__dropdown {
     position: relative;
     display: inline-block;
+    background: transparent !important;
 }
 
 .__dropdown-content {
-    display: none;
-    position: absolute;
+    display: none; /* Hide by default */
+    position: fixed;
     background-color: #f9f9f9;
-    min-width: 480px;
+    max-width: 480px;
+    max-height: 90vh;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 9999;
+    overflow: auto;
+}
+
+.__dropdown-content.above {
+    /* Position is calculated dynamically via JavaScript */
+}
+
+.__dropdown-content.below {
+    /* Position is calculated dynamically via JavaScript */
 }
 
 .__dropdown:hover .__dropdown-content {
-    display: block;
+    /* Display is controlled via JavaScript for fixed positioning */
 }
 
 .desc {
@@ -113,4 +124,301 @@ div.AttachmentsColoredOrder {
     float: left;
     height: 32px;
     line-height: 32px;
+}
+
+.selectnode {
+    width: 100%;
+    max-width: 150px;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
+}
+
+.comment-input {
+    width: 100%;
+    max-width: 100px;
+    box-sizing: border-box;
+}
+
+.__attachmentName {
+    display: block;
+    white-space: nowrap;
+    min-width:150px;
+    max-width: 600px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    background: transparent !important;
+}
+
+.__fullFilename {
+    white-space: normal !important;
+    word-break: break-word !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 300px !important;
+    min-width: 150px;
+}
+
+.__fullFilename .__attachmentName {
+    white-space: normal !important;
+    word-break: break-word !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 300px !important;
+}
+
+.inverted-text {
+}
+
+.darkmode .inverted-text {
+    mix-blend-mode: difference !important;
+    color: white !important; /* This acts as the base for the blend */
+}
+
+/* Responsive table wrapper */
+.attachments-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive table styles */
+#attachments {
+    width: 100% !important;
+    table-layout: auto;
+}
+
+#attachments th,
+#attachments td {
+    white-space: nowrap;
+}
+
+#attachments td:nth-child(3),
+#attachments th:nth-child(3) {
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Tagging column - prevent overflow */
+#attachments td:nth-child(7) {
+    overflow: hidden;
+}
+
+/* Comment column - prevent overflow */
+#attachments td:nth-child(8) {
+    overflow: hidden;
+}
+
+/* Medium screens */
+@media screen and (max-width: 1400px) {
+    #attachments th:nth-child(2),
+    #attachments td:nth-child(2) {
+        min-width: 100px !important;
+        max-width: 120px !important;
+    }
+    
+    #attachments th:nth-child(7),
+    #attachments td:nth-child(7) {
+        min-width: 100px !important;
+        max-width: 130px !important;
+    }
+    
+    #attachments th:nth-child(8),
+    #attachments td:nth-child(8) {
+        min-width: 100px !important;
+        max-width: 120px !important;
+    }
+    
+    .__attachmentName {
+        min-width: 100px;
+        max-width: 300px;
+    }
+    
+    .selectnode {
+        width: 100% !important;
+        max-width: 130px !important;
+    }
+    
+    .comment-input {
+        max-width: 90px !important;
+    }
+}
+
+/* Small screens */
+@media screen and (max-width: 1200px) {
+    #attachments th:nth-child(2),
+    #attachments td:nth-child(2) {
+        min-width: 80px !important;
+        max-width: 100px !important;
+    }
+    
+    #attachments th:nth-child(4),
+    #attachments td:nth-child(4),
+    #attachments th:nth-child(5),
+    #attachments td:nth-child(5) {
+        min-width: 70px !important;
+        max-width: 80px !important;
+    }
+    
+    #attachments th:nth-child(6),
+    #attachments td:nth-child(6) {
+        min-width: 50px !important;
+        max-width: 60px !important;
+    }
+    
+    #attachments th:nth-child(7),
+    #attachments td:nth-child(7) {
+        min-width: 80px !important;
+        max-width: 100px !important;
+    }
+    
+    #attachments th:nth-child(8),
+    #attachments td:nth-child(8) {
+        min-width: 80px !important;
+        max-width: 100px !important;
+    }
+    
+    .__attachmentName {
+        min-width: 80px;
+        max-width: 200px;
+    }
+    
+    .selectnode {
+        width: 100% !important;
+        max-width: 100px !important;
+    }
+    
+    .comment-input {
+        max-width: 70px !important;
+    }
+}
+
+/* Extra small screens */
+@media screen and (max-width: 992px) {
+    .attachments-table-wrapper {
+        margin: 0 -15px;
+        padding: 0 15px;
+    }
+    
+    #attachments {
+        min-width: 900px;
+    }
+    
+    .__attachmentName {
+        min-width: 60px;
+        max-width: 150px;
+    }
+    
+    .selectnode {
+        width: 100% !important;
+        max-width: 80px !important;
+    }
+    
+    .comment-input {
+        max-width: 60px !important;
+    }
+}
+
+/* ========================================
+   ShowAttachmentsOriginal (Update page) styles
+   ======================================== */
+
+.attachment-list {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.attachment-list table#attachments {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+/* Filename column - constrained width with ellipsis */
+.attachment-list table#attachments th:nth-child(1),
+.attachment-list table#attachments td:nth-child(1) {
+    width: 45%;
+    min-width: 150px;
+    max-width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Checkbox column */
+.attachment-list table#attachments th:nth-child(2),
+.attachment-list table#attachments td:nth-child(2) {
+    width: 40px;
+    min-width: 40px;
+    max-width: 50px;
+    text-align: center;
+}
+
+/* Download column */
+.attachment-list table#attachments th:nth-child(3),
+.attachment-list table#attachments td:nth-child(3) {
+    width: 70px;
+    min-width: 60px;
+    max-width: 90px;
+    white-space: nowrap;
+}
+
+/* Date column */
+.attachment-list table#attachments th:nth-child(4),
+.attachment-list table#attachments td:nth-child(4) {
+    width: 12%;
+    min-width: 90px;
+    max-width: 130px;
+    white-space: nowrap;
+}
+
+/* Size column */
+.attachment-list table#attachments th:nth-child(5),
+.attachment-list table#attachments td:nth-child(5) {
+    width: 55px;
+    min-width: 50px;
+    max-width: 70px;
+    white-space: nowrap;
+}
+
+/* User column */
+.attachment-list table#attachments th:nth-child(6),
+.attachment-list table#attachments td:nth-child(6) {
+    width: 10%;
+    min-width: 70px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive styles for Update page attachment list */
+@media screen and (max-width: 1200px) {
+    .attachment-list table#attachments th:nth-child(1),
+    .attachment-list table#attachments td:nth-child(1) {
+        max-width: 180px;
+    }
+    
+    .attachment-list table#attachments th:nth-child(4),
+    .attachment-list table#attachments td:nth-child(4) {
+        max-width: 120px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .attachment-list {
+        margin: 0 -10px;
+        padding: 0 10px;
+    }
+    
+    .attachment-list table#attachments {
+        min-width: 600px;
+    }
+    
+    .attachment-list table#attachments th:nth-child(1),
+    .attachment-list table#attachments td:nth-child(1) {
+        max-width: 150px;
+    }
 }

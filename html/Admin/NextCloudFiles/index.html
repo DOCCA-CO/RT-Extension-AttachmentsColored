@@ -1,0 +1,161 @@
+<& /Admin/Elements/Header, Title => loc("NextCloud Files") &>
+<& /Elements/Tabs &>
+<&|/Widgets/TitleBox, title => loc("General Settings") &>
+    <div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Base URL</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{base_url} %> </div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Authorisation URL</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{authorize_url} %> </div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Token URL</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{token_url} %> </div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>API URL</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{api_url} %> </div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Client ID</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{client_id} %> </div> 
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Client Secret</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{client_secret} %> </div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Redirect URI</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{redirect_uri} %> </div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>User</&>: </div>
+            <div class="col-8 value"><% $RT::NextCloud->{user} %> </div>
+        </div>
+    </div>
+</&>
+
+<&|/Widgets/TitleBox, title => loc("Token Information") &>
+    <div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>User</&>: </div>
+            <div class="col-8 value"><% $json->{user_id} %></div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Token Type</&>: </div>
+            <div class="col-8 value"><% $json->{token_type} %></div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Access Token</&>: </div>
+            <div class="col-8 value"><% $json->{access_token} %></div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Refresh Token</&>: </div>
+            <div class="col-8 value"><% $json->{refresh_token} %></div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Expires In</&>: </div>
+            <div class="col-8 value"><% $json->{expires_in}/60 %> <&|/l&>minutes</&></div>
+        </div>
+        <div class="row">
+            <div class="col-4 label"><&|/l&>Created At</&>: </div>
+            <div class="col-8 value"><% scalar localtime($json->{created_at}) %></div>
+        </div>
+    </div>
+    <div>
+        <form method="get" action="<% $RT::NextCloud->{authorize_url} %>">
+            <input type="hidden" name="client_id" value="<% $RT::NextCloud->{client_id} %>">
+            <input type="hidden" name="redirect_uri" value="<% $RT::NextCloud->{redirect_uri} %>">
+            <input type="hidden" name="response_type" value="code">
+            <input type="hidden" name="state" value="<% random_code() %>">
+            <input type="submit" value="Generate Authorization Code" class="btn btn-primary">
+        </form>
+    </div>
+</&>
+
+<%init>
+use utf8;
+use strict;
+use warnings;
+
+## use Data::Dumper;
+use LWP::UserAgent;
+use JSON qw(decode_json encode_json);
+use URI::Escape;
+use MIME::Base64; 
+use Time::HiRes qw(time);
+use RT::Extension::NextCloud::Files;
+
+my @results;
+my $json_data;
+my $json = decode_json($json_data // '{}');
+my $nothing = 1;
+
+my $query_string = sub {
+    my %args = @_;
+    my $u    = URI->new();
+    $u->query_form(map { $_ => $args{$_} } sort keys %args);
+    return $u->query;
+};
+
+
+my $auth_url = $RT::NextCloud->{authorize_url} . "?" .
+                    $query_string->(
+                        response_type => 'code',
+                        client_id     => $RT::NextCloud->{client_id},
+                        redirect_uri  => $RT::NextCloud->{redirect_uri},
+                        state         => random_code(),
+                    );
+
+my $next = RT::Extension::NextCloud::Files->new(    
+        base_url      => $RT::NextCloud->{base_url},
+        client_id     => $RT::NextCloud->{client_id},
+        client_secret => $RT::NextCloud->{client_secret},
+        redirect_uri  => $RT::NextCloud->{redirect_uri},
+        user_id       => $RT::NextCloud->{user},
+        token_file    => '/opt/rt5/var/fl_token_store.json',
+);
+
+if ($code) {
+    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 0 } );
+    $ua->timeout(15);
+
+    my ($client_id, $client_secret) = ($RT::NextCloud->{client_id}, $RT::NextCloud->{client_secret});
+    my $res = $ua->post($RT::NextCloud->{token_url}, {
+        grant_type   => 'authorization_code',
+        code         => $code,
+        redirect_uri => $RT::NextCloud->{redirect_uri},
+    }, 'Authorization' => 'Basic ' . MIME::Base64::encode("$client_id:$client_secret", ''));
+
+    Abort ("Token request failed: " . $res->status_line . "\n" . $res->decoded_content)
+        unless $res->is_success;
+
+    my $token = decode_json($res->decoded_content);
+    $token->{created_at} = time();
+
+    open my $fh, '>', '/opt/rt5/var/fl_token_store.json' or Abort ("Cannot save /opt/rt5/var/fl_token_store.json!");
+    print $fh encode_json($token);
+    close $fh;
+} elsif (-e $next->{token_file}) {
+    open my $fh, '<', $next->{token_file} or Abort ("Cannot read $next->{token_file}!");
+    local $/;
+    $json_data = <$fh>;
+    close $fh;
+    $json = decode_json($json_data // '{}');
+    $next->access_token();
+}
+
+sub random_code {
+    my $length = shift || 16;
+    my @chars = ('A'..'Z', 'a'..'z', '0'..'9');
+    my $code = '';
+    $code = join '', map { $chars[rand @chars] } 1..$length;
+    return $code;
+}
+
+</%init>
+<%args>
+$code => undef;
+</%args>

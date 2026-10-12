@@ -1,0 +1,107 @@
+<%init>
+use strict;
+use warnings;
+use MIME::Base64 qw(encode_base64);
+use URI::Escape qw(uri_escape);
+use RT::Extension::NextCloud::Files;
+use JSON;
+
+my $atts = $ARGS{'attachments'} || "";
+my $Ticket = RT::Ticket->new(RT->SystemUser);
+$Ticket->Load($TicketId);
+$m->abort(404) unless ($Ticket && $Ticket->id);
+
+my @attachments = @{decode_json($atts)};
+my $nextcloud = RT::Extension::NextCloud::Files->new(
+        base_url      => $RT::NextCloud->{base_url},
+        client_id     => $RT::NextCloud->{client_id},
+        client_secret => $RT::NextCloud->{client_secret},
+        redirect_uri  => $RT::NextCloud->{redirect_uri},
+        user_id       => $RT::NextCloud->{user},
+        token_file    => '/opt/rt5/var/fl_token_store.json',
+    );
+
+my $folder_id = $RT::NextCloud->{'default_folder'};
+
+### callback to enable #folder_id modification
+$m->callback( CallbackName => "ModifyFolderId", ARGSRef => \%ARGS, TicketObj => $Ticket, FolderId => \$folder_id );
+
+my $upload_count = 0;
+my $error_count = 0;
+
+foreach my $attachment (@attachments) {
+    eval {
+        # Load attachment
+        my $Att = RT::Attachment->new($RT::SystemUser);
+        $Att->Load($attachment);
+        
+        unless ($Att && $Att->id) {
+            die "Could not load attachment with ID: $attachment";
+        }
+        my $content = $Att->OriginalContent;
+        my $tmp = $Att->Filename || "attachment_$attachment";
+        
+        # Create a ticket-prefixed filename (using underscore instead of hash and space)
+        my $filename = '#' . $TicketId . "_$tmp";
+
+        # Choose upload method based on file size (4MB threshold for resumable upload)
+        my $file_size = $Att->ContentLength;
+        my $file_info;
+        
+        $m->out("Uploading file ($file_size bytes): $filename\n");
+        $file_info = $nextcloud->upload_file(
+            remote_file => $filename,
+            content     => $content,
+            folder      => $folder_id,
+            create_share_link => 1
+        );
+        
+        # Extract file information
+
+        # Create MIME entity for the uploaded file reference
+        my $mime = MIME::Entity->build( 
+            Subject => Encode::encode_utf8("NextCloud: " . $filename),
+            Encoding => "quoted-printable",
+            Type => 'text/plain',
+            Data => [Encode::encode_utf8("NextCloud file: " . $filename . "\nLink: " . $file_info->{share_link})]
+        );    
+        $mime->attach( 
+            Type => "text/uri-list",
+            Filename => Encode::encode_utf8($filename),
+            Data => [$file_info->{share_link}]
+        );
+        
+        # Add transaction
+        my ($TransactionID, $ErrorMessage, $TransactionObject) = $Ticket->Comment(
+            MIMEObj => $mime,
+            Silent => 1,
+            TimeTaken => 1
+        );
+        if ($ErrorMessage) {
+            RT::Logger->error("Could not create transaction: $ErrorMessage");
+        }
+
+        # Mark attachment as uploaded to NextCloud
+        $Att->SetAttribute(Name => 'Comment', Content => 'NextCloud Uploaded');
+        $upload_count++;
+    } or do {
+        my $error = $@;
+        if ($error) {
+            $m->out("Error uploading attachment $attachment: $error\n");
+            RT::Logger->error("Error uploading attachment $attachment: $error");
+            $error_count++;
+        }
+    };
+}
+
+# Summary
+$m->out("\nUpload Summary:\n");
+$m->out("Successfully uploaded: $upload_count files\n");
+$m->out("Errors: $error_count files\n");
+
+$m->abort();
+</%init>
+<%args>
+$TicketId => undef
+## $AttachmentId => undef
+</%args>

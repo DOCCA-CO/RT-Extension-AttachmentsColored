@@ -1,0 +1,10 @@
+<%init>
+use strict;
+use warnings;
+
+$m->abort();
+</%init>
+<%args>
+$TicketId => undef
+$AttachmentId => undef
+</%args>
