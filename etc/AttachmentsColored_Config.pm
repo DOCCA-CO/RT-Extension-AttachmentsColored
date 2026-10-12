@@ -57,6 +57,8 @@ Set($SimpleUpload, {
 	'enabled' => 0,
 });
 
+Set($AttachmentsColoredShowArticle, 0);
+
 # Set the maximum length of the filename to display in the attachment list.
 # If the filename is longer than this value, it will be truncated.
 # Set to 0 to display the full filename.

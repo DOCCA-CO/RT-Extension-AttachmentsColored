@@ -48,6 +48,7 @@
 % if ( $attachments ) {
 <div class="form-row attachment"><div class="label col-3"><&|/l&>Attached file</&>:</div>
 <div class="value col-9">
+  <span class="current-value">
 % foreach my $attach_name ( sort keys %$attachments ) {
     <div>
         <label for="DeleteAttach-<%$attach_name%>"><% $attach_name %></label>
@@ -55,11 +56,16 @@
         (<a href="#" class="delete-attach" data-name="<%$attach_name%>"><&|/l&>Delete</&></a>)
     </div>
 % } # end of foreach
+  </span>
 </div>
 </div>
 % } # end of if
 
 <div class="form-group">
+% if ($FullWidth) {
+  <div class="form-row">
+    <div class="col-12">
+% }
         <div class="dropzone" id="attach-dropzone">
         </div>
 <script type="text/javascript">
@@ -176,6 +182,10 @@ jQuery( function() {
             </div>
           </div>
         </div>
+% if ($FullWidth) {
+    </div>
+  </div>
+% }
 </div>
 % if ($HasExisting) {
 <div class="form-row">
@@ -199,6 +209,7 @@ $Token => ''
 @AttachExisting => ()
 $QuoteTransaction => ''
 $TicketObj => undef
+$FullWidth => undef
 </%ARGS>
 <%INIT>
 my $attachments;

@@ -92,6 +92,7 @@ my $modify_behavior = $InlineEdit ? ($inline_edit_behavior{Basics} || $inline_ed
         title_href   => ($can_modify || $can_modify_cf) ? RT->Config->Get('WebPath')."/Ticket/Modify.html" : "",
         InlineEdit   => ($can_modify || $can_modify_cf) ? $InlineEdit : 0,
         &>
+    % $m->callback( %ARGS, CallbackName => 'AfterCustomFields' );
 
 <%PERL>
 my $people_url = RT->Config->Get('WebPath')."/Ticket/ModifyPeople.html?id=".$Ticket->Id;
@@ -124,7 +125,6 @@ my $people_behavior = $InlineEdit ? ($inline_edit_behavior{People} || $inline_ed
 
 % $m->callback( %ARGS, CallbackName => 'AfterPeople' );
 
-% $m->callback( %ARGS, CallbackName => 'AfterAttachments' );
     <& /Ticket/Elements/ShowRequestor, Ticket => $Ticket &>
 % $m->callback( %ARGS, CallbackName => 'LeftColumn' );
   </div>
@@ -141,6 +141,10 @@ my $people_behavior = $InlineEdit ? ($inline_edit_behavior{People} || $inline_ed
     </&>
 % }
 % $m->callback( %ARGS, CallbackName => 'AfterReminders' );
+
+% if ( RT->Config->Get('AttachmentsColoredShowArticle') ) {
+<& /Elements/ShowArticle, Ticket => $Ticket &>
+% }
 
 <%PERL>
 my $dates_url = RT->Config->Get('WebPath')."/Ticket/ModifyDates.html?id=".$Ticket->Id;
@@ -230,6 +234,7 @@ push @extra, (titleright_raw => $links_titleright) if $links_titleright;
 <div class="row">
     <div class="boxcontainer col-md-12">
         <& /Ticket/Elements/ShowAttachments, Ticket => $Ticket, Attachments => $Attachments, Count => RT->Config->Get('AttachmentListCount') &>
+% $m->callback( %ARGS, CallbackName => 'AfterAttachments' );
     </div>
 </div>
 
